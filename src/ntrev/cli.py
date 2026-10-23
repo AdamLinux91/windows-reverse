@@ -11,6 +11,7 @@ Commands:
 from __future__ import annotations
 
 import argparse
+import subprocess
 import sys
 from pathlib import Path
 
@@ -198,6 +199,33 @@ def _cmd_whole_kernel(args: argparse.Namespace) -> int:
         except (OSError, ValueError) as exc:
             console.print(f"[bold red]Exact-image export refused:[/bold red] {exc}")
             return 2
+
+    standalone_image = None
+    if args.standalone_output:
+        if not args.compile or compile_result is None or compile_result.failed_units or compile_result.unexpected_unresolved_symbols:
+            console.print("[bold red]A standalone image requires a successful --compile gate first.[/bold red]")
+            return 2
+        builder = Path(__file__).resolve().parents[2] / "decompiled_nt_kernel" / "scripts" / "link_standalone_whole_kernel.py"
+        objects = sorted((out_dir / "obj").glob("*.o"))
+        standalone_image = Path(args.standalone_output).resolve()
+        cmd = [
+            sys.executable,
+            str(builder),
+            "--input-ntoskrnl", str(Path(args.binary).resolve()),
+            "--whole-manifest", str(out_dir / "specs" / "nt_whole_kernel_rvas.json"),
+            "--entry-symbol", args.standalone_entry_symbol,
+            "--out", str(standalone_image),
+            *(str(obj) for obj in objects),
+        ]
+        standalone_result = subprocess.run(cmd, capture_output=True, text=True)
+        if standalone_result.stdout:
+            console.print(standalone_result.stdout.rstrip())
+        if standalone_result.returncode != 0:
+            if standalone_result.stderr:
+                console.print(f"[red]{standalone_result.stderr.rstrip()}[/red]")
+            console.print("[bold red]Standalone whole-kernel link failed.[/bold red]")
+            return 2
+
     table = Table(title="Whole-Kernel Coverage")
     table.add_column("Metric", style="bold cyan")
     table.add_column("Value", style="green")
@@ -217,6 +245,12 @@ def _cmd_whole_kernel(args: argparse.Namespace) -> int:
         console.print(
             f"[bold green]Exact behavior artifact:[/bold green] {exact_artifact.artifact_image}\n"
             f"[bold green]Exact artifact manifest:[/bold green] {exact_artifact.manifest_path}"
+        )
+    if standalone_image is not None:
+        console.print(
+            f"[bold green]Standalone generated-kernel image:[/bold green] {standalone_image}\n"
+            "[yellow]This image contains no host-code fallback. It still requires a real Windows "
+            "boot/application gate before it can be called functional.[/yellow]"
         )
     console.print("[bold green]Whole-kernel C/ASM shards, reconstructed data sections, prototypes, and RVA manifest written.[/bold green]")
     return 0
@@ -322,6 +356,18 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--exact-image",
         action="store_true",
         help="Also copy the input PE byte-for-byte to output/exact for actual kernel behavior",
+    )
+    p_whole.add_argument(
+        "--standalone-output",
+        help=(
+            "Build a new PE from the generated whole-kernel objects with no host-code "
+            "fallback; requires --compile"
+        ),
+    )
+    p_whole.add_argument(
+        "--standalone-entry-symbol",
+        default="KiSystemStartup",
+        help="Original generated symbol used as the standalone PE entry point",
     )
     p_whole.set_defaults(func=_cmd_whole_kernel)
 

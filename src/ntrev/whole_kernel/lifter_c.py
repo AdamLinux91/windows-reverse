@@ -266,9 +266,10 @@ class WholeKernelCLifter:
         """Compile every generated shard and link a relocatable whole-kernel object.
 
         This is intentionally a separate gate from emission: a decompiler is not useful
-        if one rare internal instruction produces uncompilable output. The only normal
-        unresolved symbols after `ld -r` are GCC's 128-bit division helpers and the
-        platform GOT marker; all raw-ASM symbols must resolve inside the generated tree.
+        if one rare internal instruction produces uncompilable output. The generated
+        tree supplies freestanding GCC 128-bit division helpers; the only normal
+        unresolved symbol after `ld -r` is the platform GOT marker. All raw-ASM symbols
+        must resolve inside the generated tree.
         """
         root = Path(out_root)
         include = root / "include"
@@ -310,7 +311,7 @@ class WholeKernelCLifter:
                 nm = subprocess.run(["nm", "-u", str(reloc_obj)], capture_output=True, text=True)
                 unresolved = sorted({line.split()[-1] for line in nm.stdout.splitlines() if line.strip()})
 
-        allowed = {"_GLOBAL_OFFSET_TABLE_", "__divti3", "__modti3", "__udivti3", "__umodti3"}
+        allowed = {"_GLOBAL_OFFSET_TABLE_"}
         unexpected = [s for s in unresolved if s not in allowed]
         return WholeKernelCompileResult(
             translation_units=len(sources),
@@ -761,6 +762,11 @@ class WholeKernelCLifter:
         )
         (glob_dir / "nt_reconstructed_globals.c").write_text(
             self._emit_globals_and_imports_c(index), encoding="utf-8"
+        )
+        runtime_dir = src_dir / "runtime"
+        runtime_dir.mkdir(parents=True, exist_ok=True)
+        (runtime_dir / "nt_int128_runtime.c").write_text(
+            self._emit_int128_runtime_c(), encoding="utf-8"
         )
 
         # 4. Build fast VA -> GAS symbol map for raw-ASM functions
@@ -2769,6 +2775,70 @@ class WholeKernelCLifter:
                 i += 1
             out.append("    .byte " + ", ".join(b_vals))
 
+    def _emit_int128_runtime_c(self) -> str:
+        """Emit freestanding GCC 128-bit helpers instead of linking a C runtime.
+
+        GCC may request these compiler-generated symbols from lifted arithmetic, but a
+        standalone PE cannot leave them unresolved. This bitwise
+        implementation has no division/modulo operators of its own and therefore does
+        not recurse into the helpers it defines.
+        """
+        return r'''/* Freestanding GCC __int128 helpers for the generated kernel image. */
+#include <stdint.h>
+
+typedef unsigned __int128 nt_u128_t;
+typedef __int128 nt_s128_t;
+
+static nt_u128_t nt_udivmod128(nt_u128_t numerator, nt_u128_t denominator,
+                               nt_u128_t *remainder) {
+    if (denominator == 0) {
+        __builtin_trap();
+    }
+    nt_u128_t quotient = 0;
+    nt_u128_t rem = 0;
+    for (int bit = 127; bit >= 0; --bit) {
+        nt_u128_t shifted = (rem << 1) | ((numerator >> bit) & 1);
+        if ((rem >> 127) != 0 || shifted >= denominator) {
+            rem = shifted - denominator;
+            quotient |= ((nt_u128_t)1 << bit);
+        } else {
+            rem = shifted;
+        }
+    }
+    if (remainder != 0) {
+        *remainder = rem;
+    }
+    return quotient;
+}
+
+nt_u128_t __attribute__((ms_abi)) __udivti3(nt_u128_t a, nt_u128_t b) {
+    return nt_udivmod128(a, b, 0);
+}
+
+nt_u128_t __attribute__((ms_abi)) __umodti3(nt_u128_t a, nt_u128_t b) {
+    nt_u128_t remainder;
+    (void)nt_udivmod128(a, b, &remainder);
+    return remainder;
+}
+
+nt_s128_t __attribute__((ms_abi)) __divti3(nt_s128_t a, nt_s128_t b) {
+    int negative = (a < 0) != (b < 0);
+    nt_u128_t ua = a < 0 ? (nt_u128_t)(0 - a) : (nt_u128_t)a;
+    nt_u128_t ub = b < 0 ? (nt_u128_t)(0 - b) : (nt_u128_t)b;
+    nt_u128_t quotient = nt_udivmod128(ua, ub, 0);
+    return negative ? (nt_s128_t)(0 - quotient) : (nt_s128_t)quotient;
+}
+
+nt_s128_t __attribute__((ms_abi)) __modti3(nt_s128_t a, nt_s128_t b) {
+    int negative = a < 0;
+    nt_u128_t ua = a < 0 ? (nt_u128_t)(0 - a) : (nt_u128_t)a;
+    nt_u128_t ub = b < 0 ? (nt_u128_t)(0 - b) : (nt_u128_t)b;
+    nt_u128_t remainder;
+    (void)nt_udivmod128(ua, ub, &remainder);
+    return negative ? (nt_s128_t)(0 - remainder) : (nt_s128_t)remainder;
+}
+'''
+
     def _emit_globals_and_imports_c(self, index: WholeKernelSymbolIndex) -> str:
         lines = [
             "/* Whole-Kernel Runtime Helpers, IAT Import Dispatch Table & Weak Fallbacks */",
@@ -2782,15 +2852,17 @@ class WholeKernelCLifter:
             "uint64_t __nt_sim_cr2 = 0ULL, __nt_sim_cr3 = 0x1AD000ULL, __nt_sim_cr8 = 0ULL;",
             "#endif",
             "",
-            "void __attribute__((ms_abi, weak)) __nt_int29(uint64_t code) {",
+            "void __attribute__((ms_abi)) __nt_int29(uint64_t code) {",
             "    (void)code;",
             "    __builtin_trap();",
             "}",
-            "void __attribute__((ms_abi, weak)) __nt_int_n(uint32_t vec) {",
+            "void __attribute__((ms_abi)) __nt_int_n(uint32_t vec) {",
             "    (void)vec;",
+            "    __builtin_trap();",
             "}",
-            "void __attribute__((ms_abi, weak)) __nt_check_cookie_preserve_rax(uint64_t cookie) {",
+            "void __attribute__((ms_abi)) __nt_check_cookie_preserve_rax(uint64_t cookie) {",
             "    (void)cookie;",
+            "    __builtin_trap();",
             "}",
             "",
             "/* Default standalone Ring-0 / HAL / KD / BootVid import stubs (overridden by Windows Loader IAT in PE builds) */",

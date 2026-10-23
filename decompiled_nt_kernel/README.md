@@ -10,9 +10,9 @@
 
 This self-contained directory holds a selected decompiled and de-optimized output produced by `ntrev` from the retail x86-64 Microsoft Windows 10 NT Kernel (`ntoskrnl.exe` `10.0.16299.15`, RSDS GUID `83DB4240-4EFD-4AB6-AFB6-FA864B700CB3`) paired with its exact retail Microsoft symbol database (`ntkrnlmp.pdb`). It is useful for analysis and controlled hardware experiments, but it must not be advertised as a complete or exact Microsoft kernel replacement.
 
-1. **Drop directly into a real Windows installation** (`winload.efi` -> `IMAGE_SUBSYSTEM_NATIVE` PE32+ `ntoskrnl.exe` / `ntoskrnl_dropin.exe`) via a safe, non-destructive dual-boot BCD entry (`scripts/Install-DecompiledKernel.ps1` / `scripts/install_to_windows.bat`).
-2. **Boot directly on bare-metal x86-64 hardware** via UEFI (`\EFI\BOOT\BOOTX64.EFI`), GRUB2 / Multiboot2 (`nt_hybrid_kernel.elf`), or a flashable GPT + FAT32 USB drive (`nt_hardware_usb.img`).
-3. **Verify all 16 subsystems live on x86-64 CPU silicon** (`make test-silicon`).
+1. Generate a new standalone `IMAGE_SUBSYSTEM_NATIVE` PE from the complete whole-kernel object tree; Windows boot/application compatibility is an explicit VM gate, not inferred from compilation.
+2. Boot the diagnostic UEFI/Multiboot artifacts on bare-metal x86-64 hardware when testing the low-level runtime, without treating that as Windows compatibility.
+3. Verify the selected 16-subsystem analysis tree on x86-64 CPU silicon (`make test-silicon`).
 
 ---
 
@@ -20,13 +20,13 @@ This self-contained directory holds a selected decompiled and de-optimized outpu
 
 ```text
 decompiled_nt_kernel/
-├── Makefile                              # Builds ntoskrnl.exe, ntoskrnl_dropin.exe, BOOTX64.EFI, ELF64, USB & silicon suite
-├── README.md                             # Windows drop-in installation, BCD dual-boot & bare-metal hardware guide
+├── Makefile                              # Builds diagnostic PE/UEFI/ELF/USB artifacts and silicon suite
+├── README.md                             # Generated-image validation, BCD VM testing & low-level diagnostics
 ├── include/
 │   ├── nt_reconstructed_types.h          # PDB-reconstructed _KPCR, _KPRCB, _KTHREAD, _EPROCESS, _IRP, _MDL, _KDPC, etc.
 │   ├── nt_baremetal.h                    # Ring-0 x86-64 MSR/CR8/port I/O intrinsics & executive runtime interface
 │   └── efi_min.h                         # Freestanding UEFI 2.x SystemTable, ConOut & GOP framebuffer definitions
-├── src/                                  # 527 / 527 Z3-proven & raw-ASM-preserved retail ntoskrnl.exe routines (16 subsystems)
+├── src/                                  # Selected 527-function analysis tree with C candidates and raw-ASM boundaries (16 subsystems)
 │   ├── ke/ke_kernel.c                    #  72 Core Kernel, IRQL (CR8), TLB (CR3/CR4), Syscall, DPC, Timer & Dispatcher routines
 │   ├── ps/ps_process.c                   #  73 Process, Thread, Job, Silo & PPL Executive routines
 │   ├── mm/mm_memory.c                    #  22 Virtual Memory Manager, PTE, MDL & Physical Memory routines
@@ -60,8 +60,9 @@ decompiled_nt_kernel/
 ├── scripts/
 │   ├── pe_elf_linker.py                  # Pure-Python COFF/ELF64 section mergers, x86-64 relocation engine & PE `CheckSumMappedFile` calculator
 │   ├── link_ntoskrnl_pe.py               # Standalone from-source PE32+ `IMAGE_SUBSYSTEM_NATIVE` `ntoskrnl.exe` linker
-│   ├── build_windows_dropin_ntoskrnl.py  # Boot-to-desktop binary-grafted `ntoskrnl_dropin.exe` builder (`.ntrev` + `.edata` + `E9` prologues + `.pdata` + `GFIDS`)
-│   ├── Install-DecompiledKernel.ps1      # Safe Administrator PowerShell BCD dual-boot installer & uninstaller for Windows 10/11
+│   ├── build_windows_dropin_ntoskrnl.py  # Historical host-graft research tool; not the standalone implementation
+│   ├── Install-DecompiledKernel.ps1      # Safe Administrator PowerShell BCD VM installer & uninstaller
+│   ├── Run-StandaloneKernelSmoke.ps1     # Application-facing smoke gate for a VM booted with the generated image
 │   ├── install_to_windows.bat            # Double-clickable UAC-elevating batch wrapper for `Install-DecompiledKernel.ps1`
 │   └── make_bootable_usb.py              # Zero-dependency GPT + genuine FAT32 EFI System Partition USB image generator
 ├── tests/
@@ -69,12 +70,16 @@ decompiled_nt_kernel/
 ├── ir/
 │   └── verified_lifted.ll                # Combined optimized LLVM 22 SSA IR across lifted ntoskrnl.exe functions
 └── proofs/
-    └── z3_equivalence_proofs.json        # Machine-checkable Z3 SMT proof manifest (527 / 527 = 100.0% verified)
+    └── z3_equivalence_proofs.json        # Proof artifacts for selected analysis routines; not a kernel-wide behavior proof
 ```
 
 ---
 
-## Verified Real `ntoskrnl.exe` Coverage (527 / 527 Functions — 100.0% Proven Across All 16 Subsystems)
+## Selected analysis coverage (527 functions across 16 subsystems)
+
+The table below describes the committed analysis tree only. It is not a complete
+ntoskrnl implementation, a proof of semantic equivalence, or evidence that Windows can
+boot or run applications on the generated image.
 
 | Subsystem | Unit | Count | Representative Verified / Raw-ASM Preserved Functions |
 |---|---|---:|---|
@@ -97,53 +102,65 @@ decompiled_nt_kernel/
 
 ---
 
-## Building the Windows Drop-In Kernel & Hardware Targets
+## Building the generated standalone kernel image
 
-Only standard GNU `gcc`, `ld` (`binutils` with `i386pep` + `elf_x86_64`), and `python3` are required — **no Visual Studio/WDK, no root privileges, no EDK2 SDK, and no proprietary Microsoft binaries are stored in Git**:
+Only standard GNU `gcc`, `ld` (`binutils` with `i386pep` + `elf_x86_64`), and `python3`
+are required to generate the object tree. The committed 527-function directory is a
+selected analysis/diagnostic tree; `make all` and `make test-silicon` do **not** prove
+that Windows applications can run on it.
+
+For the actual complete recompiled image, provide the matching retail PE/PDB and run:
 
 ```bash
-cd decompiled_nt_kernel
-
-# 1. Build standalone Windows ntoskrnl.exe + UEFI BOOTX64.EFI + Multiboot2 ELF64 + GPT/FAT32 USB image:
-make all
-
-# 2. Build a full boot-to-desktop drop-in replica grafted onto your Windows ntoskrnl.exe:
-make windows-dropin NTOSKRNL=/path/to/Windows/System32/ntoskrnl.exe
-
-# 3. Execute all 16 decompiled NT subsystems directly on live x86-64 CPU silicon:
-make test-silicon
+ntrev whole-kernel \
+  /path/to/Windows/System32/ntoskrnl.exe \
+  --pdb /path/to/symbols/ntkrnlmp.pdb \
+  -o build/ntoskrnl_whole \
+  --compile \
+  --standalone-output build/ntoskrnl_standalone.exe
 ```
 
-### Two Real Windows `IMAGE_SUBSYSTEM_NATIVE` PE32+ Kernel Targets
+The standalone linker is not the old host-graft path. It requires every function in the
+whole-kernel manifest to have a generated object symbol, uses generated
+`KiSystemStartup` as the PE entry point, redirects generated exports, binds generated
+IAT/data references to the input image's loader contract, and overwrites the input
+executable-section bytes with INT3 guards. There is no host-code fallback. Raw assembly
+procedures remain generated code because syscall/trap/CPU-state paths cannot safely be
+forced into C.
 
-1. **Boot-to-Desktop Drop-In Replica (`build/ntoskrnl_dropin.exe` via `make windows-dropin`)** — *Recommended for booting a full Windows Desktop*:
-   - Appends `.ntrev` (all 527 compiled `ms_abi` functions), `.ntrevd`, and `.reloc2` (64-bit `IMAGE_REL_BASED_DIR64` KASLR fixups) into the host `ntoskrnl.exe`.
-   - Resolves all **336 external kernel globals, helper calls, `.idata` IAT thunks (`__imp_Tm*`), and `KiServiceLinkage` / `KiServiceInternal` SSDT dispatchers** directly against the host kernel's virtual addresses.
-   - Redirects `.edata` export RVAs **and** patches internal `.text`/`PAGE` function prologues with 5-byte `E9 <rel32>` Ring-0 trampolines so **both** external drivers (`HAL.dll`, `NTFS.sys`, `ndis.sys`, `win32kfull.sys`) and internal kernel callers execute our decompiled code in Ring 0.
-   - Synthesizes sorted `.pdata` `RUNTIME_FUNCTION` + `UNWIND_INFO` entries, merges all `.ntrev` entry points into the `LOAD_CONFIG` `GuardCFFunctionTable` (`GFIDS` 5-byte `<IB` stride), clears `IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY` for BCD `testsigning`/`nointegritychecks` boot, and writes an exact `CheckSumMappedFile` PE checksum.
-   - Boots a real Windows installation all the way through `winload.efi` -> Phase 0/1 executive initialization -> `smss.exe` -> `csrss.exe` -> `winlogon.exe` -> **Windows Explorer Desktop**.
+The output is a new `IMAGE_SUBSYSTEM_NATIVE` PE, but a successful structural link is
+not yet a Windows boot/application proof. It must be booted in a disposable Windows VM;
+then the kernel debugger, loader log, system-service smoke tests, process creation,
+file/registry I/O, networking, and a real application workload must pass before this
+project can claim Windows-kernel behavior.
 
-2. **100% From-Source Standalone Kernel (`build/ntoskrnl.exe` via `make windows-kernel`)**:
-   - Links our 16 decompiled subsystem `.o` files + `arch/x86_64/ki_system_startup.S` (`NtKiSystemStartupEntry`) + `src/runtime/nt_windows_boot.c` directly from source into a native PE32+ `ntoskrnl.exe` (`Subsystem = 1`, `ImageBase = 0x140000000`) with all **2,848** retail exports (`507` live code + `70` exported kernel variables + ordinal stubs), all **18** imported kernel DLLs, `.pdata` SEH, `LOAD_CONFIG` + `GFIDS` CFG, `.rsrc` `VS_VERSION_INFO` (`10.0.16299.15`), `.reloc`, and valid PE checksum.
-   - Directly loadable by `winload.efi`: parses `LOADER_PARAMETER_BLOCK`, initializes `BOOTVID.dll` (`VidInitialize` / `VidDisplayString`) + UEFI GOP framebuffer + COM1 (`115200 8N1`), and runs the 16-subsystem Ring-0 verification suite on screen.
+The legacy `make windows-dropin` target is retained only as an historical research tool
+and is not the implementation requested here.
 
 ---
 
-## Deploying into a Real Windows Installation (Safe Dual-Boot BCD Entry)
+## Testing a Standalone Image in a Disposable Windows VM
 
-> **Prerequisite**: Temporarily disable **UEFI Secure Boot** in your PC/VM firmware settings so `winload.efi` honors `testsigning` and `nointegritychecks` on the secondary boot entry. Your default Windows boot entry is **never** modified or overwritten.
+> **Important:** this is a boot/application validation procedure, not a claim that the
+> selected 527-function tree is complete. Use the generated
+> `build/ntoskrnl_standalone.exe` from `ntrev whole-kernel --standalone-output`, not the
+> historical host-graft image, when testing the actual recompiled path.
 
-1. Copy `build/ntoskrnl_dropin.exe` (or `build/ntoskrnl.exe`) together with the `scripts/` folder onto your Windows machine (or VM).
+> **Prerequisite**: Temporarily disable **UEFI Secure Boot** in a disposable VM so
+> `winload.efi` honors `testsigning` and `nointegritychecks`. Keep a recovery snapshot;
+> the stock kernel must remain available as the fallback boot entry.
+
+1. Copy `build/ntoskrnl_standalone.exe` (or another generated standalone image) together with the `scripts/` folder onto the Windows VM.
 2. Right-click **`scripts\install_to_windows.bat` -> Run as administrator** (or run from an Administrator PowerShell prompt):
    ```powershell
    powershell -ExecutionPolicy Bypass -File .\scripts\Install-DecompiledKernel.ps1 `
-       -KernelPath .\build\ntoskrnl_dropin.exe
+       -KernelPath .\build\ntoskrnl_standalone.exe
    ```
 3. What the installer does safely:
    - Verifies PE32+ `MZ`/`PE\0\0`, `Machine == 0x8664`, and `Subsystem == 1 (IMAGE_SUBSYSTEM_NATIVE)`.
    - Copies the kernel side-by-side to `C:\Windows\System32\ntoskrnl_decompiled.exe` (**never** overwrites `C:\Windows\System32\ntoskrnl.exe`).
-   - Clones `{current}` via `bcdedit /copy {current}` into a separate boot menu entry (`"Windows NT (Decompiled ntoskrnl.exe Replica - ntrev)"`) configured with `kernel=ntoskrnl_decompiled.exe`, `testsigning Yes`, `nointegritychecks Yes`, `debug Yes` (COM1 `115200`), and `timeout 10`.
-4. Reboot and select **`Windows NT (Decompiled ntoskrnl.exe Replica - ntrev)`** on the Windows Boot Manager screen!
+   - Clones `{current}` via `bcdedit /copy {current}` into a separate boot menu entry (`"Windows NT (ntrev standalone generated kernel)"`) configured with `kernel=ntoskrnl_decompiled.exe`, `testsigning Yes`, `nointegritychecks Yes`, `debug Yes` (COM1 `115200`), and `timeout 10`.
+4. Reboot and select the **ntrev standalone generated-kernel** entry on the Windows Boot Manager screen. If it fails before user mode, select the untouched stock entry and inspect the serial/kernel-debug log.
 5. To remove the dual-boot entry and `ntoskrnl_decompiled.exe` cleanly at any time:
    ```powershell
    powershell -ExecutionPolicy Bypass -File .\scripts\Install-DecompiledKernel.ps1 -Uninstall
