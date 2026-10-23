@@ -56,6 +56,9 @@ WINPE_CFLAGS  := $(FREESTANDING_CFLAGS) -fno-pie -fno-pic
 HOST_CFLAGS   := $(COMMON_WARN) -O2 -std=gnu11 -fno-builtin -mcx16 -DNT_HOST_SILICON_TEST -Iinclude
 
 WINPE_PURE_OBJS := $(patsubst %.c,$(BUILD)/winpe/%.o,$(NT_PURE_SUBSYS_SRCS))
+# Dynamic cross-build grafts also need weak reconstructed-global definitions;
+# exact retail-PDB mode still binds those symbols to the host kernel.
+WINPE_DROPIN_OBJS := $(WINPE_PURE_OBJS) $(BUILD)/winpe/src/runtime/nt_reconstructed_globals.o
 WINPE_ALL_OBJS  := $(BUILD)/winpe/arch/x86_64/ki_system_startup.o \
                    $(BUILD)/winpe/src/runtime/nt_windows_boot.o \
                    $(patsubst %.c,$(BUILD)/winpe/%.o,$(NT_SUBSYS_SRCS))
@@ -103,14 +106,14 @@ $(WIN_PE): $(WINPE_ALL_OBJS) scripts/link_ntoskrnl_pe.py scripts/pe_elf_linker.p
 		--out $@ \
 		$(WINPE_ALL_OBJS)
 
-$(DROPIN_PE): $(WINPE_PURE_OBJS) scripts/build_windows_dropin_ntoskrnl.py scripts/pe_elf_linker.py
+$(DROPIN_PE): $(WINPE_DROPIN_OBJS) scripts/build_windows_dropin_ntoskrnl.py scripts/pe_elf_linker.py
 	@mkdir -p $(dir $@)
 	$(PYTHON) scripts/build_windows_dropin_ntoskrnl.py \
 		--host-ntoskrnl "$(NTOSKRNL)" \
 		--specs-dir specs \
 		--proofs proofs/z3_equivalence_proofs.json \
 		--out $@ \
-		$(WINPE_PURE_OBJS)
+		$(WINPE_DROPIN_OBJS)
 
 # --- UEFI Bare-Metal Hardware Target ---
 $(BUILD)/uefi/%.o: %.c

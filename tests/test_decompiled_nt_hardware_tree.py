@@ -161,7 +161,14 @@ def test_hardware_and_windows_dropin_targets_build_and_execute_on_silicon() -> N
     # 3. Validate binary-grafted drop-in `ntoskrnl_dropin.exe` builder (`windows-dropin`)
     #    Use retail 10.0.16299.15 host if cached in /tmp/real_nt, else test cross-build mode on win_pe_path
     retail_host = Path("/tmp/real_nt/ntoskrnl_16299_15.exe")
-    host_arg = retail_host if retail_host.is_file() else win_pe_path
+    host_arg = win_pe_path
+    if retail_host.is_file():
+        try:
+            retail_pe = pefile.PE(str(retail_host), fast_load=True)
+            if retail_pe.FILE_HEADER.Machine == 0x8664:
+                host_arg = retail_host
+        except (OSError, pefile.PEFormatError):
+            pass
     subprocess.run(
         [
             "make",
