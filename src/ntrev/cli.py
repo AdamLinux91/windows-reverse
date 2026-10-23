@@ -76,22 +76,22 @@ def _cmd_inspect_pdb(args: argparse.Namespace) -> int:
     )
 
     if db.structs:
-        st_table = Table(title="TPI Structures")
+        st_table = Table(title=f"TPI Structures (showing up to {args.limit} of {len(db.structs)})")
         st_table.add_column("Struct Name", style="bold green")
         st_table.add_column("Size")
         st_table.add_column("Fields")
-        for st in db.structs.values():
+        for st in list(db.structs.values())[: args.limit]:
             fld_preview = ", ".join(f"{f.name}@+0x{f.offset:x}" for f in st.fields[:5])
             st_table.add_row(st.name, f"0x{st.size:x}", fld_preview)
         console.print(st_table)
 
     if db.symbols_by_rva:
-        sym_table = Table(title="Symbols")
+        sym_table = Table(title=f"Symbols (showing up to {args.limit} of {len(db.symbols_by_rva)})")
         sym_table.add_column("RVA")
         sym_table.add_column("Size")
         sym_table.add_column("Name", style="bold yellow")
         sym_table.add_column("Prototype Hint")
-        for rva in sorted(db.symbols_by_rva.keys()):
+        for rva in sorted(db.symbols_by_rva.keys())[: args.limit]:
             s = db.symbols_by_rva[rva]
             proto = (
                 f"{s.return_type or '?'} ({', '.join(t for _, t in s.param_types)})"
@@ -111,8 +111,10 @@ def _cmd_decompile(args: argparse.Namespace) -> int:
         pdb_path=args.pdb,
         ghidra_json_path=args.ghidra_json,
         target_functions=targets,
-        output_dir=args.output_dir,
+        output_dir=None if args.modular_tree else args.output_dir,
     )
+    if args.modular_tree and args.output_dir:
+        pipeline.export_subsystem_tree(report, args.output_dir)
 
     _render_report_summary(report)
     if args.show_c:
@@ -201,6 +203,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p_dec.add_argument("--ghidra-json", help="Path to exported Ghidra analysis JSON")
     p_dec.add_argument("-f", "--functions", help="Comma-separated list of function names")
     p_dec.add_argument("-o", "--output-dir", default="output", help="Directory for C/IR/Proof deliverables")
+    p_dec.add_argument(
+        "--modular-tree",
+        action="store_true",
+        help="Export modular per-subsystem C kernel tree (include/, src/{ke,ps,mm,ob,io,ex,rtl,se}/, ir/, proofs/)",
+    )
     p_dec.add_argument("--no-smt", action="store_true", help="Skip Z3 SMT equivalence proofs")
     p_dec.add_argument("--show-c", action="store_true", help="Print reconstructed C source to stdout")
     p_dec.set_defaults(func=_cmd_decompile)
@@ -211,6 +218,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
     p_pdb = sub.add_parser("inspect-pdb", help="Inspect binary MSF 7.00 .pdb TPI structs and symbols")
     p_pdb.add_argument("pdb", help="Path to .pdb file")
+    p_pdb.add_argument("--limit", type=int, default=40, help="Max structs/symbols to display")
     p_pdb.set_defaults(func=_cmd_inspect_pdb)
 
     p_demo = sub.add_parser(

@@ -64,8 +64,13 @@ class CompilerDeoptimizer:
         if mb_loop is not None:
             rerolled_loops.append(mb_loop)
         else:
-            # 2. Check intra-block linear strided loop unrolling
-            rerolled_loops.extend(self._detect_linear_strided_loops(cfg, param_map))
+            # 2a. Check back-edge unrolled strided loop (e.g. 16x unrolled 4KB page scan in KeCheckForZeroPage)
+            be_loop = self._detect_backedge_unrolled_strided_loop(cfg, param_map)
+            if be_loop is not None:
+                rerolled_loops.append(be_loop)
+            else:
+                # 2b. Check intra-block linear strided loop unrolling
+                rerolled_loops.extend(self._detect_linear_strided_loops(cfg, param_map))
 
         # 3. Check magic-multiplier constant division / modulo strength reduction
         recovered_divs = self._detect_magic_divisions(cfg, param_map)
@@ -385,7 +390,136 @@ class CompilerDeoptimizer:
         return len(ops_on_overflow) == max_k
 
     # ------------------------------------------------------------------
-    # 2. Intra-Block Linear Strided Unrolled Loop Collapse
+    # 2a. Back-Edge Unrolled Strided Loop Collapse (e.g. KeCheckForZeroPage 16x unroll)
+    # ------------------------------------------------------------------
+    def _detect_backedge_unrolled_strided_loop(
+        self,
+        cfg: FunctionCFG,
+        param_map: dict[str, str],
+    ) -> RerolledLoop | None:
+        """
+        Detect a counted pointer-bump loop whose body was unrolled K >= 4 times
+        (e.g. `KeCheckForZeroPage` in retail `ntoskrnl.exe`: 16x 8-byte `or` loads per
+        128-byte outer iteration across a 4096-byte page -> 512-element single loop).
+        """
+        if len(cfg.blocks) != 3 or cfg.entry_address not in cfg.blocks:
+            return None
+
+        entry_blk = cfg.blocks[cfg.entry_address]
+        if len(entry_blk.successors) != 1:
+            return None
+        loop_addr = entry_blk.successors[0]
+        if loop_addr not in cfg.blocks or loop_addr == cfg.entry_address:
+            return None
+        loop_blk = cfg.blocks[loop_addr]
+        if loop_addr not in loop_blk.successors or len(loop_blk.successors) != 2:
+            return None
+        exit_addrs = [s for s in loop_blk.successors if s != loop_addr]
+        if len(exit_addrs) != 1 or exit_addrs[0] not in cfg.blocks:
+            return None
+        exit_blk = cfg.blocks[exit_addrs[0]]
+        if len(exit_blk.instructions) != 1 or exit_blk.instructions[0].mnemonic not in ("ret", "retq", "retn"):
+            return None
+
+        # Preheader: `lea end_reg, [base_reg + total_bytes]` and `xor eax, eax`
+        base_reg: str | None = None
+        end_reg: str | None = None
+        total_bytes: int | None = None
+        zeroed_rax = False
+        for ins in entry_blk.instructions:
+            if ins.mnemonic == "lea" and len(ins.operands) == 2:
+                d, s = ins.operands
+                if d.kind == "reg" and s.kind == "mem" and s.base and s.index is None and s.disp > 0:
+                    end_reg = CANONICAL_GPR64.get(d.reg or "")
+                    base_reg = CANONICAL_GPR64.get(s.base)
+                    total_bytes = s.disp
+            elif ins.mnemonic == "xor" and len(ins.operands) == 2:
+                d, s = ins.operands
+                if d.kind == "reg" and s.kind == "reg" and d.reg == s.reg:
+                    if CANONICAL_GPR64.get(d.reg or "") == "rax":
+                        zeroed_rax = True
+
+        if not (base_reg and end_reg and total_bytes and zeroed_rax):
+            return None
+
+        # Extract the unrolled strided memory reductions in the loop block
+        ops = self._extract_path_strided_ops(cfg, [loop_addr])
+        k = len(ops)
+        if k < 4:
+            return None
+        ok0 = ops[0].op_kind
+        sz0 = ops[0].size
+        if any(m.base_reg != base_reg or m.op_kind != ok0 or m.size != sz0 for m in ops):
+            return None
+        if [m.disp for m in ops] != [i * sz0 for i in range(k)]:
+            return None
+
+        outer_stride = k * sz0
+        if total_bytes <= 0 or total_bytes % outer_stride != 0:
+            return None
+
+        # Verify pointer increment by `outer_stride` and unsigned `jb` back-edge against `end_reg`
+        has_step = False
+        has_cmp = False
+        for ins in loop_blk.instructions:
+            if ins.mnemonic in ("lea", "add") and len(ins.operands) == 2:
+                d, s = ins.operands
+                if d.kind == "reg" and CANONICAL_GPR64.get(d.reg or "") == base_reg:
+                    if ins.mnemonic == "lea" and s.kind == "mem" and CANONICAL_GPR64.get(s.base or "") == base_reg and s.disp == outer_stride:
+                        has_step = True
+                    elif ins.mnemonic == "add" and s.kind == "imm" and s.imm == outer_stride:
+                        has_step = True
+            elif ins.mnemonic == "cmp" and len(ins.operands) == 2:
+                o0, o1 = ins.operands
+                if (
+                    o0.kind == "reg"
+                    and o1.kind == "reg"
+                    and CANONICAL_GPR64.get(o0.reg or "") == base_reg
+                    and CANONICAL_GPR64.get(o1.reg or "") == end_reg
+                ):
+                    has_cmp = True
+
+        term = loop_blk.instructions[-1]
+        if not (has_step and has_cmp and term.mnemonic in ("jb", "jc", "jnae", "jne", "jnz") and loop_blk.branch_target == loop_addr):
+            return None
+
+        total_elems = total_bytes // sz0
+        base_name = param_map.get(base_reg, base_reg)
+        elem_c_type = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t", 8: "uint64_t"}.get(sz0, "uint64_t")
+        c_op = {"add": "+=", "xor": "^=", "or": "|="}.get(ok0, "|=")
+        ptr_expr = f"((const {elem_c_type} *)(uintptr_t){base_name})"
+        body_stmt = f"acc {c_op} {ptr_expr}[i];"
+        loop_lines = [
+            "uint64_t acc = 0ULL;",
+            f"for (size_t i = 0; i < {total_elems}ULL; ++i) {{",
+            f"    {body_stmt}",
+            "}",
+            "return acc;",
+        ]
+        all_addrs = [ins.address for ins in cfg.all_instructions()]
+        return RerolledLoop(
+            kind="unrolled_page_loop",
+            header_addr=loop_addr,
+            trip_count_expr=str(total_elems),
+            max_unroll_factor=k,
+            induction_var="i",
+            base_expr=base_name,
+            elem_c_type=elem_c_type,
+            stride_bytes=sz0,
+            op_kind=ok0,
+            accumulator_init="0",
+            body_c_code=body_stmt,
+            c_loop_code="\n".join(loop_lines),
+            covered_addrs=all_addrs,
+            replaces_entire_function=True,
+            description=(
+                f"Collapsed {k}x-unrolled strided loop ({total_bytes}B = {total_elems} x {sz0}B, "
+                f"op={ok0}) into single counted for-loop"
+            ),
+        )
+
+    # ------------------------------------------------------------------
+    # 2b. Intra-Block Linear Strided Unrolled Loop Collapse
     # ------------------------------------------------------------------
     def _detect_linear_strided_loops(
         self,
@@ -519,6 +653,60 @@ class CompilerDeoptimizer:
                     if rec is not None:
                         results.append(rec)
 
+                # Detect MSVC x64 32-bit unsigned magic reciprocal via 64-bit 3-operand
+                # `imul r64, src64, imm32` (`imm > 0x10000`) followed by `shr r64, s` (`s >= 32`)!
+                elif (
+                    m == "imul"
+                    and len(ins.operands) == 3
+                    and ins.operands[0].kind == "reg"
+                    and ins.operands[1].kind == "reg"
+                    and ins.operands[2].kind == "imm"
+                    and (ins.operands[0].size or 8) == 8
+                ):
+                    imm_m = ins.operands[2].imm & 0xFFFFFFFF
+                    if imm_m > 0x10000:
+                        dst_c = CANONICAL_GPR64.get(ins.operands[0].reg or "") or "rax"
+                        src_c = CANONICAL_GPR64.get(ins.operands[1].reg or "") or "rcx"
+                        win = insns[idx + 1 : min(len(insns), idx + 8)]
+                        sh_amt: int | None = None
+                        for w_ins in win:
+                            if (
+                                w_ins.mnemonic == "shr"
+                                and len(w_ins.operands) == 2
+                                and w_ins.operands[0].kind == "reg"
+                                and CANONICAL_GPR64.get(w_ins.operands[0].reg or "") == dst_c
+                                and w_ins.operands[1].kind == "imm"
+                                and w_ins.operands[1].imm >= 32
+                            ):
+                                sh_amt = w_ins.operands[1].imm
+                                break
+                        if sh_amt is not None:
+                            divisor = round((1 << sh_amt) / imm_m)
+                            if divisor > 1:
+                                is_mod = any(
+                                    w_ins.mnemonic == "imul"
+                                    and len(w_ins.operands) == 3
+                                    and w_ins.operands[2].kind == "imm"
+                                    and (w_ins.operands[2].imm & 0xFFFFFFFF) == divisor
+                                    for w_ins in win
+                                )
+                                div_name = param_map.get(src_c, src_c)
+                                op_sym = "%" if is_mod else "/"
+                                results.append(
+                                    RecoveredDivMod(
+                                        insn_addrs=[ins.address] + [w.address for w in win],
+                                        dividend_reg=src_c,
+                                        dividend_c_expr=div_name,
+                                        divisor=divisor,
+                                        is_signed=False,
+                                        is_modulo=is_mod,
+                                        bit_width=32,
+                                        magic_constant=imm_m,
+                                        shift_amount=sh_amt - 32,
+                                        c_expr=f"((uint32_t){div_name} {op_sym} (uint32_t){divisor})",
+                                    )
+                                )
+
         return results
 
     def _analyze_post_mul_window(
@@ -531,21 +719,33 @@ class CompilerDeoptimizer:
         dividend_reg: str,
         param_map: dict[str, str],
     ) -> RecoveredDivMod | None:
-        window = insns[mul_idx : min(len(insns), mul_idx + 10)]
+        window = insns[mul_idx : min(len(insns), mul_idx + 12)]
         shifts: list[tuple[str, int, int]] = []
         has_overflow_add_trick = False
         has_signed_add_adj = False
+        sign_bit_regs: set[str] = set()
 
         for w_ins in window[1:]:
             wm = w_ins.mnemonic
             if wm in ("shr", "sar") and len(w_ins.operands) == 2 and w_ins.operands[1].kind == "imm":
                 sh_amt = w_ins.operands[1].imm
-                shifts.append((wm, sh_amt, w_ins.address))
+                if wm == "shr" and sh_amt in (31, 63) and w_ins.operands[0].kind == "reg":
+                    rc = CANONICAL_GPR64.get(w_ins.operands[0].reg or "")
+                    if rc:
+                        sign_bit_regs.add(rc)
+                else:
+                    shifts.append((wm, sh_amt, w_ins.address))
             elif wm == "sub" and not is_signed:
                 # `sub rcx, rdx; shr rcx, 1; add rdx, rcx; shr rdx, s` (65-bit unsigned magic)
                 has_overflow_add_trick = True
-            elif wm == "add" and is_signed:
-                has_signed_add_adj = True
+            elif wm == "add" and is_signed and len(w_ins.operands) == 2:
+                src_rc = (
+                    CANONICAL_GPR64.get(w_ins.operands[1].reg or "")
+                    if w_ins.operands[1].kind == "reg"
+                    else None
+                )
+                if src_rc not in sign_bit_regs:
+                    has_signed_add_adj = True
             elif wm in ("ret", "retq", "jmp"):
                 break
 
@@ -579,9 +779,17 @@ class CompilerDeoptimizer:
         if divisor <= 1:
             return None
 
+        is_mod = any(
+            w_ins.mnemonic == "imul"
+            and len(w_ins.operands) == 3
+            and w_ins.operands[2].kind == "imm"
+            and w_ins.operands[2].imm == divisor
+            for w_ins in window[1:]
+        )
+        op_sym = "%" if is_mod else "/"
         div_name = param_map.get(dividend_reg, dividend_reg)
         cast_ty = f"int{bits}_t" if is_signed else f"uint{bits}_t"
-        c_expr = f"(({cast_ty}){div_name} / ({cast_ty}){divisor})"
+        c_expr = f"(({cast_ty}){div_name} {op_sym} ({cast_ty}){divisor})"
         covered = [w.address for w in window]
 
         return RecoveredDivMod(
@@ -590,7 +798,7 @@ class CompilerDeoptimizer:
             dividend_c_expr=div_name,
             divisor=divisor,
             is_signed=is_signed,
-            is_modulo=False,
+            is_modulo=is_mod,
             bit_width=bits,
             magic_constant=magic,
             shift_amount=shift_used,

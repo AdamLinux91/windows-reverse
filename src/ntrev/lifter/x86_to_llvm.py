@@ -7,19 +7,28 @@ Key design highlights:
     merge into existing upper bits).
   - Non-escaping GEP stack-frame recovery (`%stack_frame = alloca [4096 x i8]`): `push`/`pop`
     and `[rsp + disp]` / `[rbp - disp]` accesses resolve to `getelementptr` into `%stack_frame`,
-    enabling LLVM 22's SROA + GVN + DCE passes to eliminate prologue/epilogue spills and
-    promote stack variables directly to pure SSA registers.
-  - Preserves inline privileged instructions inside mixed C functions via `ir.InlineAsm`.
+    enabling LLVM 22's SROA + GVN + DCE passes to eliminate prologue/epilogue spills.
+  - RIP-relative `.rdata` constant folding + PDB named kernel global symbol lifting
+    (`@__nt_sym_addr_<Symbol>()`) for position-independent bare-metal C emission.
+  - Exact x86-64 memory bit-string indexing for `bt`/`bts`/`btr`/`btc`, `lock` atomics,
+    `xadd`/`cmpxchg`, `bsf`/`bsr`/`tzcnt`/`lzcnt`/`popcnt`, and tailcalls.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from llvmlite import binding as llvm
 from llvmlite import ir
 
-from ntrev.models import BasicBlock, DisasmInsn, FunctionCFG, InsnOperand
+from ntrev.models import (
+    BasicBlock,
+    BinaryImage,
+    DisasmInsn,
+    FunctionCFG,
+    InsnOperand,
+    KernelGlobalRef,
+)
 
 llvm.initialize_all_targets()
 llvm.initialize_all_asmprinters()
@@ -30,7 +39,6 @@ GPR64_LIST = [
 ]
 
 SUBREG_MAP: dict[str, tuple[str, int, int]] = {
-    # reg_name -> (parent_64, bit_offset, bit_size)
     "rax": ("rax", 0, 64), "eax": ("rax", 0, 32), "ax": ("rax", 0, 16), "al": ("rax", 0, 8), "ah": ("rax", 8, 8),
     "rbx": ("rbx", 0, 64), "ebx": ("rbx", 0, 32), "bx": ("rbx", 0, 16), "bl": ("rbx", 0, 8), "bh": ("rbx", 8, 8),
     "rcx": ("rcx", 0, 64), "ecx": ("rcx", 0, 32), "cx": ("rcx", 0, 16), "cl": ("rcx", 0, 8), "ch": ("rcx", 8, 8),
@@ -55,6 +63,7 @@ class LiftedModuleResult:
     raw_ir: str
     optimized_ir: str
     verified: bool
+    referenced_globals: list[KernelGlobalRef] = field(default_factory=list)
 
 
 class X86ToLLVMLifter:
@@ -74,6 +83,10 @@ class X86ToLLVMLifter:
         cfg: FunctionCFG,
         param_count: int = 4,
         symbol_lookup: dict[int, str] | None = None,
+        global_data_symbols: dict[int, str] | None = None,
+        callee_arg_counts: dict[str, int] | None = None,
+        callee_param_widths: dict[str, list[int]] | None = None,
+        image: BinaryImage | None = None,
         opt_level: int = 2,
     ) -> LiftedModuleResult:
         """Lift `cfg` to LLVM IR, verify with LLVM Core, and run NewPM optimization passes."""
@@ -87,12 +100,12 @@ class X86ToLLVMLifter:
             arg.name = f"arg_{aname}"
 
         uses_rbp_as_frame = self._detect_frame_pointer(cfg)
-        stack_Base_regs = {"rsp"} | ({"rbp"} if uses_rbp_as_frame else set())
+        stack_base_regs = {"rsp"} | ({"rbp"} if uses_rbp_as_frame else set())
+        has_escaped_stack_lea = self._detect_escaped_stack_lea(cfg, stack_base_regs)
 
         entry_bb = func.append_basic_block(name="lift_init")
         builder = ir.IRBuilder(entry_bb)
 
-        # Allocate register state & local stack frame
         stack_arr = builder.alloca(ir.ArrayType(self.i8, STACK_FRAME_BYTES), name="stack_frame")
         stack_arr.align = 16
 
@@ -106,7 +119,6 @@ class X86ToLLVMLifter:
             for flg in ("zf", "cf", "sf", "of")
         }
 
-        # Initialize registers
         arg_map = {aname: func.args[i] for i, aname in enumerate(arg_names)}
         for gpr in GPR64_LIST:
             if gpr in arg_map:
@@ -119,7 +131,6 @@ class X86ToLLVMLifter:
         for flg_slot in flag_slots.values():
             builder.store(ir.Constant(self.i1, 0), flg_slot)
 
-        # Create an LLVM basic block for every CFG basic block
         llvm_blocks: dict[int, ir.Block] = {}
         for blk in cfg.sorted_blocks():
             llvm_blocks[blk.address] = func.append_basic_block(name=f"bb_{blk.address:x}")
@@ -130,6 +141,10 @@ class X86ToLLVMLifter:
             builder.ret(ir.Constant(self.i64, 0))
 
         ext_helpers: dict[str, ir.Function] = {}
+        ref_globals_map: dict[str, KernelGlobalRef] = {}
+        g_syms = global_data_symbols or {}
+        c_counts = callee_arg_counts or {}
+        c_widths = callee_param_widths or {}
 
         for blk in cfg.sorted_blocks():
             bb_ir = llvm_blocks[blk.address]
@@ -147,10 +162,16 @@ class X86ToLLVMLifter:
                     reg_slots=reg_slots,
                     flag_slots=flag_slots,
                     stack_arr=stack_arr,
-                    stack_base_regs=stack_Base_regs,
+                    stack_base_regs=stack_base_regs,
+                    has_escaped_stack_lea=has_escaped_stack_lea,
                     llvm_blocks=llvm_blocks,
                     ext_helpers=ext_helpers,
                     symbol_lookup=symbol_lookup or {},
+                    global_data_symbols=g_syms,
+                    callee_arg_counts=c_counts,
+                    callee_param_widths=c_widths,
+                    image=image,
+                    ref_globals_map=ref_globals_map,
                 )
 
             if not terminated:
@@ -162,9 +183,22 @@ class X86ToLLVMLifter:
                     ret_val = b.load(reg_slots["rax"], name="ret_rax")
                     b.ret(ret_val)
 
+        if image is not None:
+            for g in ref_globals_map.values():
+                if not g.is_array_or_addr and g.size in (1, 2, 4, 8):
+                    ro_val = image.read_readonly_scalar(g.va, g.size)
+                    if ro_val is not None:
+                        g.is_const = True
+                        g.initial_value = ro_val
+
         raw_ir = str(module)
         opt_ir, verified = self.optimize_and_verify_ir(raw_ir, opt_level=opt_level)
-        return LiftedModuleResult(raw_ir=raw_ir, optimized_ir=opt_ir, verified=verified)
+        return LiftedModuleResult(
+            raw_ir=raw_ir,
+            optimized_ir=opt_ir,
+            verified=verified,
+            referenced_globals=list(ref_globals_map.values()),
+        )
 
     def optimize_and_verify_ir(self, raw_ir: str, opt_level: int = 2) -> tuple[str, bool]:
         """Parse IR via LLVM 22 Core (`llvmlite.binding`), verify, and run NewPM passes."""
@@ -186,7 +220,6 @@ class X86ToLLVMLifter:
         return str(mod), True
 
     def _detect_frame_pointer(self, cfg: FunctionCFG) -> bool:
-        """Check whether prologue establishes RBP from RSP (`mov rbp, rsp` / `lea rbp, [rsp+...]`)."""
         if cfg.entry_address not in cfg.blocks:
             return False
         for ins in cfg.blocks[cfg.entry_address].instructions[:8]:
@@ -198,6 +231,25 @@ class X86ToLLVMLifter:
                     if s.kind == "mem" and s.base == "rsp" and s.index is None:
                         return True
         return False
+
+    def _detect_escaped_stack_lea(self, cfg: FunctionCFG, stack_base_regs: set[str]) -> bool:
+        has_call = False
+        has_stack_lea = False
+        for blk in cfg.blocks.values():
+            for ins in blk.instructions:
+                if ins.mnemonic == "call":
+                    has_call = True
+                elif ins.mnemonic == "lea" and len(ins.operands) == 2:
+                    dst, src = ins.operands
+                    if (
+                        dst.kind == "reg"
+                        and dst.reg not in ("rsp", "esp", "rbp", "ebp")
+                        and src.kind == "mem"
+                        and src.base in stack_base_regs
+                        and src.segment is None
+                    ):
+                        has_stack_lea = True
+        return has_call and has_stack_lea
 
     def _int_ty(self, bits: int) -> ir.IntType:
         return ir.IntType(bits)
@@ -235,10 +287,8 @@ class X86ToLLVMLifter:
         if bit_sz == 64:
             b.store(val, reg_slots[parent])
         elif bit_sz == 32:
-            # x86-64 rule: 32-bit GPR write zero-extends into upper 32 bits!
             b.store(b.zext(val, self.i64), reg_slots[parent])
         else:
-            # 16-bit or 8-bit write preserves remaining bits
             old = b.load(reg_slots[parent])
             mask_int = ((1 << bit_sz) - 1) << bit_off
             inv_mask = (~mask_int) & 0xFFFFFFFFFFFFFFFF
@@ -248,13 +298,61 @@ class X86ToLLVMLifter:
                 shifted = b.shl(shifted, ir.Constant(self.i64, bit_off))
             b.store(b.or_(cleared, shifted), reg_slots[parent])
 
+    def _emit_sym_addr_call(
+        self,
+        b: ir.IRBuilder,
+        module: ir.Module,
+        ext_helpers: dict[str, ir.Function],
+        sym_name: str,
+    ) -> ir.Value:
+        helper_name = f"__nt_sym_addr_{sym_name}"
+        if helper_name not in ext_helpers:
+            fn = ir.Function(module, ir.FunctionType(self.i64, []), name=helper_name)
+            fn.attributes.add("readnone")
+            fn.attributes.add("nounwind")
+            ext_helpers[helper_name] = fn
+        return b.call(ext_helpers[helper_name], [], name=f"addr_{sym_name}")
+
     def _compute_ea(
         self,
         b: ir.IRBuilder,
+        module: ir.Module,
         ins: DisasmInsn,
         op: InsnOperand,
         reg_slots: dict[str, ir.AllocaInstr],
+        ext_helpers: dict[str, ir.Function],
+        global_data_symbols: dict[int, str],
+        ref_globals_map: dict[str, KernelGlobalRef],
+        is_lea: bool = False,
+        image: BinaryImage | None = None,
     ) -> ir.Value:
+        if op.base == "rip" and op.index is None:
+            target_va = (ins.end_address + op.disp) & 0xFFFFFFFFFFFFFFFF
+            sec = image.section_for_va(target_va) if image is not None else None
+            if target_va in global_data_symbols or (is_lea and sec is not None):
+                sym_name = global_data_symbols.get(target_va, f"__nt_rodata_{target_va:x}")
+                byte_sz = op.size if (op.size and not is_lea) else 8
+                c_ty = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t", 8: "uint64_t"}.get(
+                    byte_sz, "uint64_t"
+                )
+                prev = ref_globals_map.get(sym_name)
+                is_arr = bool(is_lea or (prev and prev.is_array_or_addr))
+                init_bytes = prev.initial_bytes if prev else None
+                if is_arr and init_bytes is None and image is not None:
+                    blob = image.read_va(target_va, 64)
+                    if blob:
+                        init_bytes = list(blob)
+                ref_globals_map[sym_name] = KernelGlobalRef(
+                    name=sym_name,
+                    va=target_va,
+                    size=byte_sz,
+                    c_type=prev.c_type if (prev and prev.is_array_or_addr) else ("uint8_t" if is_arr else c_ty),
+                    is_array_or_addr=is_arr,
+                    is_const=bool(sec is not None and not sec.is_writable),
+                    initial_bytes=init_bytes,
+                )
+                return self._emit_sym_addr_call(b, module, ext_helpers, sym_name)
+
         addr: ir.Value = ir.Constant(self.i64, 0)
         if op.base:
             if op.base == "rip":
@@ -279,14 +377,20 @@ class X86ToLLVMLifter:
     def _mem_ptr(
         self,
         b: ir.IRBuilder,
+        module: ir.Module,
         ins: DisasmInsn,
         op: InsnOperand,
         reg_slots: dict[str, ir.AllocaInstr],
         stack_arr: ir.AllocaInstr,
         stack_base_regs: set[str],
+        ext_helpers: dict[str, ir.Function],
+        global_data_symbols: dict[int, str],
+        ref_globals_map: dict[str, KernelGlobalRef],
         bits: int,
     ) -> ir.Value:
-        ea = self._compute_ea(b, ins, op, reg_slots)
+        ea = self._compute_ea(
+            b, module, ins, op, reg_slots, ext_helpers, global_data_symbols, ref_globals_map
+        )
         elem_ty = self._int_ty(bits)
         if op.base in stack_base_regs and op.segment is None:
             raw_ptr = b.gep(stack_arr, [ir.Constant(self.i64, 0), ea])
@@ -303,6 +407,9 @@ class X86ToLLVMLifter:
         stack_arr: ir.AllocaInstr,
         stack_base_regs: set[str],
         ext_helpers: dict[str, ir.Function],
+        global_data_symbols: dict[int, str],
+        image: BinaryImage | None,
+        ref_globals_map: dict[str, KernelGlobalRef],
         default_bits: int = 64,
     ) -> ir.Value:
         bits = (op.size * 8) if op.size else default_bits
@@ -319,21 +426,38 @@ class X86ToLLVMLifter:
                 if helper_name not in ext_helpers:
                     hty = ir.FunctionType(self._int_ty(bits), [self.i64])
                     ext_helpers[helper_name] = ir.Function(module, hty, name=helper_name)
-                ea = self._compute_ea(b, ins, op, reg_slots)
+                ea = self._compute_ea(
+                    b, module, ins, op, reg_slots, ext_helpers, global_data_symbols, ref_globals_map
+                )
                 return b.call(ext_helpers[helper_name], [ea], name="gs_val")
-            ptr = self._mem_ptr(b, ins, op, reg_slots, stack_arr, stack_base_regs, bits)
+
+            # Fold RIP-relative read-only constants (`.rdata`) directly
+            if op.base == "rip" and op.index is None and image is not None:
+                target_va = (ins.end_address + op.disp) & 0xFFFFFFFFFFFFFFFF
+                ro_val = image.read_readonly_scalar(target_va, bits // 8)
+                if ro_val is not None:
+                    return ir.Constant(self._int_ty(bits), ro_val)
+
+            ptr = self._mem_ptr(
+                b, module, ins, op, reg_slots, stack_arr, stack_base_regs,
+                ext_helpers, global_data_symbols, ref_globals_map, bits,
+            )
             return b.load(ptr, name="mem_ld")
         return ir.Constant(self._int_ty(bits), 0)
 
     def _write_operand(
         self,
         b: ir.IRBuilder,
+        module: ir.Module,
         ins: DisasmInsn,
         op: InsnOperand,
         val: ir.Value,
         reg_slots: dict[str, ir.AllocaInstr],
         stack_arr: ir.AllocaInstr,
         stack_base_regs: set[str],
+        ext_helpers: dict[str, ir.Function],
+        global_data_symbols: dict[int, str],
+        ref_globals_map: dict[str, KernelGlobalRef],
     ) -> None:
         if op.kind == "reg" and op.reg:
             self._write_reg(b, reg_slots, op.reg, val)
@@ -343,7 +467,10 @@ class X86ToLLVMLifter:
                 val = b.zext(val, self._int_ty(bits))
             elif val.type.width > bits:
                 val = b.trunc(val, self._int_ty(bits))
-            ptr = self._mem_ptr(b, ins, op, reg_slots, stack_arr, stack_base_regs, bits)
+            ptr = self._mem_ptr(
+                b, module, ins, op, reg_slots, stack_arr, stack_base_regs,
+                ext_helpers, global_data_symbols, ref_globals_map, bits,
+            )
             b.store(val, ptr)
 
     def _update_flags_arith(
@@ -361,7 +488,6 @@ class X86ToLLVMLifter:
         b.store(b.icmp_signed("<", res, zero), flag_slots["sf"])
         if is_sub:
             cf = b.icmp_unsigned("<", lhs, rhs)
-            # Signed overflow on sub: (lhs ^ rhs) < 0 && (lhs ^ res) < 0
             diff_sign = b.icmp_signed("<", b.xor(lhs, rhs), zero)
             res_flip = b.icmp_signed("<", b.xor(lhs, res), zero)
             of = b.and_(diff_sign, res_flip)
@@ -424,12 +550,59 @@ class X86ToLLVMLifter:
             return b.not_(of)
         return zf
 
-    def _match_width(self, b: ir.IRBuilder, val: ir.Value, bits: int, signed: bool = False) -> ir.Value:
+    def _match_width(
+        self, b: ir.IRBuilder, val: ir.Value, bits: int, signed: bool = False
+    ) -> ir.Value:
         if val.type.width == bits:
             return val
         if val.type.width < bits:
             return b.sext(val, self._int_ty(bits)) if signed else b.zext(val, self._int_ty(bits))
         return b.trunc(val, self._int_ty(bits))
+
+    def _emit_direct_call(
+        self,
+        b: ir.IRBuilder,
+        module: ir.Module,
+        target_va: int,
+        reg_slots: dict[str, ir.AllocaInstr],
+        ext_helpers: dict[str, ir.Function],
+        symbol_lookup: dict[int, str],
+        callee_arg_counts: dict[str, int],
+        callee_param_widths: dict[str, list[int]],
+        r_op_fn=None,
+        stack_arg_base: int = 0x20,
+    ) -> ir.Value:
+        callee_name = symbol_lookup.get(target_va, f"sub_{target_va:x}")
+        widths = callee_param_widths.get(callee_name)
+        n_args = len(widths) if widths is not None else callee_arg_counts.get(callee_name, 4)
+        n_args = max(0, min(n_args, 8))
+        arg_vals: list[ir.Value] = []
+        for idx, r in enumerate(("rcx", "rdx", "r8", "r9")[: min(n_args, 4)]):
+            rv = self._read_reg(b, reg_slots, r)
+            if widths is not None and idx < len(widths) and widths[idx] in (8, 16):
+                rv = b.and_(rv, ir.Constant(self.i64, (1 << widths[idx]) - 1))
+            arg_vals.append(rv)
+        for idx in range(4, n_args):
+            w = widths[idx] if (widths is not None and idx < len(widths)) else 64
+            if w not in (8, 16, 32, 64):
+                w = 64
+            if r_op_fn is not None:
+                sv = r_op_fn(
+                    InsnOperand(
+                        kind="mem",
+                        size=w // 8,
+                        base="rsp",
+                        disp=stack_arg_base + 8 * (idx - 4),
+                    ),
+                    w,
+                )
+                arg_vals.append(self._match_width(b, sv, 64, signed=False))
+            else:
+                arg_vals.append(ir.Constant(self.i64, 0))
+        if callee_name not in ext_helpers:
+            callee_ty = ir.FunctionType(self.i64, [self.i64] * n_args)
+            ext_helpers[callee_name] = ir.Function(module, callee_ty, name=callee_name)
+        return b.call(ext_helpers[callee_name], arg_vals, name="call_res")
 
     def _lift_instruction(
         self,
@@ -441,15 +614,21 @@ class X86ToLLVMLifter:
         flag_slots: dict[str, ir.AllocaInstr],
         stack_arr: ir.AllocaInstr,
         stack_base_regs: set[str],
+        has_escaped_stack_lea: bool,
         llvm_blocks: dict[int, ir.Block],
         ext_helpers: dict[str, ir.Function],
         symbol_lookup: dict[int, str],
+        global_data_symbols: dict[int, str],
+        callee_arg_counts: dict[str, int],
+        callee_param_widths: dict[str, list[int]],
+        image: BinaryImage | None,
+        ref_globals_map: dict[str, KernelGlobalRef],
     ) -> bool:
-        """Lift a single x86-64 instruction; returns True if block was terminated."""
-        m = ins.mnemonic
+        raw_m = ins.mnemonic
+        m = raw_m[5:].strip() if raw_m.startswith("lock ") else raw_m
         ops = ins.operands
 
-        if m in ("nop", "endbr64", "lfence", "mfence", "sfence", "pause"):
+        if m in ("nop", "endbr64", "lfence", "mfence", "sfence", "pause", "prefetchw", "prefetcht0", "cld"):
             return False
 
         if ins.is_privileged:
@@ -463,6 +642,18 @@ class X86ToLLVMLifter:
             b.call(iasm, [])
             return False
 
+        def r_op(op: InsnOperand, dbits: int = 64) -> ir.Value:
+            return self._read_operand(
+                b, module, ins, op, reg_slots, stack_arr, stack_base_regs,
+                ext_helpers, global_data_symbols, image, ref_globals_map, dbits,
+            )
+
+        def w_op(op: InsnOperand, val: ir.Value) -> None:
+            self._write_operand(
+                b, module, ins, op, val, reg_slots, stack_arr, stack_base_regs,
+                ext_helpers, global_data_symbols, ref_globals_map,
+            )
+
         # Control flow: returns
         if m in ("ret", "retq", "retn"):
             rsp_v = self._read_reg(b, reg_slots, "rsp")
@@ -470,11 +661,20 @@ class X86ToLLVMLifter:
             b.ret(self._read_reg(b, reg_slots, "rax"))
             return True
 
-        # Unconditional jump
+        # Unconditional jump (intra-function branch or external tailcall)
         if m == "jmp":
-            if ops and ops[0].kind == "imm" and ops[0].imm in llvm_blocks:
-                b.branch(llvm_blocks[ops[0].imm])
-                return True
+            if ops and ops[0].kind == "imm":
+                if ops[0].imm in llvm_blocks:
+                    b.branch(llvm_blocks[ops[0].imm])
+                    return True
+                if blk.tailcall_target is not None:
+                    res = self._emit_direct_call(
+                        b, module, blk.tailcall_target, reg_slots,
+                        ext_helpers, symbol_lookup, callee_arg_counts, callee_param_widths,
+                        r_op_fn=r_op, stack_arg_base=0x28,
+                    )
+                    b.ret(res)
+                    return True
             b.ret(self._read_reg(b, reg_slots, "rax"))
             return True
 
@@ -500,18 +700,16 @@ class X86ToLLVMLifter:
 
         # Function call
         if m == "call":
-            arg_vals = [self._read_reg(b, reg_slots, r) for r in ("rcx", "rdx", "r8", "r9")]
-            callee_ty = ir.FunctionType(self.i64, [self.i64] * 4)
             if ops and ops[0].kind == "imm":
-                target_va = ops[0].imm
-                callee_name = symbol_lookup.get(target_va, f"sub_{target_va:x}")
-                if callee_name not in ext_helpers:
-                    ext_helpers[callee_name] = ir.Function(module, callee_ty, name=callee_name)
-                res = b.call(ext_helpers[callee_name], arg_vals, name="call_res")
-            else:
-                tgt = self._read_operand(
-                    b, module, ins, ops[0], reg_slots, stack_arr, stack_base_regs, ext_helpers, 64
+                res = self._emit_direct_call(
+                    b, module, ops[0].imm, reg_slots,
+                    ext_helpers, symbol_lookup, callee_arg_counts, callee_param_widths,
+                    r_op_fn=r_op, stack_arg_base=0x20,
                 )
+            else:
+                arg_vals = [self._read_reg(b, reg_slots, r) for r in ("rcx", "rdx", "r8", "r9")]
+                callee_ty = ir.FunctionType(self.i64, [self.i64] * 4)
+                tgt = r_op(ops[0], 64)
                 fn_ptr = b.inttoptr(self._match_width(b, tgt, 64), callee_ty.as_pointer())
                 res = b.call(fn_ptr, arg_vals, name="icall_res")
             self._write_reg(b, reg_slots, "rax", res)
@@ -519,33 +717,24 @@ class X86ToLLVMLifter:
 
         # Stack push / pop
         if m == "push" and len(ops) == 1:
-            val = self._read_operand(
-                b, module, ins, ops[0], reg_slots, stack_arr, stack_base_regs, ext_helpers, 64
-            )
+            val = r_op(ops[0], 64)
             val64 = self._match_width(b, val, 64, signed=(ops[0].kind == "imm"))
             new_rsp = b.sub(self._read_reg(b, reg_slots, "rsp"), ir.Constant(self.i64, 8))
             self._write_reg(b, reg_slots, "rsp", new_rsp)
-            mem_op = InsnOperand(kind="mem", size=8, base="rsp")
-            self._write_operand(b, ins, mem_op, val64, reg_slots, stack_arr, stack_base_regs)
+            w_op(InsnOperand(kind="mem", size=8, base="rsp"), val64)
             return False
 
         if m == "pop" and len(ops) == 1:
-            mem_op = InsnOperand(kind="mem", size=8, base="rsp")
-            val64 = self._read_operand(
-                b, module, ins, mem_op, reg_slots, stack_arr, stack_base_regs, ext_helpers, 64
-            )
+            val64 = r_op(InsnOperand(kind="mem", size=8, base="rsp"), 64)
             new_rsp = b.add(self._read_reg(b, reg_slots, "rsp"), ir.Constant(self.i64, 8))
             self._write_reg(b, reg_slots, "rsp", new_rsp)
-            self._write_operand(b, ins, ops[0], val64, reg_slots, stack_arr, stack_base_regs)
+            w_op(ops[0], val64)
             return False
 
         if m == "leave":
             rbp_v = self._read_reg(b, reg_slots, "rbp")
             self._write_reg(b, reg_slots, "rsp", rbp_v)
-            mem_op = InsnOperand(kind="mem", size=8, base="rsp")
-            saved_rbp = self._read_operand(
-                b, module, ins, mem_op, reg_slots, stack_arr, stack_base_regs, ext_helpers, 64
-            )
+            saved_rbp = r_op(InsnOperand(kind="mem", size=8, base="rsp"), 64)
             self._write_reg(b, reg_slots, "rsp", b.add(rbp_v, ir.Constant(self.i64, 8)))
             self._write_reg(b, reg_slots, "rbp", saved_rbp)
             return False
@@ -557,66 +746,78 @@ class X86ToLLVMLifter:
             return False
         if m == "cdq":
             eax = self._read_reg(b, reg_slots, "eax")
-            edx = b.ashr(eax, ir.Constant(self.i32, 31))
-            self._write_reg(b, reg_slots, "edx", edx)
+            self._write_reg(b, reg_slots, "edx", b.ashr(eax, ir.Constant(self.i32, 31)))
             return False
         if m == "cqo":
             rax = self._read_reg(b, reg_slots, "rax")
-            rdx = b.ashr(rax, ir.Constant(self.i64, 63))
-            self._write_reg(b, reg_slots, "rdx", rdx)
+            self._write_reg(b, reg_slots, "rdx", b.ashr(rax, ir.Constant(self.i64, 63)))
             return False
 
         # Data movement
         if m in ("mov", "movabs") and len(ops) == 2:
             dst_bits = (ops[0].size * 8) if ops[0].size else 64
-            src = self._read_operand(
-                b, module, ins, ops[1], reg_slots, stack_arr, stack_base_regs, ext_helpers, dst_bits
-            )
+            src = r_op(ops[1], dst_bits)
             src = self._match_width(b, src, dst_bits, signed=(ops[1].kind == "imm"))
-            self._write_operand(b, ins, ops[0], src, reg_slots, stack_arr, stack_base_regs)
+            w_op(ops[0], src)
             return False
 
         if m == "movzx" and len(ops) == 2:
             dst_bits = (ops[0].size * 8) if ops[0].size else 64
-            src = self._read_operand(
-                b, module, ins, ops[1], reg_slots, stack_arr, stack_base_regs, ext_helpers
-            )
-            self._write_operand(
-                b, ins, ops[0], self._match_width(b, src, dst_bits, signed=False),
-                reg_slots, stack_arr, stack_base_regs,
-            )
+            w_op(ops[0], self._match_width(b, r_op(ops[1]), dst_bits, signed=False))
             return False
 
         if m in ("movsx", "movsxd") and len(ops) == 2:
             dst_bits = (ops[0].size * 8) if ops[0].size else 64
-            src = self._read_operand(
-                b, module, ins, ops[1], reg_slots, stack_arr, stack_base_regs, ext_helpers
-            )
-            self._write_operand(
-                b, ins, ops[0], self._match_width(b, src, dst_bits, signed=True),
-                reg_slots, stack_arr, stack_base_regs,
-            )
+            w_op(ops[0], self._match_width(b, r_op(ops[1]), dst_bits, signed=True))
             return False
 
         if m == "lea" and len(ops) == 2 and ops[1].kind == "mem":
             dst_bits = (ops[0].size * 8) if ops[0].size else 64
-            ea = self._compute_ea(b, ins, ops[1], reg_slots)
-            self._write_operand(
-                b, ins, ops[0], self._match_width(b, ea, dst_bits),
-                reg_slots, stack_arr, stack_base_regs,
+            ea = self._compute_ea(
+                b, module, ins, ops[1], reg_slots, ext_helpers,
+                global_data_symbols, ref_globals_map, is_lea=True, image=image,
             )
+            if (
+                has_escaped_stack_lea
+                and ops[0].kind == "reg"
+                and ops[0].reg not in ("rsp", "esp", "rbp", "ebp")
+                and ops[1].base in stack_base_regs
+                and ops[1].segment is None
+            ):
+                stk_ptr = b.gep(stack_arr, [ir.Constant(self.i64, 0), ea])
+                ea = b.ptrtoint(stk_ptr, self.i64)
+            w_op(ops[0], self._match_width(b, ea, dst_bits))
             return False
 
         if m == "xchg" and len(ops) == 2:
             bits = (ops[0].size * 8) if ops[0].size else 64
-            v0 = self._read_operand(
-                b, module, ins, ops[0], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-            )
-            v1 = self._read_operand(
-                b, module, ins, ops[1], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-            )
-            self._write_operand(b, ins, ops[0], v1, reg_slots, stack_arr, stack_base_regs)
-            self._write_operand(b, ins, ops[1], v0, reg_slots, stack_arr, stack_base_regs)
+            v0 = self._match_width(b, r_op(ops[0], bits), bits)
+            v1 = self._match_width(b, r_op(ops[1], bits), bits)
+            w_op(ops[0], v1)
+            w_op(ops[1], v0)
+            return False
+
+        if m == "xadd" and len(ops) == 2:
+            bits = (ops[0].size * 8) if ops[0].size else 64
+            v0 = self._match_width(b, r_op(ops[0], bits), bits)
+            v1 = self._match_width(b, r_op(ops[1], bits), bits)
+            res = b.add(v0, v1)
+            self._update_flags_arith(b, flag_slots, v0, v1, res, is_sub=False)
+            w_op(ops[1], v0)
+            w_op(ops[0], res)
+            return False
+
+        if m == "cmpxchg" and len(ops) == 2:
+            bits = (ops[0].size * 8) if ops[0].size else 64
+            acc_reg = {8: "al", 16: "ax", 32: "eax", 64: "rax"}[bits]
+            acc_v = self._read_reg(b, reg_slots, acc_reg)
+            dst_v = self._match_width(b, r_op(ops[0], bits), bits)
+            src_v = self._match_width(b, r_op(ops[1], bits), bits)
+            diff = b.sub(acc_v, dst_v)
+            self._update_flags_arith(b, flag_slots, acc_v, dst_v, diff, is_sub=True)
+            eq = b.icmp_unsigned("==", acc_v, dst_v)
+            w_op(ops[0], b.select(eq, src_v, dst_v))
+            self._write_reg(b, reg_slots, acc_reg, b.select(eq, acc_v, dst_v))
             return False
 
         # Conditional move & setcc
@@ -624,48 +825,50 @@ class X86ToLLVMLifter:
             cc = m[4:]
             bits = (ops[0].size * 8) if ops[0].size else 64
             cond = self._eval_cc(b, flag_slots, cc)
-            cur = self._read_operand(
-                b, module, ins, ops[0], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-            )
-            alt = self._read_operand(
-                b, module, ins, ops[1], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-            )
-            sel = b.select(cond, self._match_width(b, alt, bits), self._match_width(b, cur, bits))
-            self._write_operand(b, ins, ops[0], sel, reg_slots, stack_arr, stack_base_regs)
+            cur = self._match_width(b, r_op(ops[0], bits), bits)
+            alt = self._match_width(b, r_op(ops[1], bits), bits)
+            w_op(ops[0], b.select(cond, alt, cur))
             return False
 
         if m.startswith("set") and len(ops) == 1:
             cc = m[3:]
             cond = self._eval_cc(b, flag_slots, cc)
-            v8 = b.zext(cond, self.i8)
-            self._write_operand(b, ins, ops[0], v8, reg_slots, stack_arr, stack_base_regs)
+            w_op(ops[0], b.zext(cond, self.i8))
+            return False
+
+        # Bit scan & population count: bsf, tzcnt, bsr, lzcnt, popcnt
+        if m in ("bsf", "tzcnt", "bsr", "lzcnt", "popcnt") and len(ops) == 2:
+            bits = (ops[0].size * 8) if ops[0].size else 64
+            ty = self._int_ty(bits)
+            src = self._match_width(b, r_op(ops[1], bits), bits)
+            if m in ("bsf", "tzcnt"):
+                cttz = module.declare_intrinsic("llvm.cttz", [ty])
+                res = b.call(cttz, [src, ir.Constant(self.i1, 0)])
+                b.store(b.icmp_unsigned("==", src, ir.Constant(ty, 0)), flag_slots["zf"])
+            elif m in ("bsr", "lzcnt"):
+                ctlz = module.declare_intrinsic("llvm.ctlz", [ty])
+                lz = b.call(ctlz, [src, ir.Constant(self.i1, 0)])
+                res = b.sub(ir.Constant(ty, bits - 1), lz) if m == "bsr" else lz
+                b.store(b.icmp_unsigned("==", src, ir.Constant(ty, 0)), flag_slots["zf"])
+            else:
+                ctpop = module.declare_intrinsic("llvm.ctpop", [ty])
+                res = b.call(ctpop, [src])
+            w_op(ops[0], res)
             return False
 
         # Comparisons
         if m == "cmp" and len(ops) == 2:
             bits = (ops[0].size * 8) if ops[0].size else 64
-            lhs = self._read_operand(
-                b, module, ins, ops[0], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-            )
-            rhs = self._read_operand(
-                b, module, ins, ops[1], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-            )
-            lhs = self._match_width(b, lhs, bits)
-            rhs = self._match_width(b, rhs, bits, signed=(ops[1].kind == "imm"))
+            lhs = self._match_width(b, r_op(ops[0], bits), bits)
+            rhs = self._match_width(b, r_op(ops[1], bits), bits, signed=(ops[1].kind == "imm"))
             res = b.sub(lhs, rhs)
             self._update_flags_arith(b, flag_slots, lhs, rhs, res, is_sub=True)
             return False
 
         if m == "test" and len(ops) == 2:
             bits = (ops[0].size * 8) if ops[0].size else 64
-            lhs = self._read_operand(
-                b, module, ins, ops[0], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-            )
-            rhs = self._read_operand(
-                b, module, ins, ops[1], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-            )
-            lhs = self._match_width(b, lhs, bits)
-            rhs = self._match_width(b, rhs, bits, signed=(ops[1].kind == "imm"))
+            lhs = self._match_width(b, r_op(ops[0], bits), bits)
+            rhs = self._match_width(b, r_op(ops[1], bits), bits, signed=(ops[1].kind == "imm"))
             res = b.and_(lhs, rhs)
             self._update_flags_logic(b, flag_slots, res)
             return False
@@ -673,13 +876,7 @@ class X86ToLLVMLifter:
         # Unary ALU: inc, dec, neg, not, bswap
         if m in ("inc", "dec", "neg", "not", "bswap") and len(ops) == 1:
             bits = (ops[0].size * 8) if ops[0].size else 64
-            v = self._match_width(
-                b,
-                self._read_operand(
-                    b, module, ins, ops[0], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-                ),
-                bits,
-            )
+            v = self._match_width(b, r_op(ops[0], bits), bits)
             one = ir.Constant(self._int_ty(bits), 1)
             zero = ir.Constant(self._int_ty(bits), 0)
             if m == "inc":
@@ -697,10 +894,10 @@ class X86ToLLVMLifter:
                 self._update_flags_arith(b, flag_slots, zero, v, res, is_sub=True)
             elif m == "not":
                 res = b.not_(v)
-            else:  # bswap
+            else:
                 bswap_fn = module.declare_intrinsic("llvm.bswap", [self._int_ty(bits)])
                 res = b.call(bswap_fn, [v])
-            self._write_operand(b, ins, ops[0], res, reg_slots, stack_arr, stack_base_regs)
+            w_op(ops[0], res)
             return False
 
         # Widening 1-operand mul / imul, and div / idiv
@@ -709,13 +906,7 @@ class X86ToLLVMLifter:
             acc_reg = {8: "al", 16: "ax", 32: "eax", 64: "rax"}[bits]
             hi_reg = {8: "ah", 16: "dx", 32: "edx", 64: "rdx"}[bits]
             lhs = self._read_reg(b, reg_slots, acc_reg)
-            rhs = self._match_width(
-                b,
-                self._read_operand(
-                    b, module, ins, ops[0], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-                ),
-                bits,
-            )
+            rhs = self._match_width(b, r_op(ops[0], bits), bits)
             wide_ty = self._int_ty(bits * 2)
             if m == "mul":
                 prod = b.mul(b.zext(lhs, wide_ty), b.zext(rhs, wide_ty))
@@ -735,13 +926,7 @@ class X86ToLLVMLifter:
             lo = b.zext(self._read_reg(b, reg_slots, lo_reg), wide_ty)
             hi = b.shl(b.zext(self._read_reg(b, reg_slots, hi_reg), wide_ty), ir.Constant(wide_ty, bits))
             dividend = b.or_(hi, lo)
-            divisor_narrow = self._match_width(
-                b,
-                self._read_operand(
-                    b, module, ins, ops[0], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-                ),
-                bits,
-            )
+            divisor_narrow = self._match_width(b, r_op(ops[0], bits), bits)
             if m == "div":
                 d_wide = b.zext(divisor_narrow, wide_ty)
                 quot = b.trunc(b.udiv(dividend, d_wide), self._int_ty(bits))
@@ -759,29 +944,17 @@ class X86ToLLVMLifter:
             bits = (ops[0].size * 8) if ops[0].size else 64
             src1_op = ops[0] if len(ops) == 2 else ops[1]
             src2_op = ops[1] if len(ops) == 2 else ops[2]
-            lhs = self._match_width(
-                b,
-                self._read_operand(
-                    b, module, ins, src1_op, reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-                ),
-                bits,
-            )
-            rhs = self._match_width(
-                b,
-                self._read_operand(
-                    b, module, ins, src2_op, reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-                ),
-                bits,
-                signed=(src2_op.kind == "imm"),
-            )
-            res = b.mul(lhs, rhs)
-            self._write_operand(b, ins, ops[0], res, reg_slots, stack_arr, stack_base_regs)
+            lhs = self._match_width(b, r_op(src1_op, bits), bits)
+            rhs = self._match_width(b, r_op(src2_op, bits), bits, signed=(src2_op.kind == "imm"))
+            w_op(ops[0], b.mul(lhs, rhs))
             return False
 
         # Binary ALU & shifts
-        if m in ("add", "sub", "adc", "sbb", "and", "or", "xor", "shl", "sal", "shr", "sar", "rol", "ror") and len(ops) == 2:
+        if (
+            m in ("add", "sub", "adc", "sbb", "and", "or", "xor", "shl", "sal", "shr", "sar", "rol", "ror")
+            and len(ops) == 2
+        ):
             bits = (ops[0].size * 8) if ops[0].size else 64
-            # Fast-path zeroing idiom: xor eax, eax / xor rax, rax
             if (
                 m == "xor"
                 and ops[0].kind == "reg"
@@ -789,21 +962,12 @@ class X86ToLLVMLifter:
                 and ops[0].reg == ops[1].reg
             ):
                 zero = ir.Constant(self._int_ty(bits), 0)
-                self._write_operand(b, ins, ops[0], zero, reg_slots, stack_arr, stack_base_regs)
+                w_op(ops[0], zero)
                 self._update_flags_logic(b, flag_slots, zero)
                 return False
 
-            lhs = self._match_width(
-                b,
-                self._read_operand(
-                    b, module, ins, ops[0], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-                ),
-                bits,
-            )
-            rhs_raw = self._read_operand(
-                b, module, ins, ops[1], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-            )
-            rhs = self._match_width(b, rhs_raw, bits, signed=(ops[1].kind == "imm"))
+            lhs = self._match_width(b, r_op(ops[0], bits), bits)
+            rhs = self._match_width(b, r_op(ops[1], bits), bits, signed=(ops[1].kind == "imm"))
 
             if m == "add":
                 res = b.add(lhs, rhs)
@@ -826,7 +990,7 @@ class X86ToLLVMLifter:
                 res = b.or_(lhs, rhs)
                 self._update_flags_logic(b, flag_slots, res)
             elif m == "xor":
-                res = b.xor_(lhs, rhs) if hasattr(b, "xor_") else b.xor(lhs, rhs)
+                res = b.xor(lhs, rhs)
                 self._update_flags_logic(b, flag_slots, res)
             else:
                 shift_mask = 63 if bits == 64 else 31
@@ -838,46 +1002,68 @@ class X86ToLLVMLifter:
                 elif m == "sar":
                     res = b.ashr(lhs, amt)
                 elif m == "rol":
-                    fshl = module.declare_intrinsic(
-                        "llvm.fshl", [self._int_ty(bits)]
-                    )
+                    fshl = module.declare_intrinsic("llvm.fshl", [self._int_ty(bits)])
                     res = b.call(fshl, [lhs, lhs, amt])
-                else:  # ror
-                    fshr = module.declare_intrinsic(
-                        "llvm.fshr", [self._int_ty(bits)]
-                    )
+                else:
+                    fshr = module.declare_intrinsic("llvm.fshr", [self._int_ty(bits)])
                     res = b.call(fshr, [lhs, lhs, amt])
                 self._update_flags_logic(b, flag_slots, res)
 
-            self._write_operand(b, ins, ops[0], res, reg_slots, stack_arr, stack_base_regs)
+            w_op(ops[0], res)
             return False
 
-        # Bit test instructions: bt, bts, btr
-        if m in ("bt", "bts", "btr") and len(ops) == 2:
+        # Bit test instructions: bt, bts, btr, btc (including x86-64 memory bit-string indexing!)
+        if m in ("bt", "bts", "btr", "btc") and len(ops) == 2:
             bits = (ops[0].size * 8) if ops[0].size else 64
-            lhs = self._match_width(
-                b,
-                self._read_operand(
-                    b, module, ins, ops[0], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-                ),
-                bits,
-            )
-            rhs = self._match_width(
-                b,
-                self._read_operand(
-                    b, module, ins, ops[1], reg_slots, stack_arr, stack_base_regs, ext_helpers, bits
-                ),
-                bits,
-            )
-            bit_idx = b.and_(rhs, ir.Constant(self._int_ty(bits), bits - 1))
+            if bits not in (16, 32, 64):
+                bits = 32
+            ty = self._int_ty(bits)
+            rhs_raw = r_op(ops[1], bits)
+
+            if ops[0].kind == "mem" and ops[1].kind == "reg":
+                # x86-64 architectural rule: BT [mem], reg indexes across arbitrary memory words!
+                rhs_s64 = self._match_width(b, rhs_raw, 64, signed=True)
+                lg2 = {16: 4, 32: 5, 64: 6}[bits]
+                word_idx = b.ashr(rhs_s64, ir.Constant(self.i64, lg2))
+                byte_off = b.mul(word_idx, ir.Constant(self.i64, bits // 8))
+                base_ea = self._compute_ea(
+                    b, module, ins, ops[0], reg_slots, ext_helpers,
+                    global_data_symbols, ref_globals_map,
+                )
+                eff_ea = b.add(base_ea, byte_off)
+                if ops[0].base in stack_base_regs and ops[0].segment is None:
+                    raw_ptr = b.gep(stack_arr, [ir.Constant(self.i64, 0), eff_ea])
+                    ptr = b.bitcast(raw_ptr, ty.as_pointer())
+                else:
+                    ptr = b.inttoptr(eff_ea, ty.as_pointer())
+                lhs = b.load(ptr, name="bt_word")
+                bit_idx = b.and_(self._match_width(b, rhs_s64, bits), ir.Constant(ty, bits - 1))
+                bit_val = b.trunc(b.lshr(lhs, bit_idx), self.i1)
+                b.store(bit_val, flag_slots["cf"])
+                if m in ("bts", "btr", "btc"):
+                    mask = b.shl(ir.Constant(ty, 1), bit_idx)
+                    if m == "bts":
+                        new_w = b.or_(lhs, mask)
+                    elif m == "btr":
+                        new_w = b.and_(lhs, b.not_(mask))
+                    else:
+                        new_w = b.xor(lhs, mask)
+                    b.store(new_w, ptr)
+                return False
+
+            lhs = self._match_width(b, r_op(ops[0], bits), bits)
+            rhs = self._match_width(b, rhs_raw, bits)
+            bit_idx = b.and_(rhs, ir.Constant(ty, bits - 1))
             bit_val = b.trunc(b.lshr(lhs, bit_idx), self.i1)
             b.store(bit_val, flag_slots["cf"])
-            if m == "bts":
-                mask = b.shl(ir.Constant(self._int_ty(bits), 1), bit_idx)
-                self._write_operand(b, ins, ops[0], b.or_(lhs, mask), reg_slots, stack_arr, stack_base_regs)
-            elif m == "btr":
-                mask = b.not_(b.shl(ir.Constant(self._int_ty(bits), 1), bit_idx))
-                self._write_operand(b, ins, ops[0], b.and_(lhs, mask), reg_slots, stack_arr, stack_base_regs)
+            if m in ("bts", "btr", "btc"):
+                mask = b.shl(ir.Constant(ty, 1), bit_idx)
+                if m == "bts":
+                    w_op(ops[0], b.or_(lhs, mask))
+                elif m == "btr":
+                    w_op(ops[0], b.and_(lhs, b.not_(mask)))
+                else:
+                    w_op(ops[0], b.xor(lhs, mask))
             return False
 
         return False

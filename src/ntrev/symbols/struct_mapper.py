@@ -1,10 +1,10 @@
 """
 Symbol & Structural Mapper.
 
-Maps low-level x86-64 memory displacements (`[reg + disp]`, `gs:[0x188]`) into high-level
-C structure dereferences (`Process->UniqueProcessId`, `KeGetCurrentThread()->ApcStateProcess`,
-`CONTAINING_RECORD(...)`), and synthesizes reconstructed `struct _RECON_*` definitions for
-untyped pointer parameters from observed memory access patterns.
+Maps low-level x86-64 memory displacements (`[reg + disp]`, `gs:[0x188]`, `gs:[0x20]`) into
+high-level C structure dereferences (`Process->UniqueProcessId`, `KeGetCurrentThread()->ApcState.Process`,
+`Thread->Cid.UniqueThread`, `CONTAINING_RECORD(...)`), and synthesizes reconstructed
+`struct _RECON_*` definitions for untyped pointer parameters from observed memory access patterns.
 """
 
 from __future__ import annotations
@@ -19,7 +19,11 @@ from ntrev.models import (
     StructDef,
     StructField,
 )
-from ntrev.symbols.nt_types import KPCR_GS_OFFSETS, get_builtin_nt_structs
+from ntrev.symbols.nt_types import (
+     KNOWN_WDK_PROTOTYPES,
+    KPCR_GS_OFFSETS,
+    get_builtin_nt_structs,
+)
 
 WIN64_PARAM_REGS = ["rcx", "rdx", "r8", "r9"]
 
@@ -31,7 +35,7 @@ class TrackedPointer:
 
 
 class StructuralMapper:
-    """Applies PDB & built-in NT types to CFG memory operands and reconstructs unknown structs."""
+    """Applies PDB, WDK, & built-in NT types to CFG memory operands and reconstructs unknown structs."""
 
     def __init__(self, pdb: PDBDatabase | None = None) -> None:
         self.structs: dict[str, StructDef] = dict(get_builtin_nt_structs())
@@ -45,38 +49,51 @@ class StructuralMapper:
         cfg: FunctionCFG,
         param_names: dict[str, str] | None = None,
     ) -> tuple[list[FieldAccessRef], list[StructDef], dict[str, str]]:
-        """
-        Analyze memory accesses in `cfg`, returning:
-          - `field_refs`: resolved struct field expressions per instruction
-          - `new_structs`: newly synthesized structs for untyped pointer parameters
-          - `inferred_param_structs`: `{param_reg: c_pointer_type}`
-        """
-        p_names = param_names or {
-            "rcx": "arg1",
-            "rdx": "arg2",
-            "r8": "arg3",
-            "r9": "arg4",
-        }
+        p_names = dict(
+            param_names
+            or {
+                "rcx": "arg1",
+                "rdx": "arg2",
+                "r8": "arg3",
+                "r9": "arg4",
+            }
+        )
         reg_ptrs: dict[str, TrackedPointer] = {}
         inferred_param_structs: dict[str, str] = {}
-        pdb_explicit_typed_regs: set[str] = set()
+        explicit_typed_regs: set[str] = set()
 
-        # Seed pointer types from PDB function prototype if available
+        # 1. Seed pointer types from authoritative PDB S_GPROC32 prototype if available
+        seeded_from_pdb = False
         if self.pdb is not None:
             rva = cfg.address - self._guess_image_base(cfg.address)
             sym = self.pdb.symbols_by_name.get(cfg.name) or self.pdb.symbols_by_rva.get(rva)
             if sym and sym.param_types:
+                seeded_from_pdb = True
                 for idx, (pname, ptype) in enumerate(sym.param_types[:4]):
                     reg = WIN64_PARAM_REGS[idx]
                     p_names[reg] = pname
                     if ptype.strip() not in ("void*", "PVOID"):
-                        pdb_explicit_typed_regs.add(reg)
+                        explicit_typed_regs.add(reg)
                     sname = self._resolve_pointee_struct(ptype)
                     if sname and sname in self.structs:
                         reg_ptrs[reg] = TrackedPointer(struct_name=sname, c_expr=pname)
                         inferred_param_structs[reg] = ptype
 
-        # Collect raw displacement accesses on untyped parameter registers
+        # 2. Fall back to documented WDK prototype catalog if stripped public PDB had no S_GPROC32
+        if not seeded_from_pdb and cfg.name in KNOWN_WDK_PROTOTYPES:
+            _wdk_ret, wdk_params = KNOWN_WDK_PROTOTYPES[cfg.name]
+            for idx, (pname, ptype) in enumerate(wdk_params[:4]):
+                reg = WIN64_PARAM_REGS[idx]
+                adj_ptype = self._adapt_wdk_type(ptype)
+                p_names[reg] = pname
+                if adj_ptype.strip() not in ("void*", "PVOID"):
+                    explicit_typed_regs.add(reg)
+                sname = self._resolve_pointee_struct(adj_ptype)
+                if sname and sname in self.structs:
+                    reg_ptrs[reg] = TrackedPointer(struct_name=sname, c_expr=pname)
+                    inferred_param_structs[reg] = adj_ptype
+
+        # 3. Collect raw displacement accesses on remaining untyped parameter registers
         untyped_accesses: dict[str, dict[int, tuple[int, bool]]] = {}
         for blk in cfg.sorted_blocks():
             for ins in blk.instructions:
@@ -86,7 +103,7 @@ class StructuralMapper:
                         if (
                             canon_base in WIN64_PARAM_REGS
                             and canon_base not in reg_ptrs
-                            and canon_base not in pdb_explicit_typed_regs
+                            and canon_base not in explicit_typed_regs
                             and op.disp >= 0
                         ):
                             is_w = op_idx == 0 and ins.mnemonic not in ("cmp", "test")
@@ -104,7 +121,8 @@ class StructuralMapper:
             pname = p_names.get(reg, reg)
             if matched is not None:
                 reg_ptrs[reg] = TrackedPointer(struct_name=matched.name, c_expr=pname)
-                ptr_t = matched.pointer_typedef or f"struct {matched.name}*"
+                kw = "union" if matched.is_union else "struct"
+                ptr_t = matched.pointer_typedef or f"{kw} {matched.name}*"
                 inferred_param_structs[reg] = ptr_t
             else:
                 recon = self._synthesize_struct(cfg.name, reg, disp_map)
@@ -125,7 +143,7 @@ class StructuralMapper:
                         c_expr = (
                             kpcr_hit[0]
                             if kpcr_hit
-                            else f"__readgsqword(0x{op.disp:x})"
+                            else f"__ntrev_readgsqword(0x{op.disp:x})"
                         )
                         c_type = kpcr_hit[1] if kpcr_hit else "uint64_t"
                         pointee = kpcr_hit[2] if kpcr_hit else None
@@ -157,7 +175,7 @@ class StructuralMapper:
                                     struct_name=pointee, c_expr=c_expr
                                 )
 
-                # 2. Check CONTAINING_RECORD: `lea dst, [base - offset]` or `sub reg, offset`
+                # 2. Check CONTAINING_RECORD: `lea dst, [base - offset]`
                 if (
                     ins.mnemonic == "lea"
                     and len(ins.operands) == 2
@@ -194,7 +212,7 @@ class StructuralMapper:
                         )
                         continue
 
-                # 3. Resolve `[tracked_ptr + disp]` struct field accesses & propagate child pointers
+                # 3. Resolve `[tracked_ptr + disp]` struct field accesses (including nested paths!)
                 for op_idx, op in enumerate(ins.operands):
                     if op.kind == "mem" and op.base and op.index is None and op.segment is None:
                         canon_base = CANONICAL_GPR64.get(op.base)
@@ -204,9 +222,19 @@ class StructuralMapper:
                         sdef = self.structs.get(tracked.struct_name)
                         if not sdef:
                             continue
-                        fld = sdef.field_at_offset(op.disp)
-                        if not fld:
-                            continue
+                        acc_sz = op.size or 8
+                        is_lea = ins.mnemonic == "lea"
+                        nested = sdef.resolve_nested_field_path(
+                            op.disp, acc_sz, self.structs, is_address_only=is_lea
+                        )
+                        if nested is not None:
+                            fpath, fld = nested
+                        else:
+                            fld_fb = sdef.field_at_offset(op.disp)
+                            if not fld_fb:
+                                continue
+                            fpath, fld = fld_fb.name, fld_fb
+
                         is_write = op_idx == 0 and ins.mnemonic not in ("cmp", "test", "lea")
                         base_str = (
                             f"({tracked.c_expr})"
@@ -214,9 +242,9 @@ class StructuralMapper:
                             else tracked.c_expr
                         )
                         c_expr = (
-                            f"&({base_str}->{fld.name})"
-                            if ins.mnemonic == "lea"
-                            else f"{base_str}->{fld.name}"
+                            f"&({base_str}->{fpath})"
+                            if is_lea
+                            else f"{base_str}->{fpath}"
                         )
                         field_refs.append(
                             FieldAccessRef(
@@ -225,7 +253,7 @@ class StructuralMapper:
                                 disp=op.disp,
                                 access_size=op.size or fld.size,
                                 struct_name=sdef.name,
-                                field_name=fld.name,
+                                field_name=fpath,
                                 field_c_type=fld.c_type,
                                 c_expr=c_expr,
                                 is_write=is_write,
@@ -241,13 +269,13 @@ class StructuralMapper:
                         ):
                             dst_canon = CANONICAL_GPR64.get(ins.operands[0].reg)
                             if dst_canon:
-                                if fld.is_pointer and fld.pointee_type in self.structs:
+                                pt = fld.pointee_type or self._resolve_pointee_struct(fld.c_type)
+                                if fld.is_pointer and pt in self.structs:
                                     reg_ptrs[dst_canon] = TrackedPointer(
-                                        struct_name=fld.pointee_type,
+                                        struct_name=pt,
                                         c_expr=c_expr,
                                     )
                                 elif dst_canon == canon_base:
-                                    # Register overwritten with non-struct scalar
                                     reg_ptrs.pop(dst_canon, None)
 
                 # Copy propagation: `mov rbx, rcx`
@@ -267,10 +295,25 @@ class StructuralMapper:
 
         return field_refs, synthesized, inferred_param_structs
 
+    def _adapt_wdk_type(self, c_type: str) -> str:
+        """Adapt WDK struct/union qualifiers to match loaded PDB definitions."""
+        clean = c_type.strip()
+        if clean == "struct _ETHREAD*" and "_ETHREAD" not in self.structs and "_KTHREAD" in self.structs:
+            return "struct _KTHREAD*"
+        sname = self._resolve_pointee_struct(clean)
+        if sname and sname in self.structs:
+            kw = "union" if self.structs[sname].is_union else "struct"
+            const_pfx = "const " if clean.startswith("const ") else ""
+            return f"{const_pfx}{kw} {sname}*"
+        return clean
+
     def _resolve_pointee_struct(self, c_type: str) -> str | None:
         clean = c_type.strip()
-        if clean.startswith("struct ") and clean.endswith("*"):
-            return clean[len("struct ") : -1].strip()
+        if clean.startswith("const "):
+            clean = clean[len("const ") :].strip()
+        for pfx in ("struct ", "union "):
+            if clean.startswith(pfx) and clean.endswith("*"):
+                return clean[len(pfx) : -1].strip()
         for sname, sdef in self.structs.items():
             if sdef.pointer_typedef and clean == sdef.pointer_typedef:
                 return sname
@@ -332,10 +375,17 @@ class StructuralMapper:
         )
 
     def _find_containing_record(self, pos_offset: int) -> tuple[StructDef, StructField] | None:
-        for sdef in self.structs.values():
+        # Prioritize canonical intrusive links (`_EPROCESS.ActiveProcessLinks`, `_OBJECT_HEADER.Body`)
+        priority_names = ["_OBJECT_HEADER", "_EPROCESS", "_KTHREAD", "_ETHREAD", "_DEVICE_OBJECT"]
+        ordered = [self.structs[n] for n in priority_names if n in self.structs] + [
+            s for n, s in self.structs.items() if n not in priority_names
+        ]
+        for sdef in ordered:
             for fld in sdef.fields:
                 if fld.offset == pos_offset and (
-                    "LIST_ENTRY" in fld.c_type or fld.name.endswith("Links")
+                    "LIST_ENTRY" in fld.c_type
+                    or fld.name.endswith("Links")
+                    or (sdef.name == "_OBJECT_HEADER" and fld.name == "Body")
                 ):
                     return sdef, fld
         return None

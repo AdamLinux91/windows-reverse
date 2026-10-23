@@ -2,10 +2,10 @@
 Capstone-backed x86-64 Control-Flow Graph (CFG) disassembler for Windows PE32+ binaries.
 
 Combines:
-  1. .pdata RUNTIME_FUNCTION unwind bounds (authoritative on Windows x64)
-  2. PDB public/procedure symbols (S_PUB32 / S_GPROC32)
-  3. PE export table & direct CALL target discovery
-  4. Basic-block leader splitting & branch edge linking
+  1. .pdata RUNTIME_FUNCTION unwind bounds + UNW_FLAG_CHAININFO PGO cold chunks
+  2. PDB public/procedure symbols (S_PUB32 / S_GPROC32) & /OPT:ICF alias support
+  3. Accurate leaf-function terminator boundary discovery
+  4. Recursive out-of-line MSVC PGO cold-block stitching & tailcall detection
 """
 
 from __future__ import annotations
@@ -30,7 +30,10 @@ COND_JUMPS = {
     "js", "jns", "jo", "jno", "jp", "jpe", "jnp", "jpo",
     "jrcxz", "jecxz",
 }
-RET_MNEMONICS = {"ret", "retq", "retn", "retf", "lretq", "iret", "iretd", "iretq", "sysret", "sysretq"}
+RET_MNEMONICS = {
+    "ret", "retq", "retn", "retf", "lretq",
+    "iret", "iretd", "iretq", "sysret", "sysretq",
+}
 PADDING_MNEMONICS = {"int3", "nop"}
 
 PRIVILEGED_MNEMONICS = {
@@ -43,12 +46,27 @@ PRIVILEGED_MNEMONICS = {
     "in", "out", "insb", "insw", "insd", "outsb", "outsw", "outsd",
     "fxsave", "fxsave64", "fxrstor", "fxrstor64",
     "xsave", "xsave64", "xsaveopt", "xrstor", "xrstor64", "xsetbv",
+    "ldmxcsr", "stmxcsr",
 }
 
 SPECIAL_REGS = {
     "cr0", "cr2", "cr3", "cr4", "cr8",
     "dr0", "dr1", "dr2", "dr3", "dr6", "dr7",
 }
+
+
+def pdb_matches_image_symbols(image: BinaryImage, pdb: PDBDatabase | None) -> bool:
+    """
+    Check whether `pdb`'s RVA symbol table matches `image`.
+    If both have non-zero GUIDs that differ, TPI structs are still usable for same-OS-build
+    layout recovery, while RVAs must come from `image.exports` / `.pdata`.
+    """
+    if pdb is None:
+        return False
+    zero_guid = "00000000-0000-0000-0000-000000000000"
+    if image.rsds and pdb.guid != zero_guid:
+        return image.rsds.guid.upper() == pdb.guid.upper()
+    return True
 
 
 class X86Disassembler:
@@ -65,12 +83,23 @@ class X86Disassembler:
         target_functions: list[str] | None = None,
     ) -> list[FunctionCFG]:
         """Discover and build CFGs for all (or selected) functions in `image`."""
-        bounds = self._discover_function_bounds(image, pdb)
+        use_pdb_rvas = pdb_matches_image_symbols(image, pdb)
+        known_entry_vas = self._collect_known_function_entry_vas(image, pdb if use_pdb_rvas else None)
+        pdata_by_begin = {rf.begin_rva: rf for rf in image.pdata_functions}
+
+        if target_functions:
+            return self._disassemble_targeted_functions(
+                image=image,
+                pdb=pdb if use_pdb_rvas else None,
+                target_functions=target_functions,
+                pdata_by_begin=pdata_by_begin,
+                known_entry_vas=known_entry_vas,
+            )
+
+        bounds = self._discover_function_bounds(image, pdb if use_pdb_rvas else None)
         cfgs: list[FunctionCFG] = []
 
         for rva_start, rva_end, name, has_pdata, sec_name in bounds:
-            if target_functions and name not in target_functions:
-                continue
             va_start = image.image_base + rva_start
             size = rva_end - rva_start
             code_bytes = image.read_va(va_start, size)
@@ -82,10 +111,118 @@ class X86Disassembler:
                 base_va=va_start,
                 has_pdata_unwind=has_pdata,
                 section_name=sec_name,
+                image=image,
+                known_entry_vas=known_entry_vas,
+                pdata_by_begin=pdata_by_begin,
             )
             if cfg.blocks:
                 cfgs.append(cfg)
         return cfgs
+
+    def _collect_known_function_entry_vas(
+        self, image: BinaryImage, pdb: PDBDatabase | None
+    ) -> set[int]:
+        vas: set[int] = set()
+        base = image.image_base
+        for rva in image.exports:
+            vas.add(base + rva)
+        for rf in image.pdata_functions:
+            if rf.chained_parent_rva is None:
+                vas.add(base + rf.begin_rva)
+        if pdb is not None:
+            for rva, sym in pdb.symbols_by_rva.items():
+                if sym.is_function:
+                    vas.add(base + rva)
+        return vas
+
+    def _disassemble_targeted_functions(
+        self,
+        image: BinaryImage,
+        pdb: PDBDatabase | None,
+        target_functions: list[str],
+        pdata_by_begin: dict[int, object],
+        known_entry_vas: set[int],
+    ) -> list[FunctionCFG]:
+        cfgs: list[FunctionCFG] = []
+        exec_sections = [s for s in image.sections if s.is_executable]
+
+        def section_for_rva(rva: int) -> tuple[str, int] | None:
+            for sec in exec_sections:
+                if sec.virtual_address <= rva < sec.virtual_address + len(sec.raw_data):
+                    return sec.name, sec.virtual_address + len(sec.raw_data)
+            return None
+
+        for fn_name in target_functions:
+            rva: int | None = None
+            size_hint = 0
+            if fn_name in image.export_by_name:
+                rva = image.export_by_name[fn_name]
+            elif pdb is not None and fn_name in pdb.symbols_by_name:
+                sym = pdb.symbols_by_name[fn_name]
+                if sym.is_function:
+                    rva = sym.rva
+                    size_hint = sym.size
+            if rva is None:
+                continue
+
+            sec_info = section_for_rva(rva)
+            if sec_info is None:
+                continue
+            sec_name, sec_end = sec_info
+
+            rf = pdata_by_begin.get(rva)
+            if rf is not None:
+                end_rva = min(rf.end_rva, sec_end)  # type: ignore[attr-defined]
+                has_pdata = True
+            elif size_hint > 0:
+                end_rva = min(rva + size_hint, sec_end)
+                has_pdata = False
+            else:
+                end_rva = self._scan_leaf_function_end(image, rva, sec_end)
+                has_pdata = False
+
+            va_start = image.image_base + rva
+            code_bytes = image.read_va(va_start, max(1, end_rva - rva))
+            if not code_bytes:
+                continue
+
+            cfg = self.build_function_cfg(
+                name=fn_name,
+                code=code_bytes,
+                base_va=va_start,
+                has_pdata_unwind=has_pdata,
+                section_name=sec_name,
+                image=image,
+                known_entry_vas=known_entry_vas,
+                pdata_by_begin=pdata_by_begin,
+            )
+            if cfg.blocks:
+                cfgs.append(cfg)
+        return cfgs
+
+    def _scan_leaf_function_end(self, image: BinaryImage, start_rva: int, sec_end: int) -> int:
+        """Scan forward from a leaf function entry (without .pdata) until final reachable terminator."""
+        va_start = image.image_base + start_rva
+        max_scan = min(512, sec_end - start_rva)
+        raw = image.read_va(va_start, max_scan)
+        if not raw:
+            return min(start_rva + 16, sec_end)
+
+        furthest_target = va_start
+        for cs_insn in self._md.disasm(raw, va_start):
+            mnem = cs_insn.mnemonic.lower()
+            end_va = int(cs_insn.address + cs_insn.size)
+            if mnem in COND_JUMPS or mnem in UNCOND_JUMPS:
+                if len(cs_insn.operands) == 1 and cs_insn.operands[0].type == x86.X86_OP_IMM:
+                    tgt = int(cs_insn.operands[0].imm)
+                    if va_start <= tgt < va_start + max_scan:
+                        furthest_target = max(furthest_target, tgt)
+            if (mnem in RET_MNEMONICS or mnem in UNCOND_JUMPS) and cs_insn.address >= furthest_target:
+                return int(end_va - image.image_base)
+            if mnem == "int3" and cs_insn.address > va_start and cs_insn.address >= furthest_target:
+                return int(cs_insn.address - image.image_base)
+
+        return min(start_rva + max_scan, sec_end)
 
     def _discover_function_bounds(
         self,
@@ -105,6 +242,8 @@ class X86Disassembler:
 
         pdata_map: dict[int, int] = {}
         for rf in image.pdata_functions:
+            if rf.chained_parent_rva is not None:
+                continue  # Out-of-line PGO chunk belonging to parent function
             if section_for_rva(rf.begin_rva) is not None:
                 pdata_map[rf.begin_rva] = rf.end_rva
 
@@ -118,7 +257,7 @@ class X86Disassembler:
         if pdb is not None:
             for rva, sym in pdb.symbols_by_rva.items():
                 if section_for_rva(rva) is not None and sym.is_function:
-                    name_map[rva] = sym.name
+                    name_map.setdefault(rva, sym.name)
                     if sym.size > 0:
                         size_hints[rva] = sym.size
 
@@ -163,7 +302,6 @@ class X86Disassembler:
         trimmed_len = len(raw)
         while trimmed_len > 1 and raw[trimmed_len - 1] in (0xCC, 0x00):
             trimmed_len -= 1
-        # Also trim multi-byte alignment NOPs right after a RET
         insns = list(self._md.disasm(raw[:trimmed_len], va))
         last_real_end = start_rva + trimmed_len
         for idx in range(len(insns) - 1, -1, -1):
@@ -181,24 +319,27 @@ class X86Disassembler:
         base_va: int,
         has_pdata_unwind: bool = False,
         section_name: str = ".text",
+        image: BinaryImage | None = None,
+        known_entry_vas: set[int] | None = None,
+        pdata_by_begin: dict[int, object] | None = None,
     ) -> FunctionCFG:
-        """Disassemble `code` starting at `base_va` and construct a basic-block CFG."""
-        end_va = base_va + len(code)
-        raw_insns: list[DisasmInsn] = []
-
-        for cs_insn in self._md.disasm(code, base_va):
-            d_insn = self._convert_insn(cs_insn)
-            raw_insns.append(d_insn)
+        """
+        Disassemble `code` starting at `base_va`, stitch separated MSVC PGO cold chunks
+        when `image` is supplied, and construct a complete basic-block `FunctionCFG`.
+        """
+        primary_insns: list[DisasmInsn] = [
+            self._convert_insn(cs_i) for cs_i in self._md.disasm(code, base_va)
+        ]
 
         # Strip trailing alignment padding (int3 / nop after final terminator)
-        while len(raw_insns) > 1 and raw_insns[-1].mnemonic in PADDING_MNEMONICS:
-            prev = raw_insns[-2].mnemonic
+        while len(primary_insns) > 1 and primary_insns[-1].mnemonic in PADDING_MNEMONICS:
+            prev = primary_insns[-2].mnemonic
             if prev in RET_MNEMONICS or prev in UNCOND_JUMPS or prev in PADDING_MNEMONICS:
-                raw_insns.pop()
+                primary_insns.pop()
             else:
                 break
 
-        if not raw_insns:
+        if not primary_insns:
             return FunctionCFG(
                 name=name,
                 address=base_va,
@@ -208,14 +349,79 @@ class X86Disassembler:
                 section_name=section_name,
             )
 
-        valid_addrs = {ins.address for ins in raw_insns}
-        leaders: set[int] = {raw_insns[0].address}
+        primary_size = primary_insns[-1].end_address - base_va
+        insn_by_addr: dict[int, DisasmInsn] = {ins.address: ins for ins in primary_insns}
+        chunk_end_addrs: set[int] = {primary_insns[-1].end_address}
+        entry_vas = known_entry_vas or set()
+
+        # Discover separated MSVC PGO cold basic blocks reachable via conditional/unconditional jumps
+        if image is not None:
+            worklist: list[int] = []
+            visited_chunks: set[int] = set()
+            for ins in primary_insns:
+                tgt = self._branch_target(ins)
+                if tgt is not None and tgt not in insn_by_addr:
+                    if ins.mnemonic in COND_JUMPS or (
+                        ins.mnemonic in UNCOND_JUMPS and (tgt not in entry_vas or tgt == base_va)
+                    ):
+                        worklist.append(tgt)
+
+            while worklist and len(visited_chunks) < 16:
+                cold_va = worklist.pop(0)
+                if cold_va in insn_by_addr or cold_va in visited_chunks:
+                    continue
+                sec = image.section_for_va(cold_va)
+                if sec is None or not sec.is_executable:
+                    continue
+                visited_chunks.add(cold_va)
+
+                cold_rva = cold_va - image.image_base
+                sec_end_rva = sec.virtual_address + len(sec.raw_data)
+                cold_end_rva = self._find_cold_chunk_end_rva(
+                    image, cold_rva, sec_end_rva, pdata_by_begin or {}
+                )
+                cold_bytes = image.read_va(cold_va, max(1, cold_end_rva - cold_rva))
+                if not cold_bytes:
+                    continue
+
+                cold_insns = [
+                    self._convert_insn(cs_i) for cs_i in self._md.disasm(cold_bytes, cold_va)
+                ]
+                while len(cold_insns) > 1 and cold_insns[-1].mnemonic in PADDING_MNEMONICS:
+                    prev = cold_insns[-2].mnemonic
+                    if prev in RET_MNEMONICS or prev in UNCOND_JUMPS or prev in PADDING_MNEMONICS:
+                        cold_insns.pop()
+                    else:
+                        break
+                if not cold_insns:
+                    continue
+
+                for cins in cold_insns:
+                    insn_by_addr.setdefault(cins.address, cins)
+                chunk_end_addrs.add(cold_insns[-1].end_address)
+
+                for cins in cold_insns:
+                    ctgt = self._branch_target(cins)
+                    if ctgt is not None and ctgt not in insn_by_addr:
+                        if cins.mnemonic in COND_JUMPS or (
+                            cins.mnemonic in UNCOND_JUMPS and ctgt not in entry_vas
+                        ):
+                            worklist.append(ctgt)
+
+        raw_insns = [insn_by_addr[a] for a in sorted(insn_by_addr.keys())]
+        valid_addrs = set(insn_by_addr.keys())
+        leaders: set[int] = {primary_insns[0].address}
+
+        # Every non-contiguous chunk start is also a basic-block leader
+        for i in range(1, len(raw_insns)):
+            if raw_insns[i].address != raw_insns[i - 1].end_address:
+                leaders.add(raw_insns[i].address)
 
         for i, ins in enumerate(raw_insns):
             mnem = ins.mnemonic
             if mnem in UNCOND_JUMPS or mnem in COND_JUMPS:
                 target = self._branch_target(ins)
-                if target is not None and base_va <= target < end_va and target in valid_addrs:
+                if target is not None and target in valid_addrs:
                     leaders.add(target)
                 if i + 1 < len(raw_insns):
                     leaders.add(raw_insns[i + 1].address)
@@ -223,18 +429,15 @@ class X86Disassembler:
                 if i + 1 < len(raw_insns):
                     leaders.add(raw_insns[i + 1].address)
 
-        sorted_leaders = sorted(leaders)
-        leader_set = set(sorted_leaders)
-
         blocks: dict[int, BasicBlock] = {}
         cur_block: BasicBlock | None = None
         for ins in raw_insns:
-            if ins.address in leader_set or cur_block is None:
+            if ins.address in leaders or cur_block is None:
                 cur_block = BasicBlock(address=ins.address)
                 blocks[ins.address] = cur_block
             cur_block.instructions.append(ins)
 
-        # Populate control-flow edges
+        # Populate control-flow edges (only allowing fallthrough across contiguous chunk bytes!)
         block_addrs = sorted(blocks.keys())
         for idx, b_addr in enumerate(block_addrs):
             blk = blocks[b_addr]
@@ -243,6 +446,11 @@ class X86Disassembler:
             term = blk.instructions[-1]
             mnem = term.mnemonic
             next_blk_addr = block_addrs[idx + 1] if idx + 1 < len(block_addrs) else None
+            can_fallthrough = (
+                next_blk_addr is not None
+                and next_blk_addr == term.end_address
+                and term.end_address not in chunk_end_addrs
+            )
 
             if mnem in RET_MNEMONICS:
                 pass
@@ -251,17 +459,19 @@ class X86Disassembler:
                 if target is not None and target in blocks:
                     blk.branch_target = target
                     blk.successors.append(target)
+                elif target is not None:
+                    blk.tailcall_target = target
             elif mnem in COND_JUMPS:
                 target = self._branch_target(term)
                 if target is not None and target in blocks:
                     blk.branch_target = target
                     blk.successors.append(target)
-                if next_blk_addr is not None and next_blk_addr == term.end_address:
+                if can_fallthrough and next_blk_addr is not None:
                     blk.fallthrough = next_blk_addr
                     if next_blk_addr not in blk.successors:
                         blk.successors.append(next_blk_addr)
             else:
-                if next_blk_addr is not None and next_blk_addr == term.end_address:
+                if can_fallthrough and next_blk_addr is not None:
                     blk.fallthrough = next_blk_addr
                     blk.successors.append(next_blk_addr)
 
@@ -270,16 +480,34 @@ class X86Disassembler:
                 if succ in blocks and b_addr not in blocks[succ].predecessors:
                     blocks[succ].predecessors.append(b_addr)
 
-        actual_size = raw_insns[-1].end_address - base_va
         return FunctionCFG(
             name=name,
             address=base_va,
-            size=actual_size,
-            entry_address=raw_insns[0].address,
+            size=primary_size,
+            entry_address=primary_insns[0].address,
             blocks=blocks,
             has_pdata_unwind=has_pdata_unwind,
             section_name=section_name,
         )
+
+    def _find_cold_chunk_end_rva(
+        self,
+        image: BinaryImage,
+        cold_rva: int,
+        sec_end_rva: int,
+        pdata_by_begin: dict[int, object],
+    ) -> int:
+        # Check if cold_rva lies inside an explicit .pdata chunk
+        rf = pdata_by_begin.get(cold_rva)
+        if rf is not None:
+            return min(rf.end_rva, sec_end_rva)  # type: ignore[attr-defined]
+        for entry in image.pdata_functions:
+            if entry.begin_rva <= cold_rva < entry.end_rva:
+                # Scan within this .pdata chunk up to its first unconditional terminator from cold_rva
+                return self._scan_leaf_function_end(
+                    image, cold_rva, min(entry.end_rva, sec_end_rva)
+                )
+        return self._scan_leaf_function_end(image, cold_rva, min(cold_rva + 256, sec_end_rva))
 
     def _branch_target(self, ins: DisasmInsn) -> int | None:
         if len(ins.operands) == 1 and ins.operands[0].kind == "imm":

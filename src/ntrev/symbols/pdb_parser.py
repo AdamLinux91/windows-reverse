@@ -7,12 +7,11 @@ Parses:
   - Stream 1 (PDB Info): Version, Timestamp, Age, 16-byte GUID (verified against PE RSDS).
   - Stream 2 (TPI — Type Information): CodeView type records (`LF_POINTER`, `LF_MODIFIER`,
     `LF_PROCEDURE`, `LF_ARGLIST`, `LF_FIELDLIST`, `LF_MEMBER`, `LF_BITFIELD`, `LF_ARRAY`,
-    `LF_STRUCTURE`, `LF_CLASS`, `LF_UNION`) + CodeView primitive types.
+    `LF_STRUCTURE`, `LF_CLASS`, `LF_UNION`, `LF_ENUM`) + forward-reference size resolution.
   - Stream 3 (DBI — Debug Information) + Public/Global Symbol Record Stream:
-    `S_PUB32 (0x110e)`, `S_GPROC32 (0x1110)`, `S_LPROC32 (0x110f)` mapped to PE section RVAs
-    and TPI function prototypes.
-  - Also supports JSON PDB symbol/type manifests and includes `MSF70PDBBuilder` to emit
-    spec-compliant binary MSF 7.00 `.pdb` files for testing and synthetic kernel fixtures.
+    `S_PUB32 (0x110e)`, `S_GPROC32 (0x1110)`, `S_LPROC32 (0x110f)` mapped to PE section RVAs,
+    preserving `/OPT:ICF` aliases and separating global data symbols (`data_symbols_by_rva`).
+  - Also supports JSON PDB symbol/type manifests and includes `MSF70PDBBuilder`.
 """
 
 from __future__ import annotations
@@ -35,10 +34,12 @@ LF_PROCEDURE = 0x1008
 LF_ARGLIST = 0x1201
 LF_FIELDLIST = 0x1203
 LF_BITFIELD = 0x1205
+LF_ARRAY = 0x1503
 LF_CLASS = 0x1504
 LF_STRUCTURE = 0x1505
 LF_UNION = 0x1506
-LF_ARRAY = 0x1503
+LF_ENUM = 0x1507
+LF_INDEX = 0x1404
 LF_MEMBER = 0x150D
 
 # CodeView Symbol Record Constants
@@ -63,6 +64,8 @@ CV_PRIMITIVES: dict[int, tuple[str, int]] = {
     0x0010: ("int8_t", 1),
     0x0020: ("uint8_t", 1),
     0x0030: ("uint8_t", 1),  # T_BOOL08 (BOOLEAN)
+    0x0068: ("int8_t", 1),
+    0x0069: ("uint8_t", 1),
     0x0070: ("char", 1),
     0x0071: ("uint16_t", 2),  # wchar_t
     0x0011: ("int16_t", 2),
@@ -98,23 +101,25 @@ def load_pdb_database(
 
 def _decode_cv_numeric(buf: bytes, offset: int) -> tuple[int, int]:
     """Decode a CodeView numeric leaf at `offset`, returning `(value, new_offset)`."""
+    if offset + 2 > len(buf):
+        return 0, len(buf)
     val = struct.unpack_from("<H", buf, offset)[0]
     offset += 2
     if val < 0x8000:
         return val, offset
-    if val == LF_CHAR:
+    if val == LF_CHAR and offset + 1 <= len(buf):
         return struct.unpack_from("<b", buf, offset)[0], offset + 1
-    if val == LF_SHORT:
+    if val == LF_SHORT and offset + 2 <= len(buf):
         return struct.unpack_from("<h", buf, offset)[0], offset + 2
-    if val == LF_USHORT:
+    if val == LF_USHORT and offset + 2 <= len(buf):
         return struct.unpack_from("<H", buf, offset)[0], offset + 2
-    if val == LF_LONG:
+    if val == LF_LONG and offset + 4 <= len(buf):
         return struct.unpack_from("<i", buf, offset)[0], offset + 4
-    if val == LF_ULONG:
+    if val == LF_ULONG and offset + 4 <= len(buf):
         return struct.unpack_from("<I", buf, offset)[0], offset + 4
-    if val == LF_QUADWORD:
+    if val == LF_QUADWORD and offset + 8 <= len(buf):
         return struct.unpack_from("<q", buf, offset)[0], offset + 8
-    if val == LF_UQUADWORD:
+    if val == LF_UQUADWORD and offset + 8 <= len(buf):
         return struct.unpack_from("<Q", buf, offset)[0], offset + 8
     return 0, offset
 
@@ -184,22 +189,28 @@ def _parse_msf70_pdb(
     # Parse TPI Stream (Stream 2)
     tpi_records: dict[int, dict[str, Any]] = {}
     structs: dict[str, StructDef] = {}
+    full_sizes: dict[str, int] = {}
     if len(streams) > 2 and len(streams[2]) >= 56:
-        tpi_records, structs = _parse_tpi_stream(streams[2])
+        tpi_records, structs, full_sizes = _parse_tpi_stream(streams[2])
 
     # Parse DBI Stream (Stream 3) & Symbol Record Stream
     symbols_by_rva: dict[int, PDBSymbol] = {}
     symbols_by_name: dict[str, PDBSymbol] = {}
+    data_symbols_by_rva: dict[int, PDBSymbol] = {}
+
     if len(streams) > 3 and len(streams[3]) >= 64:
         sym_rec_stream_idx = struct.unpack_from("<H", streams[3], 20)[0]
-        sec_rvas = _build_section_rva_list(binary)
+        sec_rvas, exec_segs = _build_section_rva_info(binary)
         if 0 < sym_rec_stream_idx < len(streams) and streams[sym_rec_stream_idx]:
             syms = _parse_symbol_record_stream(
-                streams[sym_rec_stream_idx], sec_rvas, tpi_records
+                streams[sym_rec_stream_idx], sec_rvas, exec_segs, tpi_records, full_sizes
             )
             for s in syms:
-                symbols_by_rva[s.rva] = s
                 symbols_by_name[s.name] = s
+                if s.is_function:
+                    symbols_by_rva.setdefault(s.rva, s)
+                else:
+                    data_symbols_by_rva.setdefault(s.rva, s)
 
     return PDBDatabase(
         pdb_path=str(pdb_path),
@@ -208,11 +219,20 @@ def _parse_msf70_pdb(
         structs=structs,
         symbols_by_rva=symbols_by_rva,
         symbols_by_name=symbols_by_name,
+        data_symbols_by_rva=data_symbols_by_rva,
     )
 
 
-def _resolve_ti_type(ti: int, tpi_records: dict[int, dict[str, Any]]) -> tuple[str, int, bool, str | None]:
+def _resolve_ti_type(
+    ti: int,
+    tpi_records: dict[int, dict[str, Any]],
+    full_sizes: dict[str, int],
+    depth: int = 0,
+) -> tuple[str, int, bool, str | None]:
     """Return `(c_type, byte_size, is_pointer, pointee_struct_name)` for a CodeView TypeIndex."""
+    if depth > 8:
+        return ("uint64_t", 8, False, None)
+
     if ti < 0x1000:
         ptr_mode = (ti >> 8) & 0xFF
         base_code = ti & 0xFF
@@ -227,37 +247,83 @@ def _resolve_ti_type(ti: int, tpi_records: dict[int, dict[str, Any]]) -> tuple[s
 
     kind = rec["kind"]
     if kind == "modifier":
-        inner_c, sz, is_p, pt = _resolve_ti_type(rec["underlying"], tpi_records)
-        prefix = "const " if (rec["attr"] & 0x01) else ""
+        inner_c, sz, is_p, pt = _resolve_ti_type(
+            rec["underlying"], tpi_records, full_sizes, depth + 1
+        )
+        prefix = "const " if (rec["attr"] & 0x01) and not inner_c.startswith("const ") else ""
         return (f"{prefix}{inner_c}", sz, is_p, pt)
+
     if kind == "pointer":
-        inner_c, _sz, _ip, _pt = _resolve_ti_type(rec["referent"], tpi_records)
+        inner_c, _sz, _ip, _pt = _resolve_ti_type(
+            rec["referent"], tpi_records, full_sizes, depth + 1
+        )
         pointee_struct = None
-        ref_rec = tpi_records.get(rec["referent"])
+        ref_ti = rec["referent"]
+        ref_rec = tpi_records.get(ref_ti)
+        while ref_rec and ref_rec["kind"] == "modifier":
+            ref_ti = ref_rec["underlying"]
+            ref_rec = tpi_records.get(ref_ti)
         if ref_rec and ref_rec["kind"] in ("struct", "union"):
             pointee_struct = ref_rec["name"]
-            inner_c = f"struct {pointee_struct}" if ref_rec["kind"] == "struct" else f"union {pointee_struct}"
+            kw = "union" if ref_rec["kind"] == "union" else "struct"
+            const_pfx = "const " if inner_c.startswith("const ") else ""
+            inner_c = f"{const_pfx}{kw} {pointee_struct}"
         return (f"{inner_c}*", 8, True, pointee_struct)
+
     if kind in ("struct", "union"):
         kw = "union" if kind == "union" else "struct"
-        return (f"{kw} {rec['name']}", rec.get("size", 0), False, None)
+        sname = rec["name"]
+        st_sz = rec.get("size", 0) or full_sizes.get(sname, 0)
+        return (f"{kw} {sname}", st_sz, False, None)
+
+    if kind == "enum":
+        return _resolve_ti_type(rec["underlying"], tpi_records, full_sizes, depth + 1)
+
     if kind == "array":
-        elem_c, _esz, _ip, _pt = _resolve_ti_type(rec["elem_ti"], tpi_records)
+        elem_c, _esz, _ip, _pt = _resolve_ti_type(
+            rec["elem_ti"], tpi_records, full_sizes, depth + 1
+        )
         return (elem_c, rec["byte_size"], False, None)
+
     if kind == "bitfield":
-        base_c, base_sz, _, _ = _resolve_ti_type(rec["base_ti"], tpi_records)
+        base_c, base_sz, _, _ = _resolve_ti_type(
+            rec["base_ti"], tpi_records, full_sizes, depth + 1
+        )
         return (base_c, base_sz, False, None)
+
     if kind == "procedure":
         return ("void*", 8, True, None)
+
     return ("uint64_t", 8, False, None)
 
 
-def _parse_tpi_stream(tpi: bytes) -> tuple[dict[int, dict[str, Any]], dict[str, StructDef]]:
+def _expand_fieldlist_members(
+    field_ti: int, records: dict[int, dict[str, Any]], visited: set[int] | None = None
+) -> list[dict[str, Any]]:
+    """Expand `LF_FIELDLIST` records including `LF_INDEX` continuation chains."""
+    if visited is None:
+        visited = set()
+    if field_ti in visited:
+        return []
+    visited.add(field_ti)
+    fl_rec = records.get(field_ti)
+    if not fl_rec or fl_rec.get("kind") != "fieldlist":
+        return []
+    out = list(fl_rec.get("members", []))
+    for cont_ti in fl_rec.get("continuations", []):
+        out.extend(_expand_fieldlist_members(cont_ti, records, visited))
+    return out
+
+
+def _parse_tpi_stream(
+    tpi: bytes,
+) -> tuple[dict[int, dict[str, Any]], dict[str, StructDef], dict[str, int]]:
     _ver, hdr_size, ti_begin, ti_end, rec_bytes = struct.unpack_from("<IIIII", tpi, 0)
     pos = hdr_size
     end = min(len(tpi), hdr_size + rec_bytes)
     cur_ti = ti_begin
     records: dict[int, dict[str, Any]] = {}
+    full_sizes: dict[str, int] = {}
 
     while pos + 4 <= end and cur_ti < ti_end:
         rec_len, leaf = struct.unpack_from("<HH", tpi, pos)
@@ -274,7 +340,11 @@ def _parse_tpi_stream(tpi: bytes) -> tuple[dict[int, dict[str, Any]], dict[str, 
 
         elif leaf == LF_ARGLIST and len(body) >= 4:
             count = struct.unpack_from("<I", body, 0)[0]
-            arg_tis = list(struct.unpack_from(f"<{count}I", body, 4)) if len(body) >= 4 + 4 * count else []
+            arg_tis = (
+                list(struct.unpack_from(f"<{count}I", body, 4))
+                if len(body) >= 4 + 4 * count
+                else []
+            )
             records[cur_ti] = {"kind": "arglist", "args": arg_tis}
 
         elif leaf == LF_PROCEDURE and len(body) >= 12:
@@ -309,8 +379,18 @@ def _parse_tpi_stream(tpi: bytes) -> tuple[dict[int, dict[str, Any]], dict[str, 
                 "byte_size": arr_sz,
             }
 
+        elif leaf == LF_ENUM and len(body) >= 12:
+            _count, _prop, utype, _field_ti = struct.unpack_from("<HHII", body, 0)
+            en_name, _ = _read_cstr(body, 12)
+            records[cur_ti] = {
+                "kind": "enum",
+                "name": en_name,
+                "underlying": utype,
+            }
+
         elif leaf == LF_FIELDLIST:
             members = []
+            continuations = []
             fpos = 0
             while fpos + 2 <= len(body):
                 fpos = _align_pad(body, fpos)
@@ -324,9 +404,17 @@ def _parse_tpi_stream(tpi: bytes) -> tuple[dict[int, dict[str, Any]], dict[str, 
                     fld_off, fpos = _decode_cv_numeric(body, fpos)
                     fld_name, fpos = _read_cstr(body, fpos)
                     members.append({"name": fld_name, "offset": fld_off, "ti": fld_ti})
+                elif sub_leaf == LF_INDEX and fpos + 6 <= len(body):
+                    _pad, cont_ti = struct.unpack_from("<HI", body, fpos)
+                    fpos += 6
+                    continuations.append(cont_ti)
                 else:
                     break
-            records[cur_ti] = {"kind": "fieldlist", "members": members}
+            records[cur_ti] = {
+                "kind": "fieldlist",
+                "members": members,
+                "continuations": continuations,
+            }
 
         elif leaf in (LF_STRUCTURE, LF_CLASS, LF_UNION) and len(body) >= 8:
             is_union = leaf == LF_UNION
@@ -337,7 +425,11 @@ def _parse_tpi_stream(tpi: bytes) -> tuple[dict[int, dict[str, Any]], dict[str, 
                 count, prop, field_ti, _derived, _vshape = struct.unpack_from("<HHIII", body, 0)
                 st_size, p2 = _decode_cv_numeric(body, 16)
             st_name, _ = _read_cstr(body, p2)
+            if st_name in ("<unnamed-tag>", "<anonymous-tag>", "__unnamed"):
+                st_name = f"_ANON_TAG_{cur_ti:x}"
             is_fwdref = bool(prop & 0x0080)
+            if not is_fwdref and st_size > 0:
+                full_sizes[st_name] = st_size
             records[cur_ti] = {
                 "kind": "union" if is_union else "struct",
                 "name": st_name,
@@ -349,27 +441,34 @@ def _parse_tpi_stream(tpi: bytes) -> tuple[dict[int, dict[str, Any]], dict[str, 
 
         cur_ti += 1
 
-    # Materialize complete StructDefs
+    # Materialize complete StructDefs with resolved forward-reference sizes & LF_INDEX continuations
     structs: dict[str, StructDef] = {}
     for _ti, rec in records.items():
         if rec["kind"] not in ("struct", "union") or rec.get("is_fwdref"):
             continue
-        fl_rec = records.get(rec["field_ti"], {})
-        raw_members = fl_rec.get("members", [])
+        raw_members = _expand_fieldlist_members(rec["field_ti"], records)
         fields: list[StructField] = []
+        used_names: set[str] = set()
         for m in raw_members:
-            c_ty, f_sz, is_ptr, pointee = _resolve_ti_type(m["ti"], records)
+            fname = m["name"]
+            if fname in ("<unnamed-tag>", "<anonymous-tag>", ""):
+                fname = f"_anon_0x{m['offset']:x}"
+            if fname in used_names:
+                fname = f"{fname}_0x{m['offset']:x}"
+            used_names.add(fname)
+
+            c_ty, f_sz, is_ptr, pointee = _resolve_ti_type(m["ti"], records, full_sizes)
             m_rec = records.get(m["ti"])
             bit_off = m_rec["bit_offset"] if m_rec and m_rec["kind"] == "bitfield" else None
             bit_sz = m_rec["bit_size"] if m_rec and m_rec["kind"] == "bitfield" else None
             arr_len = None
             if m_rec and m_rec["kind"] == "array":
-                _, elem_sz, _, _ = _resolve_ti_type(m_rec["elem_ti"], records)
+                _, elem_sz, _, _ = _resolve_ti_type(m_rec["elem_ti"], records, full_sizes)
                 if elem_sz > 0:
                     arr_len = m_rec["byte_size"] // elem_sz
             fields.append(
                 StructField(
-                    name=m["name"],
+                    name=fname,
                     offset=m["offset"],
                     size=f_sz,
                     c_type=c_ty,
@@ -385,27 +484,40 @@ def _parse_tpi_stream(tpi: bytes) -> tuple[dict[int, dict[str, Any]], dict[str, 
             name=rec["name"],
             size=rec["size"],
             fields=fields,
-            typedef_name=clean_base,
-            pointer_typedef=f"P{clean_base}",
+            typedef_name=clean_base if not clean_base.startswith("ANON_TAG_") else None,
+            pointer_typedef=f"P{clean_base}" if not clean_base.startswith("ANON_TAG_") else None,
             is_union=(rec["kind"] == "union"),
             source="pdb",
         )
         structs[sdef.name] = sdef
 
-    return records, structs
+    return records, structs, full_sizes
 
 
-def _build_section_rva_list(binary: BinaryImage | None) -> list[int]:
-    """1-based PE section index -> section VirtualAddress (RVA)."""
+def _build_section_rva_info(binary: BinaryImage | None) -> tuple[list[int], set[int]]:
+    """1-based PE section index -> `(sec_rvas, executable_seg_indices)`."""
     if binary is None or not binary.sections:
-        return [0, 0x1000, 0x2000, 0x3000, 0x4000]
-    return [0] + [sec.virtual_address for sec in binary.sections]
+        return [0, 0x1000, 0x2000, 0x3000, 0x4000], {1}
+    sec_rvas = [0] + [sec.virtual_address for sec in binary.sections]
+    exec_segs = {idx + 1 for idx, sec in enumerate(binary.sections) if sec.is_executable}
+    return sec_rvas, exec_segs
+
+
+def _clean_pdb_symbol_name(raw_name: str) -> str:
+    """Clean minor fastcall/stdcall decorations while preserving valid C identifiers."""
+    if raw_name.startswith("__imp_"):
+        return raw_name
+    if raw_name.startswith("@") and "@" in raw_name[1:]:
+        return raw_name[1:].split("@", 1)[0]
+    return raw_name
 
 
 def _parse_symbol_record_stream(
     sym_stream: bytes,
     sec_rvas: list[int],
+    exec_segs: set[int],
     tpi_records: dict[int, dict[str, Any]],
+    full_sizes: dict[str, int],
 ) -> list[PDBSymbol]:
     symbols: list[PDBSymbol] = []
     pos = 0
@@ -418,10 +530,15 @@ def _parse_symbol_record_stream(
 
         if rec_ty == S_PUB32 and len(body) >= 10:
             pub_flags, offset, seg = struct.unpack_from("<IIH", body, 0)
-            name, _ = _read_cstr(body, 10)
+            raw_name, _ = _read_cstr(body, 10)
+            if seg == 0 or seg >= len(sec_rvas) and len(sec_rvas) > 5:
+                continue
+            name = _clean_pdb_symbol_name(raw_name)
+            if not name or name.startswith(("?", "__imp_", "??_C@")):
+                continue
             base_rva = sec_rvas[seg] if seg < len(sec_rvas) else 0x1000
             rva = base_rva + offset
-            is_func = bool(pub_flags & 0x02) or seg == 1
+            is_func = bool(pub_flags & 0x02) or (seg in exec_segs)
             symbols.append(
                 PDBSymbol(
                     name=name,
@@ -435,7 +552,8 @@ def _parse_symbol_record_stream(
             _p_parent, _p_end, _p_next, code_len, _dbg_start, _dbg_end, proc_ti, offset, seg, _flags = (
                 struct.unpack_from("<IIIIIIIIHB", body, 0)
             )
-            name, _ = _read_cstr(body, 35)
+            raw_name, _ = _read_cstr(body, 35)
+            name = _clean_pdb_symbol_name(raw_name)
             base_rva = sec_rvas[seg] if seg < len(sec_rvas) else 0x1000
             rva = base_rva + offset
 
@@ -443,10 +561,10 @@ def _parse_symbol_record_stream(
             param_types: list[tuple[str, str]] = []
             proc_rec = tpi_records.get(proc_ti)
             if proc_rec and proc_rec["kind"] == "procedure":
-                ret_ty, _, _, _ = _resolve_ti_type(proc_rec["rv_ti"], tpi_records)
+                ret_ty, _, _, _ = _resolve_ti_type(proc_rec["rv_ti"], tpi_records, full_sizes)
                 arg_rec = tpi_records.get(proc_rec["arglist_ti"], {})
                 for idx, ati in enumerate(arg_rec.get("args", [])):
-                    arg_c, _, _, _ = _resolve_ti_type(ati, tpi_records)
+                    arg_c, _, _, _ = _resolve_ti_type(ati, tpi_records, full_sizes)
                     param_types.append((f"arg{idx + 1}", arg_c))
 
             symbols.append(
@@ -465,7 +583,6 @@ def _parse_symbol_record_stream(
             _loc_ti, loc_flags = struct.unpack_from("<IH", body, 0)
             loc_name, _ = _read_cstr(body, 6)
             if (loc_flags & 0x0001) and symbols[-1].param_types:  # fIsParam
-                # Update next default `argN` slot with real PDB parameter name
                 pt_list = symbols[-1].param_types
                 for idx_p, (cur_n, cur_t) in enumerate(pt_list):
                     if cur_n == f"arg{idx_p + 1}":
@@ -512,8 +629,11 @@ def _parse_json_pdb(pdb_path: Path, data: dict[str, Any]) -> PDBDatabase:
             return_type=sym.get("return_type"),
             param_types=[(p[0], p[1]) for p in sym.get("param_types", [])],
         )
-        db.symbols_by_rva[psym.rva] = psym
         db.symbols_by_name[psym.name] = psym
+        if psym.is_function:
+            db.symbols_by_rva[psym.rva] = psym
+        else:
+            db.data_symbols_by_rva[psym.rva] = psym
 
     return db
 
@@ -521,10 +641,6 @@ def _parse_json_pdb(pdb_path: Path, data: dict[str, Any]) -> PDBDatabase:
 class MSF70PDBBuilder:
     """
     Constructs valid binary Microsoft MSF 7.00 `.pdb` files from Python definitions.
-
-    Writes SuperBlock, FreeBlockMap, Stream Directory, Stream 1 (PDB Info GUID/Age),
-    Stream 2 (TPI CodeView structs, pointers, and function prototypes), Stream 3 (DBI),
-    and Stream 4 (CodeView `S_GPROC32` / `S_PUB32` symbol records).
     """
 
     C_TO_CV_PRIMITIVE: dict[str, int] = {
@@ -574,7 +690,6 @@ class MSF70PDBBuilder:
 
     @staticmethod
     def _pack_tpi_record(leaf: int, body: bytes) -> bytes:
-        # Align record to 4 bytes with LF_PADn
         total_unaligned = 2 + len(body)
         rem = total_unaligned % 4
         if rem != 0:
@@ -590,7 +705,6 @@ class MSF70PDBBuilder:
         fwd_ti_map: dict[str, int] = {}
         ptr_ti_map: dict[str, int] = {}
 
-        # 1. Emit forward declarations + pointer records for all structs
         for st in self.structs:
             name_z = st.name.encode("utf-8") + b"\x00"
             leaf = LF_UNION if st.is_union else LF_STRUCTURE
@@ -603,7 +717,7 @@ class MSF70PDBBuilder:
             fwd_ti_map[st.name] = fwd_ti
             next_ti += 1
 
-            ptr_body = struct.pack("<II", fwd_ti, 0x0001000C)  # 64-bit near pointer
+            ptr_body = struct.pack("<II", fwd_ti, 0x0001000C)
             tpi_chunks.append(self._pack_tpi_record(LF_POINTER, ptr_body))
             ptr_ti_map[st.name] = next_ti
             ptr_ti_map[f"struct {st.name}*"] = next_ti
@@ -626,10 +740,9 @@ class MSF70PDBBuilder:
                 if sname in fwd_ti_map:
                     return fwd_ti_map[sname]
             if clean.endswith("*"):
-                return 0x0603  # void*
-            return 0x0077  # uint64_t
+                return 0x0603
+            return 0x0077
 
-        # 2. Emit LF_FIELDLIST + complete LF_STRUCTURE definitions
         for st in self.structs:
             fl_body = bytearray()
             for fld in st.fields:
@@ -667,7 +780,6 @@ class MSF70PDBBuilder:
                 tpi_chunks.append(self._pack_tpi_record(LF_STRUCTURE, st_body))
             next_ti += 1
 
-        # 3. Emit LF_ARGLIST + LF_PROCEDURE for typed symbols
         sym_proc_ti: dict[str, int] = {}
         for sym in self.symbols:
             if sym.is_function and (sym.return_type or sym.param_types):
@@ -686,19 +798,17 @@ class MSF70PDBBuilder:
         tpi_records_blob = b"".join(tpi_chunks)
         tpi_hdr = struct.pack(
             "<IIIII",
-            20040203,  # TPI Version V80
-            56,        # HeaderSize (exact 56-byte V80 TPI Stream Header)
-            0x1000,    # TypeIndexBegin
-            next_ti,   # TypeIndexEnd
+            20040203,
+            56,
+            0x1000,
+            next_ti,
             len(tpi_records_blob),
         ).ljust(56, b"\x00")
         stream2_tpi = tpi_hdr + tpi_records_blob
 
-        # Stream 1: PDB Info
         guid_bytes = uuid.UUID(self.guid).bytes_le
         stream1_pdb = struct.pack("<III", 20000404, 0x67000000, self.age) + guid_bytes + struct.pack("<I", 0)
 
-        # Stream 4: Symbol Record Stream (`S_GPROC32` + `S_PUB32`)
         sym_chunks: list[bytes] = []
         for sym in self.symbols:
             sec_offset = max(0, sym.rva - text_section_rva)
@@ -732,10 +842,9 @@ class MSF70PDBBuilder:
                 sym_chunks.append(self._pack_tpi_record(S_PUB32, pbody))
         stream4_syms = b"".join(sym_chunks)
 
-        # Stream 3: DBI Header (64 bytes, SymRecStream = 4 at offset 20)
         dbi_hdr = bytearray(64)
         struct.pack_into("<iI", dbi_hdr, 0, -1, 19990903)
-        struct.pack_into("<HHH", dbi_hdr, 16, 0xFFFF, 0xFFFF, 4)  # SymRecStream = 4
+        struct.pack_into("<HHH", dbi_hdr, 16, 0xFFFF, 0xFFFF, 4)
         stream3_dbi = bytes(dbi_hdr)
 
         streams = [b"", stream1_pdb, stream2_tpi, stream3_dbi, stream4_syms]
@@ -743,7 +852,6 @@ class MSF70PDBBuilder:
 
     @staticmethod
     def _pack_msf70_container(streams: list[bytes], block_size: int = 4096) -> bytes:
-        # Block 0: SuperBlock, Block 1 & 2: FPM1 & FPM2
         next_blk = 3
         stream_blocks: list[list[int]] = []
         stream_blobs: dict[int, bytes] = {}
@@ -762,7 +870,6 @@ class MSF70PDBBuilder:
                 blks.append(b_idx)
             stream_blocks.append(blks)
 
-        # Build Stream Directory
         dir_buf = bytearray()
         dir_buf.extend(struct.pack("<I", len(streams)))
         for st in streams:
@@ -803,8 +910,8 @@ class MSF70PDBBuilder:
 
         out = bytearray()
         out.extend(superblock)
-        out.extend(b"\xFF" * block_size)  # FPM1
-        out.extend(b"\xFF" * block_size)  # FPM2
+        out.extend(b"\xFF" * block_size)
+        out.extend(b"\xFF" * block_size)
         for b_idx in range(3, total_blocks):
             out.extend(stream_blobs[b_idx])
         return bytes(out)
