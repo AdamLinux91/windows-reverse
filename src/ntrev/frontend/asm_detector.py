@@ -18,6 +18,8 @@ This module classifies both:
 
 from __future__ import annotations
 
+import re
+
 from ntrev.models import (
     AsmBlockClassification,
     DisasmInsn,
@@ -57,6 +59,8 @@ HAND_CODED_ASM_MNEMONICS = {
     "rep stosq",
     "repne scasb",
     "repne scasw",
+    "pushfq",
+    "popfq",
 }
 
 WHOLE_FUNC_ASM_MNEMONICS = ENTRY_STUB_ASM_MNEMONICS | HAND_CODED_ASM_MNEMONICS
@@ -159,6 +163,15 @@ class AsmBlockDetector:
                     blk_reason = f"Non-ABI kernel stack pivot '{ins.text}'"
                     reasons.append(f"{blk_reason} at 0x{ins.address:x}")
 
+                elif mnem == "jmp" and ins.operands and ins.operands[0].kind != "imm":
+                    force_whole_asm = True
+                    priv_count += 1
+                    desc = f"0x{ins.address:x}: {ins.text}"
+                    priv_insns.append(desc)
+                    blk_has_priv = True
+                    blk_reason = f"Indirect dispatch / IAT tail-jump '{ins.text}'"
+                    reasons.append(f"{blk_reason} at 0x{ins.address:x}")
+
             if blk_has_priv:
                 blk.is_raw_asm_block = True
                 blk.raw_asm_reason = blk_reason
@@ -178,11 +191,14 @@ class AsmBlockDetector:
                     "preserved as native x86-64 assembly"
                 )
 
+        has_indirect_jmp = any(
+            i.mnemonic == "jmp" and i.operands and i.operands[0].kind != "imm"
+            for i in all_insns
+        )
         is_c_callable = (
             force_whole_asm
-            and has_standard_ret
+            and (has_standard_ret or has_indirect_jmp)
             and not has_non_abi_entry_or_pivot
-            and not any(i.mnemonic == "call" for i in all_insns)
         )
 
         inputs, outputs, clobbers = self._compute_register_interface(all_insns)
@@ -236,32 +252,57 @@ class AsmBlockDetector:
         lines.append('        ".intel_syntax noprefix\\n\\t"')
 
         valid_block_addrs = set(cfg.blocks.keys())
+        all_insn_addrs = {
+            ins.address for blk in cfg.blocks.values() for ins in blk.instructions
+        }
         label_addrs: set[int] = set()
         ext_targets: list[int] = []
         ext_seen: set[int] = set()
+        ext_rip_syms: list[int] = []
+        ext_rip_seen: set[int] = set()
+        rip_pat = re.compile(r"\[rip(?:\s*([+-])\s*(0x[0-9a-fA-F]+|\d+))?\]")
+
         for blk in cfg.sorted_blocks():
             if blk.predecessors and blk.address != cfg.entry_address:
                 label_addrs.add(blk.address)
             for ins in blk.instructions:
                 if len(ins.operands) == 1 and ins.operands[0].kind == "imm":
                     tgt = ins.operands[0].imm
-                    if tgt in valid_block_addrs:
+                    if tgt in valid_block_addrs or tgt in all_insn_addrs:
                         label_addrs.add(tgt)
                     elif (ins.mnemonic == "call" or ins.mnemonic.startswith("j")) and tgt not in ext_seen:
                         ext_seen.add(tgt)
                         ext_targets.append(tgt)
+                m_rip = rip_pat.search(ins.text)
+                if m_rip:
+                    disp = 0
+                    if m_rip.group(2) is not None:
+                        disp = int(m_rip.group(2), 0)
+                        if m_rip.group(1) == "-":
+                            disp = -disp
+                    rip_tgt = (ins.address + ins.size + disp) & 0xFFFFFFFFFFFFFFFF
+                    if rip_tgt in all_insn_addrs:
+                        label_addrs.add(rip_tgt)
+                    elif rip_tgt not in ext_rip_seen:
+                        ext_rip_seen.add(rip_tgt)
+                        ext_rip_syms.append(rip_tgt)
 
         ext_stubs: list[str] = []
         for tgt in ext_targets:
-            ext_stubs.append(
-                f'__attribute__((weak, naked)) void __nt_asm_ext_{tgt:x}(void) {{ __asm__ __volatile__ ("ret"); }}'
-            )
+            ext_stubs.append(f"extern void __nt_asm_ext_{tgt:x}(void);")
+        for rtgt in ext_rip_syms:
+            ext_stubs.append(f"extern unsigned char __nt_asm_sym_{rtgt:x}[];")
 
         body_lines: list[str] = []
+        emitted_labels: set[int] = set()
         for blk in cfg.sorted_blocks():
-            if blk.address in label_addrs:
+            if blk.address in label_addrs and blk.address not in emitted_labels:
+                emitted_labels.add(blk.address)
                 body_lines.append(f'        ".L_{cfg.name}_{blk.address:x}:\\n\\t"')
             for ins in blk.instructions:
+                if ins.address in label_addrs and ins.address not in emitted_labels:
+                    emitted_labels.add(ins.address)
+                    body_lines.append(f'        ".L_{cfg.name}_{ins.address:x}:\\n\\t"')
                 formatted = self._format_intel_insn(ins, cfg.name, label_addrs)
                 body_lines.append(f'        "{formatted}\\n\\t"')
 
@@ -373,10 +414,27 @@ class AsmBlockDetector:
     def _format_intel_insn(
         self, ins: DisasmInsn, fn_name: str, label_addrs: set[int]
     ) -> str:
+        if ins.mnemonic == "ret" and ins.op_str.strip() == "0":
+            return "ret"
         if len(ins.operands) == 1 and ins.operands[0].kind == "imm":
             target = ins.operands[0].imm
             if target in label_addrs:
                 return f"{ins.mnemonic} .L_{fn_name}_{target:x}"
             if ins.mnemonic == "call" or ins.mnemonic.startswith("j"):
                 return f"{ins.mnemonic} __nt_asm_ext_{target:x}"
-        return self._normalize_gas_text(ins.text)
+        norm = self._normalize_gas_text(ins.text)
+        m_rip = re.search(r"\[rip(?:\s*([+-])\s*(0x[0-9a-fA-F]+|\d+))?\]", norm)
+        if m_rip:
+            disp = 0
+            if m_rip.group(2) is not None:
+                disp = int(m_rip.group(2), 0)
+                if m_rip.group(1) == "-":
+                    disp = -disp
+            rip_tgt = (ins.address + ins.size + disp) & 0xFFFFFFFFFFFFFFFF
+            sym_ref = (
+                f".L_{fn_name}_{rip_tgt:x}"
+                if rip_tgt in label_addrs
+                else f"__nt_asm_sym_{rip_tgt:x}"
+            )
+            norm = norm[: m_rip.start()] + f"[rip + {sym_ref}]" + norm[m_rip.end() :]
+        return norm

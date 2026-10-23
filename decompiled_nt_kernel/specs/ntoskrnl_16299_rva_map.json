@@ -1,0 +1,5568 @@
+{
+  "image_base": 5368709120,
+  "decompiled_functions": {
+    "KiSystemStartup": {
+      "rva": 4300816,
+      "size": 576,
+      "subsystem": "ke",
+      "is_raw_asm": true,
+      "is_exported": false,
+      "patch_prologue": false
+    },
+    "KeGetCurrentIrql": {
+      "rva": 957264,
+      "size": 5,
+      "subsystem": "ke",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KzRaiseIrql": {
+      "rva": 957232,
+      "size": 12,
+      "subsystem": "ke",
+      "is_raw_asm": true,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "KzLowerIrql": {
+      "rva": 971232,
+      "size": 8,
+      "subsystem": "ke",
+      "is_raw_asm": true,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "KeRaiseIrqlToDpcLevel": {
+      "rva": 957200,
+      "size": 14,
+      "subsystem": "ke",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KiFlushCurrentTbWorker": {
+      "rva": 485872,
+      "size": 29,
+      "subsystem": "ke",
+      "is_raw_asm": true,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "KiSystemCall64": {
+      "rva": 1501568,
+      "size": 1734,
+      "subsystem": "ke",
+      "is_raw_asm": true,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "KeGetCurrentThread": {
+      "rva": 1438944,
+      "size": 10,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeGetCurrentProcessorNumberEx": {
+      "rva": 128368,
+      "size": 44,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeQueryPriorityThread": {
+      "rva": 211440,
+      "size": 30,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeInitializeDpc": {
+      "rva": 918176,
+      "size": 25,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeSetImportanceDpc": {
+      "rva": 1111680,
+      "size": 4,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "KeSetTargetProcessorDpc": {
+      "rva": 2100128,
+      "size": 104,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeCheckForZeroPage": {
+      "rva": 1469056,
+      "size": 92,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "KeSetCoalescableTimer": {
+      "rva": 227392,
+      "size": 202,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeReadStateEvent": {
+      "rva": 1006432,
+      "size": 4,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "KeReadStateMutex": {
+      "rva": 1006432,
+      "size": 4,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "KeReadStateSemaphore": {
+      "rva": 1006432,
+      "size": 4,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "KeReadStateTimer": {
+      "rva": 2079424,
+      "size": 4,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "PsGetCurrentProcess": {
+      "rva": 956816,
+      "size": 17,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetCurrentThread": {
+      "rva": 1438944,
+      "size": 10,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessId": {
+      "rva": 777440,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessInheritedFromUniqueProcessId": {
+      "rva": 512752,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessImageFileName": {
+      "rva": 1087536,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessExitStatus": {
+      "rva": 7391360,
+      "size": 7,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessPeb": {
+      "rva": 1082848,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessSectionBaseAddress": {
+      "rva": 313296,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsSystemProcess": {
+      "rva": 752896,
+      "size": 12,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsProtectedProcess": {
+      "rva": 313312,
+      "size": 16,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsProtectedProcessLight": {
+      "rva": 167600,
+      "size": 18,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetThreadId": {
+      "rva": 1074128,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetThreadProcess": {
+      "rva": 328992,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetThreadProcessId": {
+      "rva": 1093392,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetThreadTeb": {
+      "rva": 1012384,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsSystemThread": {
+      "rva": 1085920,
+      "size": 9,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmSizeOfMdl": {
+      "rva": 1035648,
+      "size": 29,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmGetMaximumFileSectionSize": {
+      "rva": 6153904,
+      "size": 11,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmIsAddressValid": {
+      "rva": 2173008,
+      "size": 14,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmFreePagesFromMdl": {
+      "rva": 191520,
+      "size": 16,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ObGetObjectType": {
+      "rva": 5690944,
+      "size": 40,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ObGetFilterVersion": {
+      "rva": 7238608,
+      "size": 6,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ObQueryNameInfo": {
+      "rva": 5661056,
+      "size": 39,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ObDereferenceObject": {
+      "rva": 290896,
+      "size": 19,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ObIsKernelHandle": {
+      "rva": 2296752,
+      "size": 16,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoGetAttachedDevice": {
+      "rva": 351184,
+      "size": 25,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoGetIoPriorityHint": {
+      "rva": 368640,
+      "size": 47,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoGetCurrentProcess": {
+      "rva": 956816,
+      "size": 17,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoThreadToProcess": {
+      "rva": 328992,
+      "size": 8,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoIs32bitProcess": {
+      "rva": 142880,
+      "size": 167,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PiUEventHashStringIntoBucket": {
+      "rva": 149132,
+      "size": 72,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "ExpInterlockedPushEntrySList": {
+      "rva": 1479696,
+      "size": 49,
+      "subsystem": "ex",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExpInterlockedPopEntrySList": {
+      "rva": 1479632,
+      "size": 51,
+      "subsystem": "ex",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExQueryDepthSList": {
+      "rva": 965104,
+      "size": 4,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "ExInitializeRundownProtection": {
+      "rva": 231456,
+      "size": 5,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExReInitializeRundownProtection": {
+      "rva": 1318272,
+      "size": 6,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlCompareMemory": {
+      "rva": 1481312,
+      "size": 122,
+      "subsystem": "rtl",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlInitUnicodeString": {
+      "rva": 351264,
+      "size": 55,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlInitAnsiString": {
+      "rva": 313344,
+      "size": 55,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlInitializeBitMap": {
+      "rva": 1069840,
+      "size": 8,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlTestBit": {
+      "rva": 1065616,
+      "size": 11,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlSetBit": {
+      "rva": 1089520,
+      "size": 8,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlClearBit": {
+      "rva": 1091712,
+      "size": 8,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlExtendedMagicDivide": {
+      "rva": 194956,
+      "size": 42,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "RtlSecondsSince1970ToTime": {
+      "rva": 1312496,
+      "size": 32,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlSecondsSince1980ToTime": {
+      "rva": 2392144,
+      "size": 32,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlTimeToSecondsSince1970": {
+      "rva": 2392192,
+      "size": 57,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeTokenIsRestricted": {
+      "rva": 92432,
+      "size": 12,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeTokenIsAdmin": {
+      "rva": 4555408,
+      "size": 119,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeQueryAuthenticationIdToken": {
+      "rva": 5707088,
+      "size": 10,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KdRefreshDebuggerNotPresent": {
+      "rva": 1318640,
+      "size": 36,
+      "subsystem": "etw_vf",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeRestoreFloatingPointState": {
+      "rva": 155840,
+      "size": 3,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "KeSweepLocalCaches": {
+      "rva": 1144256,
+      "size": 3,
+      "subsystem": "ke",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "KeSignalCallDpcDone": {
+      "rva": 1119008,
+      "size": 4,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "HalExamineMBR": {
+      "rva": 6985392,
+      "size": 5,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeClockTimerPowerChange": {
+      "rva": 2082784,
+      "size": 7,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeForceEnableNx": {
+      "rva": 4320928,
+      "size": 7,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeGetClockOwner": {
+      "rva": 2083040,
+      "size": 7,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeGetRecommendedSharedDataAlignment": {
+      "rva": 154992,
+      "size": 7,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeQueryTimeIncrement": {
+      "rva": 958112,
+      "size": 7,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeSetLastBranchRecordInUse": {
+      "rva": 2086112,
+      "size": 7,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeSetProfileIrql": {
+      "rva": 8704592,
+      "size": 7,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeSystemFullyCacheCoherent": {
+      "rva": 2099760,
+      "size": 7,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "InbvInstallDisplayStringFilter": {
+      "rva": 2018752,
+      "size": 8,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeQueryActiveGroupCount": {
+      "rva": 932800,
+      "size": 8,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeQueryActiveProcessors": {
+      "rva": 2086912,
+      "size": 8,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeQueryMaximumGroupCount": {
+      "rva": 231472,
+      "size": 8,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeQueryHighestNodeNumber": {
+      "rva": 148864,
+      "size": 11,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeReportCacheIncoherentDevice": {
+      "rva": 2099728,
+      "size": 11,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "InbvEnableDisplayString": {
+      "rva": 2018624,
+      "size": 13,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeInitializeEnumerationContextFromAffinity": {
+      "rva": 2090800,
+      "size": 13,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeIsExecutingDpc": {
+      "rva": 1263344,
+      "size": 14,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeQueryPrcbAddress": {
+      "rva": 1138448,
+      "size": 14,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeQueryRuntimeThread": {
+      "rva": 1143296,
+      "size": 15,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeIsWaitListEmpty": {
+      "rva": 7136208,
+      "size": 16,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeTestSpinLock": {
+      "rva": 929872,
+      "size": 16,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeEnterCriticalRegion": {
+      "rva": 934560,
+      "size": 17,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeEnterGuardedRegion": {
+      "rva": 938160,
+      "size": 17,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeGetClockTimerResolution": {
+      "rva": 2083056,
+      "size": 17,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeQueryGroupAffinityEx": {
+      "rva": 2081776,
+      "size": 17,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeInitializeEnumerationContext": {
+      "rva": 1016560,
+      "size": 18,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeAreApcsDisabled": {
+      "rva": 281952,
+      "size": 20,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeCountSetBitsAffinityEx": {
+      "rva": 267296,
+      "size": 20,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeInitializeEnumerationContextFromGroup": {
+      "rva": 1127056,
+      "size": 20,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeIsAttachedProcess": {
+      "rva": 371952,
+      "size": 20,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeSetHeteroCpuPolicyThread": {
+      "rva": 2081232,
+      "size": 20,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeReleaseInStackQueuedSpinLock": {
+      "rva": 915056,
+      "size": 22,
+      "subsystem": "ke",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeGetCurrentNodeNumber": {
+      "rva": 973776,
+      "size": 24,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeInitializeThreadedDpc": {
+      "rva": 1315232,
+      "size": 25,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeSetTimer": {
+      "rva": 227600,
+      "size": 25,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeAddProcessorGroupAffinity": {
+      "rva": 1283040,
+      "size": 26,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeGetEffectiveIrql": {
+      "rva": 414608,
+      "size": 26,
+      "subsystem": "ke",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeInitializeSemaphore": {
+      "rva": 231424,
+      "size": 26,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeRemoveProcessorGroupAffinity": {
+      "rva": 2081840,
+      "size": 26,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeInitializeEvent": {
+      "rva": 350496,
+      "size": 27,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeQueryActiveProcessorAffinity": {
+      "rva": 1173680,
+      "size": 27,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeQueryGroupAffinity": {
+      "rva": 314288,
+      "size": 27,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeInitializeTimer": {
+      "rva": 1101872,
+      "size": 28,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeQueryHeteroCpuPolicyThread": {
+      "rva": 2080576,
+      "size": 28,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeInitializeTimerEx": {
+      "rva": 230496,
+      "size": 31,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeSetEvent": {
+      "rva": 543072,
+      "size": 31,
+      "subsystem": "ke",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeAcquireSpinLockRaiseToSynch": {
+      "rva": 2089984,
+      "size": 32,
+      "subsystem": "ke",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeExpandKernelStackAndCalloutEx": {
+      "rva": 839088,
+      "size": 34,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KeInitializeDeviceQueue": {
+      "rva": 154224,
+      "size": 35,
+      "subsystem": "ke",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetSiloMonitorContextSlot": {
+      "rva": 5781296,
+      "size": 4,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "PsGetJobLock": {
+      "rva": 74480,
+      "size": 5,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetJobUIRestrictionsClass": {
+      "rva": 1130464,
+      "size": 7,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessPriorityClass": {
+      "rva": 2381968,
+      "size": 7,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessProtection": {
+      "rva": 1118336,
+      "size": 7,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsSetProcessPriorityClass": {
+      "rva": 2382320,
+      "size": 7,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessCreateTimeQuadPart": {
+      "rva": 1062816,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessDebugPort": {
+      "rva": 1108144,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessDxgProcess": {
+      "rva": 5605536,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessJob": {
+      "rva": 1085936,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessSecurityPort": {
+      "rva": 6014352,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessSequenceNumber": {
+      "rva": 1111472,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessServerSilo": {
+      "rva": 776464,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessWin32Process": {
+      "rva": 1082048,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessWin32WindowStation": {
+      "rva": 1096464,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetThreadCreateTime": {
+      "rva": 2381984,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetThreadWin32Thread": {
+      "rva": 1000480,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsReferenceKernelStack": {
+      "rva": 5780480,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsSetProcessDxgProcess": {
+      "rva": 5757856,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsSetProcessWindowStation": {
+      "rva": 5766480,
+      "size": 8,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsThreadTerminating": {
+      "rva": 502256,
+      "size": 10,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsLookupThreadByThreadId": {
+      "rva": 5362832,
+      "size": 10,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsSetProcessSecurityPort": {
+      "rva": 7392032,
+      "size": 10,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsDiskCountersEnabled": {
+      "rva": 1271600,
+      "size": 11,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsHostSilo": {
+      "rva": 350464,
+      "size": 11,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessExitProcessCalled": {
+      "rva": 1126400,
+      "size": 12,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetThreadHardErrorsAreDisabled": {
+      "rva": 1306912,
+      "size": 12,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsProcessBeingDebugged": {
+      "rva": 7391376,
+      "size": 12,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsProcessCommitRelinquished": {
+      "rva": 7391408,
+      "size": 12,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsThreadImpersonating": {
+      "rva": 5994112,
+      "size": 12,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsWin32KFilterAuditEnabledForProcess": {
+      "rva": 1112224,
+      "size": 12,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsWin32KFilterEnabledForProcess": {
+      "rva": 1079728,
+      "size": 12,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsSetLegoNotifyRoutine": {
+      "rva": 7403088,
+      "size": 13,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetCurrentThreadStackBase": {
+      "rva": 2381792,
+      "size": 14,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetCurrentThreadStackLimit": {
+      "rva": 2381824,
+      "size": 14,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetCurrentThreadPreviousMode": {
+      "rva": 1051792,
+      "size": 16,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetJobSessionId": {
+      "rva": 2381872,
+      "size": 16,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsDetachSiloFromCurrentThread": {
+      "rva": 293024,
+      "size": 17,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetCurrentProcessId": {
+      "rva": 778032,
+      "size": 17,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetCurrentThreadId": {
+      "rva": 1036128,
+      "size": 17,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetCurrentThreadProcess": {
+      "rva": 1314256,
+      "size": 17,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetCurrentThreadWin32Thread": {
+      "rva": 972544,
+      "size": 17,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsCurrentThreadPrefetching": {
+      "rva": 1033184,
+      "size": 21,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsSetThreadHardErrorsAreDisabled": {
+      "rva": 1302032,
+      "size": 22,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetWin32KFilterSet": {
+      "rva": 1043712,
+      "size": 23,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsRestoreImpersonation": {
+      "rva": 5359776,
+      "size": 23,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsWow64GetProcessMachine": {
+      "rva": 5152208,
+      "size": 23,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsAttachSiloToCurrentThread": {
+      "rva": 292992,
+      "size": 24,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetCurrentProcessWin32Process": {
+      "rva": 996544,
+      "size": 24,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessExitTime": {
+      "rva": 5695328,
+      "size": 24,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetProcessStartKey": {
+      "rva": 310656,
+      "size": 24,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsChargeProcessNonPagedPoolQuota": {
+      "rva": 675968,
+      "size": 26,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetThreadFreezeCount": {
+      "rva": 1130784,
+      "size": 26,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsWin32KFilterAuditEnabled": {
+      "rva": 1112176,
+      "size": 28,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsIsWin32KFilterEnabled": {
+      "rva": 1079680,
+      "size": 28,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsEnterPriorityRegion": {
+      "rva": 996640,
+      "size": 31,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PsGetCurrentThreadWin32ThreadAndEnterCriticalRegion": {
+      "rva": 965056,
+      "size": 34,
+      "subsystem": "ps",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmMapUserAddressesToPage": {
+      "rva": 4304464,
+      "size": 6,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmQuerySystemSize": {
+      "rva": 1318624,
+      "size": 6,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmSetBankedSection": {
+      "rva": 1152880,
+      "size": 6,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmIsThisAnNtAsSystem": {
+      "rva": 1081744,
+      "size": 7,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmIsDriverVerifying": {
+      "rva": 1129472,
+      "size": 20,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmIsVerifierEnabled": {
+      "rva": 7967392,
+      "size": 23,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmIsRecursiveIoFault": {
+      "rva": 693632,
+      "size": 31,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmProbeAndLockPages": {
+      "rva": 353696,
+      "size": 46,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmMapViewInSystemSpaceEx": {
+      "rva": 5744544,
+      "size": 48,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmLoadSystemImage": {
+      "rva": 7180928,
+      "size": 50,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmMapViewInSystemSpace": {
+      "rva": 5554384,
+      "size": 52,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmUnloadSystemImage": {
+      "rva": 5535408,
+      "size": 53,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmAllocateContiguousMemory": {
+      "rva": 2162464,
+      "size": 57,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmGetVirtualForPhysical": {
+      "rva": 2163120,
+      "size": 63,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmDisableModifiedWriteOfSection": {
+      "rva": 1088208,
+      "size": 74,
+      "subsystem": "mm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmAddPhysicalMemory": {
+      "rva": 7173312,
+      "size": 75,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmCanFileBeTruncated": {
+      "rva": 1040944,
+      "size": 86,
+      "subsystem": "mm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "MmAllocatePagesForMdl": {
+      "rva": 1307360,
+      "size": 94,
+      "subsystem": "mm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ObReferenceSecurityDescriptor": {
+      "rva": 5680368,
+      "size": 18,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ObCreateObjectType": {
+      "rva": 5923248,
+      "size": 22,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ObpLookupDirectoryEntry": {
+      "rva": 5925348,
+      "size": 27,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "ObpIncrPointerCount": {
+      "rva": 717408,
+      "size": 32,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "ObpIncrPointerCountEx": {
+      "rva": 399560,
+      "size": 32,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "ObpDirectoryTeardownCallback": {
+      "rva": 7867664,
+      "size": 36,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "ObDeassignSecurity": {
+      "rva": 5145472,
+      "size": 37,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "ObpReferenceNamedObject": {
+      "rva": 293124,
+      "size": 54,
+      "subsystem": "ob",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "IoIsFileOriginRemote": {
+      "rva": 1126272,
+      "size": 6,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoSizeofGenericIrpExtension": {
+      "rva": 2049760,
+      "size": 6,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoSizeofWorkItem": {
+      "rva": 1105456,
+      "size": 6,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoGetConfigurationInformation": {
+      "rva": 5949808,
+      "size": 8,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoGetDeviceToVerify": {
+      "rva": 2042112,
+      "size": 8,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoGetFileObjectGenericMapping": {
+      "rva": 5594464,
+      "size": 8,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoSetDeviceToVerify": {
+      "rva": 74880,
+      "size": 8,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoClearIrpExtraCreateParameter": {
+      "rva": 2041664,
+      "size": 13,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoGetInitialStack": {
+      "rva": 7006032,
+      "size": 14,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoClearActivityIdThread": {
+      "rva": 147488,
+      "size": 17,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoGetActivityIdThread": {
+      "rva": 148784,
+      "size": 17,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoGetTopLevelIrp": {
+      "rva": 702976,
+      "size": 17,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoSetTopLevelIrp": {
+      "rva": 702944,
+      "size": 17,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoIsWdmVersionAvailable": {
+      "rva": 7038400,
+      "size": 19,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoInitializeMiniCompletionPacket": {
+      "rva": 7008992,
+      "size": 20,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoPropagateIrpExtension": {
+      "rva": 964336,
+      "size": 20,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoSetHardErrorOrVerifyDevice": {
+      "rva": 2043760,
+      "size": 20,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoSetActivityIdThread": {
+      "rva": 147520,
+      "size": 24,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoQueueWorkItemEx": {
+      "rva": 249984,
+      "size": 33,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoGetPagingIoPriority": {
+      "rva": 1034224,
+      "size": 34,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoSetIoPriorityHint": {
+      "rva": 1014096,
+      "size": 36,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoQueryFileInformation": {
+      "rva": 5752672,
+      "size": 37,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoQueryVolumeInformation": {
+      "rva": 5752624,
+      "size": 37,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoQueueWorkItem": {
+      "rva": 249232,
+      "size": 37,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoReleaseCancelSpinLock": {
+      "rva": 1000496,
+      "size": 39,
+      "subsystem": "io",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoGetActivityIdIrp": {
+      "rva": 952432,
+      "size": 47,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoGetIoAttributionHandle": {
+      "rva": 987728,
+      "size": 47,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "IoSizeOfIrpEx": {
+      "rva": 2043968,
+      "size": 48,
+      "subsystem": "io",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExCleanupRundownProtectionCacheAware": {
+      "rva": 1141792,
+      "size": 3,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "ExSizeOfAutoExpandPushLock": {
+      "rva": 2606544,
+      "size": 6,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExGetFirmwareType": {
+      "rva": 2600672,
+      "size": 7,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExRundownCompleted": {
+      "rva": 310720,
+      "size": 9,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExIsManufacturingModeEnabled": {
+      "rva": 4604544,
+      "size": 10,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExRealTimeIsUniversal": {
+      "rva": 1317040,
+      "size": 11,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExIsSoftBoot": {
+      "rva": 1157744,
+      "size": 12,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExConvertPushLockExclusiveToShared": {
+      "rva": 2600576,
+      "size": 14,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExSystemTimeToLocalTime": {
+      "rva": 1141968,
+      "size": 14,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExGetPreviousMode": {
+      "rva": 986080,
+      "size": 17,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExLocalTimeToSystemTime": {
+      "rva": 1217424,
+      "size": 17,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExSystemExceptionFilter": {
+      "rva": 4563408,
+      "size": 21,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExInitializeAutoExpandPushLock": {
+      "rva": 1030224,
+      "size": 23,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExQueryTimerResolution": {
+      "rva": 2602128,
+      "size": 26,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExAllocateTimer": {
+      "rva": 1158496,
+      "size": 30,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExpInterlockedFlushSList": {
+      "rva": 1479760,
+      "size": 36,
+      "subsystem": "ex",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExTryConvertPushLockSharedToExclusiveEx": {
+      "rva": 1239760,
+      "size": 37,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExTryQueueWorkItem": {
+      "rva": 249280,
+      "size": 37,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExAcquireSpinLockExclusive": {
+      "rva": 740800,
+      "size": 39,
+      "subsystem": "ex",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExReleaseSpinLockExclusive": {
+      "rva": 1016832,
+      "size": 41,
+      "subsystem": "ex",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExReleaseResourceAndLeaveCriticalRegion": {
+      "rva": 205840,
+      "size": 42,
+      "subsystem": "ex",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExGetExclusiveWaiterCount": {
+      "rva": 2610176,
+      "size": 45,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExGetSharedWaiterCount": {
+      "rva": 2610240,
+      "size": 45,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExReleaseSpinLockShared": {
+      "rva": 996576,
+      "size": 45,
+      "subsystem": "ex",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExGetCurrentProcessorCounts": {
+      "rva": 1034752,
+      "size": 47,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExEnterCriticalRegionAndAcquireSharedWaitForExclusive": {
+      "rva": 2610032,
+      "size": 48,
+      "subsystem": "ex",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExEnterCriticalRegionAndAcquireResourceShared": {
+      "rva": 808048,
+      "size": 50,
+      "subsystem": "ex",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExReleaseResourceLite": {
+      "rva": 788400,
+      "size": 51,
+      "subsystem": "ex",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExIsFastResourceHeldExclusive": {
+      "rva": 1239600,
+      "size": 53,
+      "subsystem": "ex",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExInitializeFastOwnerEntry": {
+      "rva": 1230192,
+      "size": 58,
+      "subsystem": "ex",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ExAcquireResourceExclusiveLite": {
+      "rva": 801888,
+      "size": 60,
+      "subsystem": "ex",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlNumberGenericTableElements": {
+      "rva": 1102912,
+      "size": 4,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "RtlNumberGenericTableElementsAvl": {
+      "rva": 958160,
+      "size": 4,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "RtlRunOnceInitialize": {
+      "rva": 5920320,
+      "size": 5,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlSubAuthorityCountSid": {
+      "rva": 334832,
+      "size": 5,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlAreAnyAccessesGranted": {
+      "rva": 4496272,
+      "size": 6,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlEqualWnfChangeStamps": {
+      "rva": 7448176,
+      "size": 6,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "XIPDispatch": {
+      "rva": 2622208,
+      "size": 6,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FirstEntrySList": {
+      "rva": 1479616,
+      "size": 7,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlCopyLuid": {
+      "rva": 5701952,
+      "size": 7,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlGetNtGlobalFlags": {
+      "rva": 7444720,
+      "size": 7,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "srand": {
+      "rva": 1327504,
+      "size": 7,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlAreAllAccessesGranted": {
+      "rva": 5617648,
+      "size": 8,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlInitializeBitMapEx": {
+      "rva": 2403024,
+      "size": 8,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlIsGenericTableEmpty": {
+      "rva": 1298032,
+      "size": 8,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlIsGenericTableEmptyAvl": {
+      "rva": 144656,
+      "size": 8,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlClearBitEx": {
+      "rva": 2397952,
+      "size": 9,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlSetBitEx": {
+      "rva": 2404864,
+      "size": 9,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlClearBits": {
+      "rva": 778080,
+      "size": 10,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlClearBitsEx": {
+      "rva": 477280,
+      "size": 10,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlGetNonVolatileToken": {
+      "rva": 2393712,
+      "size": 10,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlIsPartialPlaceholder": {
+      "rva": 7454880,
+      "size": 10,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlSetBits": {
+      "rva": 676352,
+      "size": 10,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PfxInitialize": {
+      "rva": 7432752,
+      "size": 11,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlSubAuthoritySid": {
+      "rva": 334848,
+      "size": 11,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlLengthSid": {
+      "rva": 328528,
+      "size": 12,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlTestBitEx": {
+      "rva": 2405104,
+      "size": 12,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlGetEnabledExtendedFeatures": {
+      "rva": 1306672,
+      "size": 14,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlFreeNonVolatileToken": {
+      "rva": 2393680,
+      "size": 15,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlIsMultiUsersInSessionSku": {
+      "rva": 7439424,
+      "size": 15,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlIsStateSeparationEnabled": {
+      "rva": 5915472,
+      "size": 15,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlFindNextForwardRunClearEx": {
+      "rva": 2401232,
+      "size": 17,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlInitializeRangeList": {
+      "rva": 5989600,
+      "size": 17,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlInitializeUnicodePrefix": {
+      "rva": 6144768,
+      "size": 17,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlOpenImageFileOptionsKey": {
+      "rva": 7425344,
+      "size": 17,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlCheckTokenMembership": {
+      "rva": 152336,
+      "size": 20,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlEqualLuid": {
+      "rva": 7439040,
+      "size": 20,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlIsNonEmptyDirectoryReparsePointAllowed": {
+      "rva": 1119616,
+      "size": 20,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlLengthRequiredSid": {
+      "rva": 5001056,
+      "size": 20,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "vsprintf": {
+      "rva": 1330624,
+      "size": 20,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlCopyUnicodeString": {
+      "rva": 351328,
+      "size": 21,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlFindNextForwardRunClear": {
+      "rva": 237696,
+      "size": 21,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlGetDefaultCodePage": {
+      "rva": 6142224,
+      "size": 21,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "LdrFindResource_U": {
+      "rva": 5902240,
+      "size": 22,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlFindFirstRunClear": {
+      "rva": 63808,
+      "size": 23,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlCrc32": {
+      "rva": 2406592,
+      "size": 24,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlIsNtDdiVersionAvailable": {
+      "rva": 1318240,
+      "size": 24,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "LdrFindResourceDirectory_U": {
+      "rva": 7427776,
+      "size": 25,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlCreateHashTable": {
+      "rva": 1054912,
+      "size": 25,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlIsCloudFilesPlaceholder": {
+      "rva": 2413792,
+      "size": 26,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlGetControlSecurityDescriptor": {
+      "rva": 4977232,
+      "size": 27,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlIsServicePackVersionInstalled": {
+      "rva": 2413184,
+      "size": 27,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlGetSystemBootStatusEx": {
+      "rva": 5851856,
+      "size": 28,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlGetTokenNamedObjectPath": {
+      "rva": 7439376,
+      "size": 28,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlSetSystemBootStatusEx": {
+      "rva": 7446384,
+      "size": 28,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SkAcquirePushLockExclusive": {
+      "rva": 2385488,
+      "size": 29,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "isdigit": {
+      "rva": 1325568,
+      "size": 29,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "islower": {
+      "rva": 1325616,
+      "size": 29,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "isspace": {
+      "rva": 1325712,
+      "size": 29,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "isupper": {
+      "rva": 1325760,
+      "size": 29,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "sprintf_s": {
+      "rva": 1347808,
+      "size": 29,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "swprintf_s": {
+      "rva": 1342944,
+      "size": 29,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlAddAccessAllowedAce": {
+      "rva": 4745584,
+      "size": 30,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "rand": {
+      "rva": 1327456,
+      "size": 30,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlDrainNonVolatileFlush": {
+      "rva": 2393296,
+      "size": 31,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "RtlEqualUnicodeString": {
+      "rva": 5140720,
+      "size": 31,
+      "subsystem": "rtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeShouldCheckForAccessRightsFromParent": {
+      "rva": 5168816,
+      "size": 6,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeTokenImpersonationLevel": {
+      "rva": 5982640,
+      "size": 7,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeTokenType": {
+      "rva": 5695760,
+      "size": 7,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeTokenIsWriteRestricted": {
+      "rva": 92464,
+      "size": 12,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeSetAccessStateGenericMapping": {
+      "rva": 7467984,
+      "size": 13,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeCaptureSubjectContextEx": {
+      "rva": 5361488,
+      "size": 17,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeAdjustAccessStateForTrustLabel": {
+      "rva": 7467952,
+      "size": 20,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeSetSecurityAttributesToken": {
+      "rva": 7467296,
+      "size": 25,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeCaptureSubjectContext": {
+      "rva": 5168224,
+      "size": 30,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeComputeAutoInheritByObjectType": {
+      "rva": 1091296,
+      "size": 34,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeReportSecurityEvent": {
+      "rva": 2450928,
+      "size": 34,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeDeassignSecurity": {
+      "rva": 5642848,
+      "size": 36,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeSetSecurityDescriptorInfoEx": {
+      "rva": 7498368,
+      "size": 58,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeCreateAccessStateEx": {
+      "rva": 5649936,
+      "size": 74,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "SeQuerySessionIdToken": {
+      "rva": 5622624,
+      "size": 75,
+      "subsystem": "se",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CmpTryAcquireIXLockExclusive": {
+      "rva": 4918268,
+      "size": 7,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpCommitDiscardReplacePre": {
+      "rva": 6877056,
+      "size": 10,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpGetEffectiveKcbSemantics": {
+      "rva": 6877440,
+      "size": 15,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpSetGlobalQuotaAllowed": {
+      "rva": 5781640,
+      "size": 15,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpTransSilentIgnore": {
+      "rva": 782080,
+      "size": 15,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmGetCallbackVersion": {
+      "rva": 6817040,
+      "size": 20,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CmGetBoundTransaction": {
+      "rva": 5761456,
+      "size": 21,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CmpFlushNotifiesPreCallback": {
+      "rva": 6877328,
+      "size": 21,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpValidateGlobalFlushControlFlags": {
+      "rva": 6154112,
+      "size": 21,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpValueEnumStackGetCurrentValueHive": {
+      "rva": 1957128,
+      "size": 21,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpComputeKcbConvKey": {
+      "rva": 6842576,
+      "size": 29,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpInitializeKcbStack": {
+      "rva": 5143600,
+      "size": 33,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpGetComponentNameAtIndex": {
+      "rva": 5671516,
+      "size": 38,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpKeyNodeStackGetEntryAtLayerHeight": {
+      "rva": 6877636,
+      "size": 38,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpSortedValueEnumStackGetEntryAtLayerHeight": {
+      "rva": 6895376,
+      "size": 38,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpSetRespectIoPriorityThread": {
+      "rva": 301480,
+      "size": 40,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpFindValueByName": {
+      "rva": 5966432,
+      "size": 41,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpInitializeDiscardReplaceContext": {
+      "rva": 6877496,
+      "size": 44,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpInitializeFreezeThaw": {
+      "rva": 6152648,
+      "size": 46,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpSystemQuotaWarningWorker": {
+      "rva": 6827696,
+      "size": 52,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CmpArmDelayDerefKCBWorker": {
+      "rva": 5675384,
+      "size": 53,
+      "subsystem": "cm",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CcTestControl": {
+      "rva": 1319104,
+      "size": 6,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CcSetReadAheadGranularity": {
+      "rva": 1080384,
+      "size": 10,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CcMapAndRead": {
+      "rva": 817744,
+      "size": 12,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CcGetFileObjectFromBcb": {
+      "rva": 1939712,
+      "size": 16,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CcNotifyWriteBehindHelper": {
+      "rva": 1940464,
+      "size": 16,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CcGetCachedDirtyPageCountForFile": {
+      "rva": 1942944,
+      "size": 21,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CcFlushCache": {
+      "rva": 1093728,
+      "size": 27,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CcFlushCacheToLsn": {
+      "rva": 1137472,
+      "size": 32,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CcIncrementVacbActiveCount": {
+      "rva": 748232,
+      "size": 32,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CcSetDirtyPageThreshold": {
+      "rva": 1939840,
+      "size": 37,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CcCopyReadExceptionFilter": {
+      "rva": 1941188,
+      "size": 38,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CcWaitForCurrentLazyWriterActivity": {
+      "rva": 1317648,
+      "size": 38,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CcFastCopyWrite": {
+      "rva": 1941664,
+      "size": 39,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CcGetPartition": {
+      "rva": 389232,
+      "size": 39,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "CcIsThereDirtyData": {
+      "rva": 1943168,
+      "size": 43,
+      "subsystem": "cc",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "CcSetDirtyPinnedData": {
+      "rva": 203744,
+      "size": 45,
+      "subsystem": "cc",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlInitializeOplock": {
+      "rva": 5818960,
+      "size": 3,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "FsRtlSyncVolumes": {
+      "rva": 5745184,
+      "size": 3,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "FsRtlAcknowledgeEcp": {
+      "rva": 6011776,
+      "size": 5,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlPrepareToReuseEcp": {
+      "rva": 6147552,
+      "size": 5,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlResetBaseMcb": {
+      "rva": 1138672,
+      "size": 5,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlAreVolumeStartupApplicationsComplete": {
+      "rva": 5738800,
+      "size": 7,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlRegisterFltMgrCalls": {
+      "rva": 6154624,
+      "size": 8,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlRegisterMupCalls": {
+      "rva": 6154608,
+      "size": 8,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlIsEcpAcknowledged": {
+      "rva": 5623856,
+      "size": 9,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlIsEcpFromUserMode": {
+      "rva": 5617632,
+      "size": 9,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlLookupReservedPerFileContext": {
+      "rva": 29840,
+      "size": 14,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlMdlReadCompleteDev": {
+      "rva": 1092144,
+      "size": 16,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlInitializeFileLock": {
+      "rva": 1299680,
+      "size": 20,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlAddMcbEntry": {
+      "rva": 1967408,
+      "size": 22,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlGetEcpListFromIrp": {
+      "rva": 5188848,
+      "size": 23,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlAreThereWaitingFileLocks": {
+      "rva": 1969216,
+      "size": 24,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlRemoveReservedPerFileContext": {
+      "rva": 1975312,
+      "size": 26,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlFastUnlockAll": {
+      "rva": 1008240,
+      "size": 27,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlAllocateResource": {
+      "rva": 6973344,
+      "size": 31,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlIsDaxVolume": {
+      "rva": 1967264,
+      "size": 33,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlSetEcpListIntoIrp": {
+      "rva": 5580752,
+      "size": 33,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlIsTotalDeviceFailure": {
+      "rva": 877440,
+      "size": 34,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlAreThereCurrentOrInProgressFileLocks": {
+      "rva": 1969168,
+      "size": 35,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "FsRtlInitializeExtraCreateParameterList": {
+      "rva": 6132112,
+      "size": 35,
+      "subsystem": "fsrtl",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PoEndDeviceBusy": {
+      "rva": 2313808,
+      "size": 5,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PoSetDeviceBusyEx": {
+      "rva": 1277728,
+      "size": 5,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PoEnergyEstimationEnabled": {
+      "rva": 231488,
+      "size": 7,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PoSetFixedWakeSource": {
+      "rva": 4356960,
+      "size": 7,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PoIsRunningStopWatch": {
+      "rva": 286000,
+      "size": 9,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "PoStartDeviceBusy": {
+      "rva": 2313824,
+      "size": 9,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PopSetShutdownMarker": {
+      "rva": 7258720,
+      "size": 11,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "PopIsUserInitiatedMonitorRequestReason": {
+      "rva": 2313640,
+      "size": 21,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "PopExecutionRequiredCallback": {
+      "rva": 5778304,
+      "size": 24,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "PopIntSteerSetTimeUnparkTrigger": {
+      "rva": 1318688,
+      "size": 24,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "PoFxIssueComponentPerfStateChange": {
+      "rva": 2314176,
+      "size": 35,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PoGetThermalRequestSupport": {
+      "rva": 7263568,
+      "size": 35,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PopAcquireTransitionLock": {
+      "rva": 7305404,
+      "size": 37,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "PoGetSystemWake": {
+      "rva": 1315152,
+      "size": 39,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PoGetProcessorIdleAccounting": {
+      "rva": 2301712,
+      "size": 42,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "PopGetTransitionsToOnCount": {
+      "rva": 2355648,
+      "size": 44,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "PopDispatchCallback": {
+      "rva": 6142256,
+      "size": 48,
+      "subsystem": "po",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "AlpcpLockForCachedReferenceBlob": {
+      "rva": 5234652,
+      "size": 55,
+      "subsystem": "alpc",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "AlpcpSetOwnerPortMessage": {
+      "rva": 4779416,
+      "size": 75,
+      "subsystem": "alpc",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "TmCancelPropagationRequest": {
+      "rva": 1320336,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmCommitComplete": {
+      "rva": 1320352,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmCommitEnlistment": {
+      "rva": 1320368,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmCommitTransaction": {
+      "rva": 1320384,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmCreateEnlistment": {
+      "rva": 1320400,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmCurrentTransaction": {
+      "rva": 1320416,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmDereferenceEnlistmentKey": {
+      "rva": 1320432,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmEnableCallbacks": {
+      "rva": 1320448,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmEndPropagationRequest": {
+      "rva": 1320464,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmFreezeTransactions": {
+      "rva": 1320480,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmGetTransactionId": {
+      "rva": 1320496,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmInitSystem": {
+      "rva": 1319760,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmInitSystemPhase2": {
+      "rva": 1319744,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmInitializeTransactionManager": {
+      "rva": 1320512,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmIsKTMCommitCoordinator": {
+      "rva": 1320528,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmIsTransactionActive": {
+      "rva": 1320544,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmPrePrepareComplete": {
+      "rva": 1320560,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmPrePrepareEnlistment": {
+      "rva": 1320576,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmPrepareComplete": {
+      "rva": 1320592,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmPrepareEnlistment": {
+      "rva": 1320608,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmPropagationComplete": {
+      "rva": 1320624,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmPropagationFailed": {
+      "rva": 1320640,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmReadOnlyEnlistment": {
+      "rva": 1320656,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmRecoverEnlistment": {
+      "rva": 1320672,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmRecoverResourceManager": {
+      "rva": 1320688,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmRecoverTransactionManager": {
+      "rva": 1320704,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmReferenceEnlistmentKey": {
+      "rva": 1320720,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmRenameTransactionManager": {
+      "rva": 1320736,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmRequestOutcomeEnlistment": {
+      "rva": 1320752,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmRollbackComplete": {
+      "rva": 1320768,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmRollbackEnlistment": {
+      "rva": 1320784,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmRollbackTransaction": {
+      "rva": 1320800,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmSetCurrentTransaction": {
+      "rva": 1320816,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmSinglePhaseReject": {
+      "rva": 1320832,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "TmThawTransactions": {
+      "rva": 1320848,
+      "size": 6,
+      "subsystem": "tm",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "DbgBreakPoint": {
+      "rva": 1479472,
+      "size": 2,
+      "subsystem": "etw_vf",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "DbgBreakPointWithStatus": {
+      "rva": 1479504,
+      "size": 2,
+      "subsystem": "etw_vf",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": false
+    },
+    "KdSetEventLoggingPresent": {
+      "rva": 7921584,
+      "size": 7,
+      "subsystem": "etw_vf",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KdGetDebugDevice": {
+      "rva": 1319120,
+      "size": 8,
+      "subsystem": "etw_vf",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "HvlQueryConnection": {
+      "rva": 1158464,
+      "size": 22,
+      "subsystem": "etw_vf",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "HvlQueryActiveHypervisorProcessorCount": {
+      "rva": 1979488,
+      "size": 27,
+      "subsystem": "etw_vf",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KdReleaseDebuggerLock": {
+      "rva": 2076016,
+      "size": 31,
+      "subsystem": "etw_vf",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "WmiTraceMessage": {
+      "rva": 1135792,
+      "size": 35,
+      "subsystem": "etw_vf",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "KdAcquireDebuggerLock": {
+      "rva": 2074992,
+      "size": 36,
+      "subsystem": "etw_vf",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "WheaDeferredRecoveryService": {
+      "rva": 2628128,
+      "size": 47,
+      "subsystem": "etw_vf",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "EtwWriteTransfer": {
+      "rva": 195296,
+      "size": 48,
+      "subsystem": "etw_vf",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "EtwWrite": {
+      "rva": 414640,
+      "size": 49,
+      "subsystem": "etw_vf",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "DbgPrintReturnControlC": {
+      "rva": 2392576,
+      "size": 63,
+      "subsystem": "etw_vf",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtCommitComplete": {
+      "rva": 1319776,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtCommitEnlistment": {
+      "rva": 1319792,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtCommitTransaction": {
+      "rva": 1319808,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtCreateEnlistment": {
+      "rva": 1319824,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtCreateResourceManager": {
+      "rva": 1319840,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtCreateTransaction": {
+      "rva": 1319856,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtCreateTransactionManager": {
+      "rva": 1319872,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtEnumerateTransactionObject": {
+      "rva": 1319888,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtFreezeTransactions": {
+      "rva": 1319904,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtGetNotificationResourceManager": {
+      "rva": 1319920,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtOpenEnlistment": {
+      "rva": 1319936,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtOpenResourceManager": {
+      "rva": 1319952,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtOpenTransaction": {
+      "rva": 1319968,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtOpenTransactionManager": {
+      "rva": 1319984,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtPrePrepareComplete": {
+      "rva": 1320000,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtPrePrepareEnlistment": {
+      "rva": 1320016,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtPrepareComplete": {
+      "rva": 1320032,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtPrepareEnlistment": {
+      "rva": 1320048,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtPropagationComplete": {
+      "rva": 1320064,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtPropagationFailed": {
+      "rva": 1320080,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtQueryInformationEnlistment": {
+      "rva": 1320096,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtQueryInformationResourceManager": {
+      "rva": 1320112,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtQueryInformationTransaction": {
+      "rva": 1320128,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtQueryInformationTransactionManager": {
+      "rva": 1320144,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtReadOnlyEnlistment": {
+      "rva": 1320160,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtRecoverEnlistment": {
+      "rva": 1320176,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtRecoverResourceManager": {
+      "rva": 1320192,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtRecoverTransactionManager": {
+      "rva": 1320208,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtRollbackComplete": {
+      "rva": 1320224,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtRollbackEnlistment": {
+      "rva": 1320240,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtRollbackTransaction": {
+      "rva": 1320256,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtSetInformationEnlistment": {
+      "rva": 1320272,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtSetInformationResourceManager": {
+      "rva": 1320288,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtSetInformationTransaction": {
+      "rva": 1320304,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtThawTransactions": {
+      "rva": 1320320,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtVdmControl": {
+      "rva": 5818816,
+      "size": 6,
+      "subsystem": "zw_nt",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtOpenProcessToken": {
+      "rva": 5360144,
+      "size": 20,
+      "subsystem": "zw_nt",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "NtOpenThreadToken": {
+      "rva": 5358192,
+      "size": 22,
+      "subsystem": "zw_nt",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "AlpcGetHeaderSize": {
+      "rva": 315888,
+      "size": 78,
+      "subsystem": "alpc",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "AlpcRegionDestroyProcedure": {
+      "rva": 5671568,
+      "size": 83,
+      "subsystem": "alpc",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "AlpcpFreeCompletionPacketLookaside": {
+      "rva": 78808,
+      "size": 87,
+      "subsystem": "alpc",
+      "is_raw_asm": true,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "AlpcpGetMessageAttributeOffset": {
+      "rva": 5595340,
+      "size": 95,
+      "subsystem": "alpc",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "AlpcpGetMessageAttributeOffset32": {
+      "rva": 5669620,
+      "size": 95,
+      "subsystem": "alpc",
+      "is_raw_asm": false,
+      "is_exported": false,
+      "patch_prologue": true
+    },
+    "LpcRequestPort": {
+      "rva": 5237456,
+      "size": 100,
+      "subsystem": "alpc",
+      "is_raw_asm": false,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ZwClose": {
+      "rva": 1441792,
+      "size": 31,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ZwOpenKey": {
+      "rva": 1441888,
+      "size": 31,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ZwQueryValueKey": {
+      "rva": 1442048,
+      "size": 31,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ZwCreateFile": {
+      "rva": 1444032,
+      "size": 31,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ZwReadFile": {
+      "rva": 1441504,
+      "size": 31,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ZwWriteFile": {
+      "rva": 1441568,
+      "size": 31,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ZwAllocateVirtualMemory": {
+      "rva": 1442080,
+      "size": 31,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ZwFreeVirtualMemory": {
+      "rva": 1442272,
+      "size": 31,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ZwQuerySystemInformation": {
+      "rva": 1443040,
+      "size": 31,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    },
+    "ZwWaitForSingleObject": {
+      "rva": 1441440,
+      "size": 31,
+      "subsystem": "zw_nt",
+      "is_raw_asm": true,
+      "is_exported": true,
+      "patch_prologue": true
+    }
+  },
+  "external_symbols": {
+    "AlpcpDereferenceBlobEx": {
+      "rva": 5237876,
+      "kind": "pdb"
+    },
+    "AlpcpSendMessage": {
+      "rva": 5247856,
+      "kind": "pdb"
+    },
+    "AlpcpUnlockBlob": {
+      "rva": 5247024,
+      "kind": "pdb"
+    },
+    "CcCopyWriteEx": {
+      "rva": 830720,
+      "kind": "pdb"
+    },
+    "CcFlushCachePriv": {
+      "rva": 384480,
+      "kind": "pdb"
+    },
+    "CcForEachPartition": {
+      "rva": 1062000,
+      "kind": "pdb"
+    },
+    "CcMdlReadComplete2": {
+      "rva": 5664432,
+      "kind": "pdb"
+    },
+    "CcNotifyWriteBehindInternal": {
+      "rva": 1095948,
+      "kind": "pdb"
+    },
+    "CmFreezeThawTimeoutInSeconds": {
+      "rva": 3476060,
+      "kind": "pdb"
+    },
+    "CmpDelayDerefKCBTimer": {
+      "rva": 3665888,
+      "kind": "pdb"
+    },
+    "CmpFindNameInList": {
+      "rva": 5109264,
+      "kind": "pdb"
+    },
+    "CmpFreezeListLock": {
+      "rva": 3665488,
+      "kind": "pdb"
+    },
+    "CmpFreezeThawWaitListHead": {
+      "rva": 3665472,
+      "kind": "pdb"
+    },
+    "CmpGlobalFlushControlFlags": {
+      "rva": 3665464,
+      "kind": "pdb"
+    },
+    "CmpGlobalQuota": {
+      "rva": 8298608,
+      "kind": "pdb"
+    },
+    "CmpGlobalQuotaAllowed": {
+      "rva": 8298984,
+      "kind": "pdb"
+    },
+    "CmpMiniNTBoot": {
+      "rva": 8298523,
+      "kind": "pdb"
+    },
+    "Crc32Ctrl": {
+      "rva": 2816040,
+      "kind": "pdb"
+    },
+    "EtwWriteEx": {
+      "rva": 414704,
+      "kind": "pdb"
+    },
+    "EtwpTraceMessageVa": {
+      "rva": 427904,
+      "kind": "pdb"
+    },
+    "ExAcquirePushLockExclusiveEx": {
+      "rva": 785360,
+      "kind": "pdb"
+    },
+    "ExAcquireResourceSharedLite": {
+      "rva": 802576,
+      "kind": "pdb"
+    },
+    "ExAcquireSharedWaitForExclusive": {
+      "rva": 1204624,
+      "kind": "pdb"
+    },
+    "ExAllocateTimerInternal2": {
+      "rva": 1158544,
+      "kind": "pdb"
+    },
+    "ExCbPowerState": {
+      "rva": 3498080,
+      "kind": "pdb"
+    },
+    "ExFreePoolWithTag": {
+      "rva": 2778208,
+      "kind": "pdb"
+    },
+    "ExNotifyCallback": {
+      "rva": 315088,
+      "kind": "pdb"
+    },
+    "ExQueueWorkItemFromIo": {
+      "rva": 254700,
+      "kind": "pdb"
+    },
+    "ExRaiseHardError": {
+      "rva": 7689584,
+      "kind": "pdb"
+    },
+    "ExpManufacturingInformation": {
+      "rva": 3499552,
+      "kind": "pdb"
+    },
+    "ExpRealTimeIsUniversal": {
+      "rva": 3781368,
+      "kind": "pdb"
+    },
+    "ExpTimeZoneBias": {
+      "rva": 3499128,
+      "kind": "pdb"
+    },
+    "ExpTryQueueWorkItem": {
+      "rva": 249324,
+      "kind": "pdb"
+    },
+    "FltMgrCallbacks": {
+      "rva": 3778656,
+      "kind": "pdb"
+    },
+    "FsRtlAddLargeMcbEntry": {
+      "rva": 1002656,
+      "kind": "pdb"
+    },
+    "FsRtlPagingIoResourceSelector": {
+      "rva": 8299200,
+      "kind": "pdb"
+    },
+    "FsRtlPagingIoResources": {
+      "rva": 3663976,
+      "kind": "pdb"
+    },
+    "FsRtlPrivateFastUnlockAll": {
+      "rva": 1008276,
+      "kind": "pdb"
+    },
+    "FsRtlpVolumeStartupApplicationsComplete": {
+      "rva": 8298578,
+      "kind": "pdb"
+    },
+    "HvlpFlags": {
+      "rva": 4165836,
+      "kind": "pdb"
+    },
+    "HvlpHypercallCodeVa": {
+      "rva": 4261960,
+      "kind": "pdb"
+    },
+    "HvlpLogicalProcessorCount": {
+      "rva": 4165984,
+      "kind": "pdb"
+    },
+    "IoPropagateIrpExtensionEx": {
+      "rva": 964368,
+      "kind": "pdb"
+    },
+    "IopQueryXxxInformation": {
+      "rva": 5144112,
+      "kind": "pdb"
+    },
+    "IopQueueWorkItemProlog": {
+      "rva": 327980,
+      "kind": "pdb"
+    },
+    "KdDebugDevice": {
+      "rva": 3636336,
+      "kind": "pdb"
+    },
+    "KdDebuggerNotPresent": {
+      "rva": 3577354,
+      "kind": "pdb"
+    },
+    "KdEnterDebugger": {
+      "rva": 7920748,
+      "kind": "pdb"
+    },
+    "KdEventLoggingPresent": {
+      "rva": 3636416,
+      "kind": "pdb"
+    },
+    "KdExitDebugger": {
+      "rva": 7921012,
+      "kind": "pdb"
+    },
+    "KdPitchDebugger": {
+      "rva": 3466697,
+      "kind": "pdb"
+    },
+    "KdpPrintString": {
+      "rva": 7933800,
+      "kind": "pdb"
+    },
+    "KeActiveProcessors": {
+      "rva": 4166624,
+      "kind": "pdb"
+    },
+    "KeBugCheckEx": {
+      "rva": 1456080,
+      "kind": "pdb"
+    },
+    "KeCopyAffinityEx": {
+      "rva": 473376,
+      "kind": "pdb"
+    },
+    "KeExpandKernelStackAndCalloutInternal": {
+      "rva": 839136,
+      "kind": "pdb"
+    },
+    "KeForceGroupAwareness": {
+      "rva": 4165924,
+      "kind": "pdb"
+    },
+    "KeLargestCacheLine": {
+      "rva": 4161724,
+      "kind": "pdb"
+    },
+    "KeLeaveCriticalRegion": {
+      "rva": 788336,
+      "kind": "pdb"
+    },
+    "KeMaximumIncrement": {
+      "rva": 4165848,
+      "kind": "pdb"
+    },
+    "KeMinimumIncrement": {
+      "rva": 4166104,
+      "kind": "pdb"
+    },
+    "KeNumberNodes": {
+      "rva": 4161536,
+      "kind": "pdb"
+    },
+    "KeNumberProcessors": {
+      "rva": 4165828,
+      "kind": "pdb"
+    },
+    "KeQueryActiveProcessorCountEx": {
+      "rva": 707504,
+      "kind": "pdb"
+    },
+    "KeSetTargetProcessorDpcEx": {
+      "rva": 1105344,
+      "kind": "pdb"
+    },
+    "KeSetTimer2": {
+      "rva": 363568,
+      "kind": "pdb"
+    },
+    "KeTimeIncrement": {
+      "rva": 4165904,
+      "kind": "pdb"
+    },
+    "KeWaitForSingleObject": {
+      "rva": 522208,
+      "kind": "pdb"
+    },
+    "KiActiveGroups": {
+      "rva": 4161556,
+      "kind": "pdb"
+    },
+    "KiClockStats": {
+      "rva": 3574784,
+      "kind": "pdb"
+    },
+    "KiClockTimerOwner": {
+      "rva": 3574880,
+      "kind": "pdb"
+    },
+    "KiDefaultHeteroCpuPolicy": {
+      "rva": 4161660,
+      "kind": "pdb"
+    },
+    "KiInitialProcess": {
+      "rva": 4270912,
+      "kind": "pdb"
+    },
+    "KiInsertQueueDpc": {
+      "rva": 436048,
+      "kind": "pdb"
+    },
+    "KiLastBranchRecordInUse": {
+      "rva": 3574728,
+      "kind": "pdb"
+    },
+    "KiLastRequestedTimeIncrement": {
+      "rva": 3574896,
+      "kind": "pdb"
+    },
+    "KiMaximumGroups": {
+      "rva": 4161560,
+      "kind": "pdb"
+    },
+    "KiNxForceEnable": {
+      "rva": 3677738,
+      "kind": "pdb"
+    },
+    "KiProcessorBlock": {
+      "rva": 4171904,
+      "kind": "pdb"
+    },
+    "KiProcessorIndexToNumberMappingTable": {
+      "rva": 4185232,
+      "kind": "pdb"
+    },
+    "KiProfileIrql": {
+      "rva": 4161600,
+      "kind": "pdb"
+    },
+    "KiSetHeteroPolicyThread": {
+      "rva": 1270456,
+      "kind": "pdb"
+    },
+    "KiSetTimerEx": {
+      "rva": 227632,
+      "kind": "pdb"
+    },
+    "KiSystemFullyCoherent": {
+      "rva": 3474488,
+      "kind": "pdb"
+    },
+    "LdrpSearchResourceSection_U": {
+      "rva": 5058844,
+      "kind": "pdb"
+    },
+    "MiAddPhysicalMemoryChunks": {
+      "rva": 7170840,
+      "kind": "pdb"
+    },
+    "MiAllocateContiguousMemory": {
+      "rva": 1048568,
+      "kind": "pdb"
+    },
+    "MiAllocatePagesForMdl": {
+      "rva": 894220,
+      "kind": "pdb"
+    },
+    "MiFreePagesFromMdl": {
+      "rva": 188356,
+      "kind": "pdb"
+    },
+    "MiIsAddressValid": {
+      "rva": 702112,
+      "kind": "pdb"
+    },
+    "MiMapViewInSystemSpace": {
+      "rva": 4867492,
+      "kind": "pdb"
+    },
+    "MiProbeAndLockPages": {
+      "rva": 353760,
+      "kind": "pdb"
+    },
+    "MiSystemPartition": {
+      "rva": 3677760,
+      "kind": "pdb"
+    },
+    "MiUnloadSystemImage": {
+      "rva": 5530404,
+      "kind": "pdb"
+    },
+    "MmAcquireLoadLock": {
+      "rva": 5530336,
+      "kind": "pdb"
+    },
+    "MmLoadSystemImageEx": {
+      "rva": 5526248,
+      "kind": "pdb"
+    },
+    "MmReleaseLoadLock": {
+      "rva": 5530272,
+      "kind": "pdb"
+    },
+    "MmVerifierData": {
+      "rva": 3547136,
+      "kind": "pdb"
+    },
+    "NlsAnsiCodePage": {
+      "rva": 8301496,
+      "kind": "pdb"
+    },
+    "NlsOemCodePage": {
+      "rva": 8301436,
+      "kind": "pdb"
+    },
+    "NtGlobalFlag": {
+      "rva": 3667360,
+      "kind": "pdb"
+    },
+    "NtOpenProcessTokenEx": {
+      "rva": 5363504,
+      "kind": "pdb"
+    },
+    "NtOpenThreadTokenEx": {
+      "rva": 5358224,
+      "kind": "pdb"
+    },
+    "ObCreateObjectTypeEx": {
+      "rva": 5923276,
+      "kind": "pdb"
+    },
+    "ObDereferenceSecurityDescriptor": {
+      "rva": 5150112,
+      "kind": "pdb"
+    },
+    "ObHeaderCookie": {
+      "rva": 4166464,
+      "kind": "pdb"
+    },
+    "ObMakeTemporaryObject": {
+      "rva": 4973824,
+      "kind": "pdb"
+    },
+    "ObTypeIndexTable": {
+      "rva": 4167968,
+      "kind": "pdb"
+    },
+    "ObfDereferenceObjectWithTag": {
+      "rva": 792256,
+      "kind": "pdb"
+    },
+    "ObfReferenceObject": {
+      "rva": 787408,
+      "kind": "pdb"
+    },
+    "ObfReferenceObjectWithTag": {
+      "rva": 330640,
+      "kind": "pdb"
+    },
+    "ObpInfoMaskToOffset": {
+      "rva": 3545600,
+      "kind": "pdb"
+    },
+    "ObpIsKernelHandle": {
+      "rva": 755200,
+      "kind": "pdb"
+    },
+    "ObpLookupDirectoryEntryEx": {
+      "rva": 5586016,
+      "kind": "pdb"
+    },
+    "PoFxIssueComponentPerfStateChangeMultiple": {
+      "rva": 2314224,
+      "kind": "pdb"
+    },
+    "PopAcquireRwLockExclusive": {
+      "rva": 279572,
+      "kind": "pdb"
+    },
+    "PopBsdShutdownInProgress": {
+      "rva": 3800400,
+      "kind": "pdb"
+    },
+    "PopEnergyEstimationEnabled": {
+      "rva": 3535664,
+      "kind": "pdb"
+    },
+    "PopFixedWakeSourceMask": {
+      "rva": 3532480,
+      "kind": "pdb"
+    },
+    "PopHandleConvergedPowerRequestUpdate": {
+      "rva": 4953160,
+      "kind": "pdb"
+    },
+    "PopReleaseRwLock": {
+      "rva": 280044,
+      "kind": "pdb"
+    },
+    "PopTelemetryOsState": {
+      "rva": 3525952,
+      "kind": "pdb"
+    },
+    "PopTransitionLock": {
+      "rva": 3526336,
+      "kind": "pdb"
+    },
+    "PpmIntSteerTriggerMax": {
+      "rva": 3466784,
+      "kind": "pdb"
+    },
+    "PsBoostThreadIoEx": {
+      "rva": 782272,
+      "kind": "pdb"
+    },
+    "PsDisableDiskCounters": {
+      "rva": 4166424,
+      "kind": "pdb"
+    },
+    "PspLegoNotifyRoutine": {
+      "rva": 8299120,
+      "kind": "pdb"
+    },
+    "PspSystemPartition": {
+      "rva": 4166504,
+      "kind": "pdb"
+    },
+    "RtlCheckTokenMembershipEx": {
+      "rva": 152368,
+      "kind": "pdb"
+    },
+    "RtlFindNextForwardRunClearCapped": {
+      "rva": 238000,
+      "kind": "pdb"
+    },
+    "RtlFindNextForwardRunClearCappedEx": {
+      "rva": 238864,
+      "kind": "pdb"
+    },
+    "RtlHashUnicodeString": {
+      "rva": 4722816,
+      "kind": "pdb"
+    },
+    "RtlpAddKnownAce": {
+      "rva": 5169712,
+      "kind": "pdb"
+    },
+    "RtlpComputeCrcInternal": {
+      "rva": 1023008,
+      "kind": "pdb"
+    },
+    "RtlpCreateHashTable": {
+      "rva": 1054944,
+      "kind": "pdb"
+    },
+    "RtlpGetTokenNamedObjectPath": {
+      "rva": 7442248,
+      "kind": "pdb"
+    },
+    "RtlpOpenImageFileOptionsKeyEx": {
+      "rva": 5647444,
+      "kind": "pdb"
+    },
+    "RtlpSetSecurityObject": {
+      "rva": 5162208,
+      "kind": "pdb"
+    },
+    "RtlpSystemBootStatusRequest": {
+      "rva": 5851892,
+      "kind": "pdb"
+    },
+    "SeAliasAdminsSid": {
+      "rva": 8301272,
+      "kind": "pdb"
+    },
+    "SeComputeAutoInheritByObjectTypeEx": {
+      "rva": 342000,
+      "kind": "pdb"
+    },
+    "SeReportSecurityEventWithSubCategory": {
+      "rva": 168304,
+      "kind": "pdb"
+    },
+    "SepAdjustAccessStateForConstraints": {
+      "rva": 6080996,
+      "kind": "pdb"
+    },
+    "SepCreateAccessStateFromSubjectContext": {
+      "rva": 780352,
+      "kind": "pdb"
+    },
+    "SepInternalSetSecurityAttributesToken": {
+      "rva": 2447108,
+      "kind": "pdb"
+    },
+    "SepSidInToken": {
+      "rva": 144048,
+      "kind": "pdb"
+    },
+    "ViVerifierDriverAddedThunkListHead": {
+      "rva": 3512784,
+      "kind": "pdb"
+    },
+    "WheaDrsDpc": {
+      "rva": 3484864,
+      "kind": "pdb"
+    },
+    "WheaPendingDrsInterrupt": {
+      "rva": 3800720,
+      "kind": "pdb"
+    },
+    "__nt_asm_ext_140013438": {
+      "rva": 78904,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14001db90": {
+      "rva": 121744,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140032134": {
+      "rva": 205108,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400322dc": {
+      "rva": 205532,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140032380": {
+      "rva": 205696,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140032590": {
+      "rva": 206224,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140032820": {
+      "rva": 206880,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140036930": {
+      "rva": 223536,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140058ba0": {
+      "rva": 363424,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14005a040": {
+      "rva": 368704,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14005a1c0": {
+      "rva": 369088,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14005f170": {
+      "rva": 389488,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14005ffd0": {
+      "rva": 393168,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140060750": {
+      "rva": 395088,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400622a0": {
+      "rva": 402080,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400665c4": {
+      "rva": 419268,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140068fa0": {
+      "rva": 429984,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140084d90": {
+      "rva": 544144,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400879b0": {
+      "rva": 555440,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400a52d0": {
+      "rva": 676560,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400b4e70": {
+      "rva": 740976,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400b9e20": {
+      "rva": 761376,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400bd9c0": {
+      "rva": 776640,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400bff30": {
+      "rva": 786224,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400c0420": {
+      "rva": 787488,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400c04f0": {
+      "rva": 787696,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400c0930": {
+      "rva": 788784,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400c0e60": {
+      "rva": 790112,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400c4010": {
+      "rva": 802832,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400c45a0": {
+      "rva": 804256,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400ca260": {
+      "rva": 828000,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1400fe28c": {
+      "rva": 1041036,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1401266b0": {
+      "rva": 1205936,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140126eb8": {
+      "rva": 1207992,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140126f10": {
+      "rva": 1208080,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140127404": {
+      "rva": 1209348,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140127ba8": {
+      "rva": 1211304,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1401637d0": {
+      "rva": 1456080,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140163ca0": {
+      "rva": 1457312,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140163d20": {
+      "rva": 1457440,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140164530": {
+      "rva": 1459504,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1401668d0": {
+      "rva": 1468624,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140166a40": {
+      "rva": 1468992,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140166eb0": {
+      "rva": 1470128,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14016e900": {
+      "rva": 1501440,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14016f080": {
+      "rva": 1503360,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14016fa40": {
+      "rva": 1505856,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14016fcc0": {
+      "rva": 1506496,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140170180": {
+      "rva": 1507712,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1401fbe54": {
+      "rva": 2080340,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1401fe10c": {
+      "rva": 2089228,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1401fe1d8": {
+      "rva": 2089432,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140201a60": {
+      "rva": 2103904,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1402728fc": {
+      "rva": 2566396,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140272d0c": {
+      "rva": 2567436,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140275690": {
+      "rva": 2578064,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140275710": {
+      "rva": 2578192,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14027d9fc": {
+      "rva": 2611708,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14027db74": {
+      "rva": 2612084,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14027dba0": {
+      "rva": 2612128,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_1402a6460": {
+      "rva": 2778208,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14041b3d0": {
+      "rva": 4305872,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14041cad0": {
+      "rva": 4311760,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14041e460": {
+      "rva": 4318304,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140513cd0": {
+      "rva": 5323984,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_140710720": {
+      "rva": 7407392,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_ext_14078d140": {
+      "rva": 7917888,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_140166a60": {
+      "rva": 1469024,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_140169d10": {
+      "rva": 1482000,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_140169d60": {
+      "rva": 1482080,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1402c1210": {
+      "rva": 2888208,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_140350ba0": {
+      "rva": 3476384,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_140350ba8": {
+      "rva": 3476392,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_140353370": {
+      "rva": 3486576,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_14037fe80": {
+      "rva": 3669632,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_14037ff80": {
+      "rva": 3669888,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403808b0": {
+      "rva": 3672240,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_140381e40": {
+      "rva": 3677760,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5440": {
+      "rva": 4150336,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5448": {
+      "rva": 4150344,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5450": {
+      "rva": 4150352,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5458": {
+      "rva": 4150360,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5460": {
+      "rva": 4150368,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5468": {
+      "rva": 4150376,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5470": {
+      "rva": 4150384,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5478": {
+      "rva": 4150392,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5480": {
+      "rva": 4150400,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5488": {
+      "rva": 4150408,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5490": {
+      "rva": 4150416,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5498": {
+      "rva": 4150424,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f54a0": {
+      "rva": 4150432,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f54a8": {
+      "rva": 4150440,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f54b0": {
+      "rva": 4150448,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f54b8": {
+      "rva": 4150456,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f54c0": {
+      "rva": 4150464,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f54c8": {
+      "rva": 4150472,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f54d0": {
+      "rva": 4150480,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f54d8": {
+      "rva": 4150488,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f54e0": {
+      "rva": 4150496,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f54e8": {
+      "rva": 4150504,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f54f0": {
+      "rva": 4150512,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f54f8": {
+      "rva": 4150520,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5500": {
+      "rva": 4150528,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5508": {
+      "rva": 4150536,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5510": {
+      "rva": 4150544,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5518": {
+      "rva": 4150552,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5520": {
+      "rva": 4150560,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5528": {
+      "rva": 4150568,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5530": {
+      "rva": 4150576,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5538": {
+      "rva": 4150584,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5540": {
+      "rva": 4150592,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5548": {
+      "rva": 4150600,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5550": {
+      "rva": 4150608,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5558": {
+      "rva": 4150616,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5560": {
+      "rva": 4150624,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5568": {
+      "rva": 4150632,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5570": {
+      "rva": 4150640,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5578": {
+      "rva": 4150648,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5580": {
+      "rva": 4150656,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5588": {
+      "rva": 4150664,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5590": {
+      "rva": 4150672,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5598": {
+      "rva": 4150680,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f55a0": {
+      "rva": 4150688,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f55a8": {
+      "rva": 4150696,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f55b0": {
+      "rva": 4150704,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f55b8": {
+      "rva": 4150712,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f55d8": {
+      "rva": 4150744,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f55e0": {
+      "rva": 4150752,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f55e8": {
+      "rva": 4150760,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f55f0": {
+      "rva": 4150768,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f55f8": {
+      "rva": 4150776,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5600": {
+      "rva": 4150784,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5618": {
+      "rva": 4150808,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5620": {
+      "rva": 4150816,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5628": {
+      "rva": 4150824,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5630": {
+      "rva": 4150832,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5640": {
+      "rva": 4150848,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5648": {
+      "rva": 4150856,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5650": {
+      "rva": 4150864,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5658": {
+      "rva": 4150872,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5660": {
+      "rva": 4150880,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5668": {
+      "rva": 4150888,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5670": {
+      "rva": 4150896,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5678": {
+      "rva": 4150904,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5680": {
+      "rva": 4150912,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5688": {
+      "rva": 4150920,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5690": {
+      "rva": 4150928,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5698": {
+      "rva": 4150936,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5778": {
+      "rva": 4151160,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f5780": {
+      "rva": 4151168,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f8068": {
+      "rva": 4161640,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f90c8": {
+      "rva": 4165832,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f9130": {
+      "rva": 4165936,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f9144": {
+      "rva": 4165956,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f9146": {
+      "rva": 4165958,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f9148": {
+      "rva": 4165960,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f9288": {
+      "rva": 4166280,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f96c0": {
+      "rva": 4167360,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f96e0": {
+      "rva": 4167392,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_1403f9700": {
+      "rva": 4167424,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_140410880": {
+      "rva": 4262016,
+      "kind": "va_encoded"
+    },
+    "__nt_asm_sym_140411280": {
+      "rva": 4264576,
+      "kind": "va_encoded"
+    },
+    "__nt_data_14034b150": {
+      "rva": 3453264,
+      "kind": "va_encoded"
+    },
+    "__nt_data_14034e510": {
+      "rva": 3466512,
+      "kind": "va_encoded"
+    },
+    "__nt_data_140356610": {
+      "rva": 3499536,
+      "kind": "va_encoded"
+    },
+    "__nt_data_140356618": {
+      "rva": 3499544,
+      "kind": "va_encoded"
+    },
+    "__nt_data_14035cd88": {
+      "rva": 3526024,
+      "kind": "va_encoded"
+    },
+    "__nt_data_14037ee48": {
+      "rva": 3665480,
+      "kind": "va_encoded"
+    },
+    "__nt_data_14037f728": {
+      "rva": 3667752,
+      "kind": "va_encoded"
+    },
+    "__nt_data_14037f730": {
+      "rva": 3667760,
+      "kind": "va_encoded"
+    },
+    "__nt_data_140380458": {
+      "rva": 3671128,
+      "kind": "va_encoded"
+    },
+    "__nt_data_1403f8130": {
+      "rva": 4161840,
+      "kind": "va_encoded"
+    },
+    "__nt_data_1403f93e8": {
+      "rva": 4166632,
+      "kind": "va_encoded"
+    },
+    "__nt_rodata_14013f350": {
+      "rva": 1307472,
+      "kind": "va_encoded"
+    },
+    "__nt_rodata_1401702f0": {
+      "rva": 1508080,
+      "kind": "va_encoded"
+    },
+    "__nt_rodata_1401715d0": {
+      "rva": 1512912,
+      "kind": "va_encoded"
+    },
+    "__nt_rodata_1401da7a0": {
+      "rva": 1943456,
+      "kind": "va_encoded"
+    },
+    "__nt_rodata_1403802b8": {
+      "rva": 3670712,
+      "kind": "va_encoded"
+    },
+    "__nt_rodata_1403f93e8": {
+      "rva": 4166632,
+      "kind": "va_encoded"
+    },
+    "__nt_rodata_1407835d0": {
+      "rva": 7878096,
+      "kind": "va_encoded"
+    },
+    "__nt_rodata_1407ea710": {
+      "rva": 8300304,
+      "kind": "va_encoded"
+    },
+    "_vsprintf_l": {
+      "rva": 1330500,
+      "kind": "pdb"
+    },
+    "memset": {
+      "rva": 1507712,
+      "kind": "pdb"
+    },
+    "pFsRtlpMupCalls": {
+      "rva": 8298856,
+      "kind": "pdb"
+    },
+    "vDbgPrintExWithPrefixInternal": {
+      "rva": 288496,
+      "kind": "pdb"
+    },
+    "vsprintf_s": {
+      "rva": 1347856,
+      "kind": "pdb"
+    },
+    "vswprintf_s": {
+      "rva": 1342992,
+      "kind": "pdb"
+    }
+  },
+  "unresolved": []
+}

@@ -1,13 +1,12 @@
 /*
  * Live x86-64 CPU Silicon Execution Harness (`make test-silicon`)
  * Binds the physical x86-64 CPU `GS.base` segment register to our PDB-reconstructed
- * `_KPCR` via `ARCH_SET_GS` and executes all 8 decompiled Windows NT 10.0.16299.15
+ * `_KPCR` via `ARCH_SET_GS` and executes all 16 decompiled Windows NT 10.0.16299.15
  * kernel subsystems (`ms_abi`, `gs:[0x188]`, `gs:[0x20]`, `lock cmpxchg16b`, `repe cmpsq`)
  * natively on real hardware.
  */
 #define _GNU_SOURCE
 #include <stdint.h>
-#include <stdio.h>
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <asm/prctl.h>
@@ -24,7 +23,8 @@ int main(void) {
 
     /* Bind physical CPU GS.base to reconstructed _KPCR so real `mov rax, gs:[0x188]` works! */
     if (syscall(SYS_arch_prctl, ARCH_SET_GS, (unsigned long)(uintptr_t)&g_host_kpcr) != 0) {
-        perror("arch_prctl(ARCH_SET_GS) failed");
+        const char msg[] = "arch_prctl(ARCH_SET_GS) failed\n";
+        (void)write(2, msg, sizeof(msg) - 1);
         return 2;
     }
 

@@ -64,6 +64,7 @@ static inline void nt_write_cr8(uint64_t v) {
 void NTAPI NtConsoleInitSerial(void);
 void NTAPI NtConsoleInitVgaText(void);
 void NTAPI NtConsoleBindUefiConOut(void *con_out);
+void NTAPI NtConsoleBindBootvid(void (NTAPI *display_str_fn)(const char *));
 void NTAPI NtConsoleBindGopFramebuffer(uint32_t *fb_base, uint32_t width, uint32_t height, uint32_t pitch);
 void NTAPI NtConsolePutChar(char c);
 void NTAPI NtConsoleWrite(const char *s);

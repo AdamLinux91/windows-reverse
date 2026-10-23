@@ -37,13 +37,28 @@ static inline uint64_t __ntrev_readgsqword(uint32_t offset) {
     return val;
 }
 
-struct _LIST_ENTRY;
-typedef struct _LIST_ENTRY LIST_ENTRY;
-typedef struct _LIST_ENTRY* PLIST_ENTRY;
+struct _ANON_TAG_1411;
+struct _ANON_TAG_147d;
 struct _ANON_TAG_1117;
 union _LARGE_INTEGER;
 typedef union _LARGE_INTEGER LARGE_INTEGER;
 typedef union _LARGE_INTEGER* PLARGE_INTEGER;
+struct _ANON_TAG_1ba4;
+struct _GENERIC_MAPPING;
+typedef struct _GENERIC_MAPPING GENERIC_MAPPING;
+typedef struct _GENERIC_MAPPING* PGENERIC_MAPPING;
+struct _GUID;
+typedef struct _GUID GUID;
+typedef struct _GUID* PGUID;
+struct _ACCESS_REASONS;
+typedef struct _ACCESS_REASONS ACCESS_REASONS;
+typedef struct _ACCESS_REASONS* PACCESS_REASONS;
+struct _AUX_ACCESS_DATA;
+typedef struct _AUX_ACCESS_DATA AUX_ACCESS_DATA;
+typedef struct _AUX_ACCESS_DATA* PAUX_ACCESS_DATA;
+struct _LIST_ENTRY;
+typedef struct _LIST_ENTRY LIST_ENTRY;
+typedef struct _LIST_ENTRY* PLIST_ENTRY;
 struct _CM_PATH_HASH;
 typedef struct _CM_PATH_HASH CM_PATH_HASH;
 typedef struct _CM_PATH_HASH* PCM_PATH_HASH;
@@ -116,6 +131,19 @@ typedef struct _RTL_AVL_TREE* PRTL_AVL_TREE;
 struct _SE_AUDIT_PROCESS_CREATION_INFO;
 typedef struct _SE_AUDIT_PROCESS_CREATION_INFO SE_AUDIT_PROCESS_CREATION_INFO;
 typedef struct _SE_AUDIT_PROCESS_CREATION_INFO* PSE_AUDIT_PROCESS_CREATION_INFO;
+union _ANON_TAG_25c8;
+struct _MMSUPPORT_FLAGS;
+typedef struct _MMSUPPORT_FLAGS MMSUPPORT_FLAGS;
+typedef struct _MMSUPPORT_FLAGS* PMMSUPPORT_FLAGS;
+struct _MMSUPPORT_INSTANCE;
+typedef struct _MMSUPPORT_INSTANCE MMSUPPORT_INSTANCE;
+typedef struct _MMSUPPORT_INSTANCE* PMMSUPPORT_INSTANCE;
+struct _MMSUPPORT_SHARED;
+typedef struct _MMSUPPORT_SHARED MMSUPPORT_SHARED;
+typedef struct _MMSUPPORT_SHARED* PMMSUPPORT_SHARED;
+struct _MMSUPPORT_FULL;
+typedef struct _MMSUPPORT_FULL MMSUPPORT_FULL;
+typedef struct _MMSUPPORT_FULL* PMMSUPPORT_FULL;
 struct _ALPC_PROCESS_CONTEXT;
 typedef struct _ALPC_PROCESS_CONTEXT ALPC_PROCESS_CONTEXT;
 typedef struct _ALPC_PROCESS_CONTEXT* PALPC_PROCESS_CONTEXT;
@@ -194,6 +222,42 @@ typedef struct _PS_PROPERTY_SET* PPS_PROPERTY_SET;
 struct _ETHREAD;
 typedef struct _ETHREAD ETHREAD;
 typedef struct _ETHREAD* PETHREAD;
+struct _EXT_SET_PARAMETERS_V0;
+typedef struct _EXT_SET_PARAMETERS_V0 EXT_SET_PARAMETERS_V0;
+typedef struct _EXT_SET_PARAMETERS_V0* PEXT_SET_PARAMETERS_V0;
+struct _UNICODE_STRING;
+typedef struct _UNICODE_STRING UNICODE_STRING;
+typedef struct _UNICODE_STRING* PUNICODE_STRING;
+struct _FILE_OBJECT;
+typedef struct _FILE_OBJECT FILE_OBJECT;
+typedef struct _FILE_OBJECT* PFILE_OBJECT;
+struct _RTL_BITMAP;
+typedef struct _RTL_BITMAP RTL_BITMAP;
+typedef struct _RTL_BITMAP* PRTL_BITMAP;
+struct _HVIEW_MAP_PIN_LOG_ENTRY;
+typedef struct _HVIEW_MAP_PIN_LOG_ENTRY HVIEW_MAP_PIN_LOG_ENTRY;
+typedef struct _HVIEW_MAP_PIN_LOG_ENTRY* PHVIEW_MAP_PIN_LOG_ENTRY;
+struct _HVIEW_MAP_PIN_LOG;
+typedef struct _HVIEW_MAP_PIN_LOG HVIEW_MAP_PIN_LOG;
+typedef struct _HVIEW_MAP_PIN_LOG* PHVIEW_MAP_PIN_LOG;
+struct _HVIEW_MAP;
+typedef struct _HVIEW_MAP HVIEW_MAP;
+typedef struct _HVIEW_MAP* PHVIEW_MAP;
+struct _FREE_DISPLAY;
+typedef struct _FREE_DISPLAY FREE_DISPLAY;
+typedef struct _FREE_DISPLAY* PFREE_DISPLAY;
+struct _DUAL;
+typedef struct _DUAL DUAL;
+typedef struct _DUAL* PDUAL;
+struct _HHIVE;
+typedef struct _HHIVE HHIVE;
+typedef struct _HHIVE* PHHIVE;
+struct _IOV_IRP_TRACE;
+typedef struct _IOV_IRP_TRACE IOV_IRP_TRACE;
+typedef struct _IOV_IRP_TRACE* PIOV_IRP_TRACE;
+struct _IO_MINI_COMPLETION_PACKET_USER;
+typedef struct _IO_MINI_COMPLETION_PACKET_USER IO_MINI_COMPLETION_PACKET_USER;
+typedef struct _IO_MINI_COMPLETION_PACKET_USER* PIO_MINI_COMPLETION_PACKET_USER;
 union _ANON_TAG_13f7;
 struct _IO_STATUS_BLOCK;
 typedef struct _IO_STATUS_BLOCK IO_STATUS_BLOCK;
@@ -205,10 +269,37 @@ union _ANON_TAG_140a;
 struct _IRP;
 typedef struct _IRP IRP;
 typedef struct _IRP* PIRP;
+struct _flags;
+typedef struct _flags flags;
+typedef struct _flags* Pflags;
+struct _KHETERO_PROCESSOR_SET;
+typedef struct _KHETERO_PROCESSOR_SET KHETERO_PROCESSOR_SET;
+typedef struct _KHETERO_PROCESSOR_SET* PKHETERO_PROCESSOR_SET;
+struct _KNODE;
+typedef struct _KNODE KNODE;
+typedef struct _KNODE* PKNODE;
 struct _ANON_TAG_1293;
 union _SLIST_HEADER;
 typedef union _SLIST_HEADER SLIST_HEADER;
 typedef union _SLIST_HEADER* PSLIST_HEADER;
+struct _KDESCRIPTOR;
+typedef struct _KDESCRIPTOR KDESCRIPTOR;
+typedef struct _KDESCRIPTOR* PKDESCRIPTOR;
+struct _KSPECIAL_REGISTERS;
+typedef struct _KSPECIAL_REGISTERS KSPECIAL_REGISTERS;
+typedef struct _KSPECIAL_REGISTERS* PKSPECIAL_REGISTERS;
+struct _M128A;
+typedef struct _M128A M128A;
+typedef struct _M128A* PM128A;
+struct _XSAVE_FORMAT;
+typedef struct _XSAVE_FORMAT XSAVE_FORMAT;
+typedef struct _XSAVE_FORMAT* PXSAVE_FORMAT;
+struct _CONTEXT;
+typedef struct _CONTEXT CONTEXT;
+typedef struct _CONTEXT* PCONTEXT;
+struct _KPROCESSOR_STATE;
+typedef struct _KPROCESSOR_STATE KPROCESSOR_STATE;
+typedef struct _KPROCESSOR_STATE* PKPROCESSOR_STATE;
 struct _KSPIN_LOCK_QUEUE;
 typedef struct _KSPIN_LOCK_QUEUE KSPIN_LOCK_QUEUE;
 typedef struct _KSPIN_LOCK_QUEUE* PKSPIN_LOCK_QUEUE;
@@ -227,6 +318,24 @@ typedef struct _KDPC_DATA* PKDPC_DATA;
 struct _KGATE;
 typedef struct _KGATE KGATE;
 typedef struct _KGATE* PKGATE;
+struct _PROC_IDLE_POLICY;
+typedef struct _PROC_IDLE_POLICY PROC_IDLE_POLICY;
+typedef struct _PROC_IDLE_POLICY* PPROC_IDLE_POLICY;
+union _PPM_IDLE_SYNCHRONIZATION_STATE;
+typedef union _PPM_IDLE_SYNCHRONIZATION_STATE PPM_IDLE_SYNCHRONIZATION_STATE;
+typedef union _PPM_IDLE_SYNCHRONIZATION_STATE* PPPM_IDLE_SYNCHRONIZATION_STATE;
+struct _PROC_FEEDBACK;
+typedef struct _PROC_FEEDBACK PROC_FEEDBACK;
+typedef struct _PROC_FEEDBACK* PPROC_FEEDBACK;
+struct _PPM_FFH_THROTTLE_STATE_INFO;
+typedef struct _PPM_FFH_THROTTLE_STATE_INFO PPM_FFH_THROTTLE_STATE_INFO;
+typedef struct _PPM_FFH_THROTTLE_STATE_INFO* PPPM_FFH_THROTTLE_STATE_INFO;
+struct _PROC_IDLE_SNAP;
+typedef struct _PROC_IDLE_SNAP PROC_IDLE_SNAP;
+typedef struct _PROC_IDLE_SNAP* PPROC_IDLE_SNAP;
+struct _PROCESSOR_POWER_STATE;
+typedef struct _PROCESSOR_POWER_STATE PROCESSOR_POWER_STATE;
+typedef struct _PROCESSOR_POWER_STATE* PPROCESSOR_POWER_STATE;
 struct _CACHE_DESCRIPTOR;
 typedef struct _CACHE_DESCRIPTOR CACHE_DESCRIPTOR;
 typedef struct _CACHE_DESCRIPTOR* PCACHE_DESCRIPTOR;
@@ -236,12 +345,18 @@ typedef struct _SYNCH_COUNTERS* PSYNCH_COUNTERS;
 struct _FILESYSTEM_DISK_COUNTERS;
 typedef struct _FILESYSTEM_DISK_COUNTERS FILESYSTEM_DISK_COUNTERS;
 typedef struct _FILESYSTEM_DISK_COUNTERS* PFILESYSTEM_DISK_COUNTERS;
+struct _KENTROPY_TIMING_STATE;
+typedef struct _KENTROPY_TIMING_STATE KENTROPY_TIMING_STATE;
+typedef struct _KENTROPY_TIMING_STATE* PKENTROPY_TIMING_STATE;
 struct _IOP_IRP_STACK_PROFILER;
 typedef struct _IOP_IRP_STACK_PROFILER IOP_IRP_STACK_PROFILER;
 typedef struct _IOP_IRP_STACK_PROFILER* PIOP_IRP_STACK_PROFILER;
 struct _KSECURE_FAULT_INFORMATION;
 typedef struct _KSECURE_FAULT_INFORMATION KSECURE_FAULT_INFORMATION;
 typedef struct _KSECURE_FAULT_INFORMATION* PKSECURE_FAULT_INFORMATION;
+struct _KSHARED_READY_QUEUE;
+typedef struct _KSHARED_READY_QUEUE KSHARED_READY_QUEUE;
+typedef struct _KSHARED_READY_QUEUE* PKSHARED_READY_QUEUE;
 struct _KTIMER_EXPIRATION_TRACE;
 typedef struct _KTIMER_EXPIRATION_TRACE KTIMER_EXPIRATION_TRACE;
 typedef struct _KTIMER_EXPIRATION_TRACE* PKTIMER_EXPIRATION_TRACE;
@@ -260,42 +375,215 @@ typedef struct _NT_TIB* PNT_TIB;
 struct _KPCR;
 typedef struct _KPCR KPCR;
 typedef struct _KPCR* PKPCR;
+struct _DIRTY_PAGE_STATISTICS;
+typedef struct _DIRTY_PAGE_STATISTICS DIRTY_PAGE_STATISTICS;
+typedef struct _DIRTY_PAGE_STATISTICS* PDIRTY_PAGE_STATISTICS;
+struct _DIRTY_PAGE_THRESHOLDS;
+typedef struct _DIRTY_PAGE_THRESHOLDS DIRTY_PAGE_THRESHOLDS;
+typedef struct _DIRTY_PAGE_THRESHOLDS* PDIRTY_PAGE_THRESHOLDS;
+struct _LOG_HANDLE_CONTEXT;
+typedef struct _LOG_HANDLE_CONTEXT LOG_HANDLE_CONTEXT;
+typedef struct _LOG_HANDLE_CONTEXT* PLOG_HANDLE_CONTEXT;
 struct _LUID;
 typedef struct _LUID LUID;
 typedef struct _LUID* PLUID;
 struct _MDL;
 typedef struct _MDL MDL;
 typedef struct _MDL* PMDL;
+struct _MM_SESSION_SPACE_FLAGS;
+typedef struct _MM_SESSION_SPACE_FLAGS MM_SESSION_SPACE_FLAGS;
+typedef struct _MM_SESSION_SPACE_FLAGS* PMM_SESSION_SPACE_FLAGS;
+union _ANON_TAG_1fcc;
+struct _RTL_BITMAP_EX;
+typedef struct _RTL_BITMAP_EX RTL_BITMAP_EX;
+typedef struct _RTL_BITMAP_EX* PRTL_BITMAP_EX;
+struct _MM_PAGED_POOL_INFO;
+typedef struct _MM_PAGED_POOL_INFO MM_PAGED_POOL_INFO;
+typedef struct _MM_PAGED_POOL_INFO* PMM_PAGED_POOL_INFO;
+struct _GENERAL_LOOKASIDE;
+typedef struct _GENERAL_LOOKASIDE GENERAL_LOOKASIDE;
+typedef struct _GENERAL_LOOKASIDE* PGENERAL_LOOKASIDE;
+struct _MMSESSION;
+typedef struct _MMSESSION MMSESSION;
+typedef struct _MMSESSION* PMMSESSION;
+struct _MMWSL_INSTANCE;
+typedef struct _MMWSL_INSTANCE MMWSL_INSTANCE;
+typedef struct _MMWSL_INSTANCE* PMMWSL_INSTANCE;
+struct _MMSUPPORT_AGGREGATION;
+typedef struct _MMSUPPORT_AGGREGATION MMSUPPORT_AGGREGATION;
+typedef struct _MMSUPPORT_AGGREGATION* PMMSUPPORT_AGGREGATION;
+struct _MI_SESSION_DRIVER_UNLOAD;
+typedef struct _MI_SESSION_DRIVER_UNLOAD MI_SESSION_DRIVER_UNLOAD;
+typedef struct _MI_SESSION_DRIVER_UNLOAD* PMI_SESSION_DRIVER_UNLOAD;
+struct _MMPTE_HARDWARE;
+typedef struct _MMPTE_HARDWARE MMPTE_HARDWARE;
+typedef struct _MMPTE_HARDWARE* PMMPTE_HARDWARE;
+struct _HARDWARE_PTE;
+typedef struct _HARDWARE_PTE HARDWARE_PTE;
+typedef struct _HARDWARE_PTE* PHARDWARE_PTE;
+struct _MMPTE_PROTOTYPE;
+typedef struct _MMPTE_PROTOTYPE MMPTE_PROTOTYPE;
+typedef struct _MMPTE_PROTOTYPE* PMMPTE_PROTOTYPE;
+struct _MMPTE_SOFTWARE;
+typedef struct _MMPTE_SOFTWARE MMPTE_SOFTWARE;
+typedef struct _MMPTE_SOFTWARE* PMMPTE_SOFTWARE;
+struct _MMPTE_TIMESTAMP;
+typedef struct _MMPTE_TIMESTAMP MMPTE_TIMESTAMP;
+typedef struct _MMPTE_TIMESTAMP* PMMPTE_TIMESTAMP;
+struct _MMPTE_TRANSITION;
+typedef struct _MMPTE_TRANSITION MMPTE_TRANSITION;
+typedef struct _MMPTE_TRANSITION* PMMPTE_TRANSITION;
+struct _MMPTE_SUBSECTION;
+typedef struct _MMPTE_SUBSECTION MMPTE_SUBSECTION;
+typedef struct _MMPTE_SUBSECTION* PMMPTE_SUBSECTION;
+struct _MMPTE_LIST;
+typedef struct _MMPTE_LIST MMPTE_LIST;
+typedef struct _MMPTE_LIST* PMMPTE_LIST;
+union _ANON_TAG_16eb;
+struct _MMPTE;
+typedef struct _MMPTE MMPTE;
+typedef struct _MMPTE* PMMPTE;
+struct _MI_PTE_CHAIN_HEAD;
+typedef struct _MI_PTE_CHAIN_HEAD MI_PTE_CHAIN_HEAD;
+typedef struct _MI_PTE_CHAIN_HEAD* PMI_PTE_CHAIN_HEAD;
+struct _MI_SPECIAL_POOL;
+typedef struct _MI_SPECIAL_POOL MI_SPECIAL_POOL;
+typedef struct _MI_SPECIAL_POOL* PMI_SPECIAL_POOL;
+struct _MI_SYSTEM_PTE_TYPE;
+typedef struct _MI_SYSTEM_PTE_TYPE MI_SYSTEM_PTE_TYPE;
+typedef struct _MI_SYSTEM_PTE_TYPE* PMI_SYSTEM_PTE_TYPE;
+struct _MM_SESSION_SPACE;
+typedef struct _MM_SESSION_SPACE MM_SESSION_SPACE;
+typedef struct _MM_SESSION_SPACE* PMM_SESSION_SPACE;
 struct _QUAD;
 typedef struct _QUAD QUAD;
 typedef struct _QUAD* PQUAD;
 struct _OBJECT_HEADER;
 typedef struct _OBJECT_HEADER OBJECT_HEADER;
 typedef struct _OBJECT_HEADER* POBJECT_HEADER;
-struct _UNICODE_STRING;
-typedef struct _UNICODE_STRING UNICODE_STRING;
-typedef struct _UNICODE_STRING* PUNICODE_STRING;
-struct _GENERIC_MAPPING;
-typedef struct _GENERIC_MAPPING GENERIC_MAPPING;
-typedef struct _GENERIC_MAPPING* PGENERIC_MAPPING;
 struct _OBJECT_TYPE_INITIALIZER;
 typedef struct _OBJECT_TYPE_INITIALIZER OBJECT_TYPE_INITIALIZER;
 typedef struct _OBJECT_TYPE_INITIALIZER* POBJECT_TYPE_INITIALIZER;
 struct _OBJECT_TYPE;
 typedef struct _OBJECT_TYPE OBJECT_TYPE;
 typedef struct _OBJECT_TYPE* POBJECT_TYPE;
+struct _PEB;
+typedef struct _PEB PEB;
+typedef struct _PEB* PPEB;
 struct _PROCESSOR_NUMBER;
 typedef struct _PROCESSOR_NUMBER PROCESSOR_NUMBER;
 typedef struct _PROCESSOR_NUMBER* PPROCESSOR_NUMBER;
+struct _PPM_SELECTION_STATISTICS;
+typedef struct _PPM_SELECTION_STATISTICS PPM_SELECTION_STATISTICS;
+typedef struct _PPM_SELECTION_STATISTICS* PPPM_SELECTION_STATISTICS;
+struct _PROC_IDLE_STATE_BUCKET;
+typedef struct _PROC_IDLE_STATE_BUCKET PROC_IDLE_STATE_BUCKET;
+typedef struct _PROC_IDLE_STATE_BUCKET* PPROC_IDLE_STATE_BUCKET;
+struct _PROC_IDLE_STATE_ACCOUNTING;
+typedef struct _PROC_IDLE_STATE_ACCOUNTING PROC_IDLE_STATE_ACCOUNTING;
+typedef struct _PROC_IDLE_STATE_ACCOUNTING* PPROC_IDLE_STATE_ACCOUNTING;
+struct _PROC_IDLE_ACCOUNTING;
+typedef struct _PROC_IDLE_ACCOUNTING PROC_IDLE_ACCOUNTING;
+typedef struct _PROC_IDLE_ACCOUNTING* PPROC_IDLE_ACCOUNTING;
+struct _RECON_ALPCPGETMESSAGEATTRIBUTEOFFSET32_RDX;
+typedef struct _RECON_ALPCPGETMESSAGEATTRIBUTEOFFSET32_RDX RECON_ALPCPGETMESSAGEATTRIBUTEOFFSET32_RDX;
+typedef struct _RECON_ALPCPGETMESSAGEATTRIBUTEOFFSET32_RDX* PRECON_ALPCPGETMESSAGEATTRIBUTEOFFSET32_RDX;
+struct _RECON_CCSETDIRTYPINNEDDATA_RCX;
+typedef struct _RECON_CCSETDIRTYPINNEDDATA_RCX RECON_CCSETDIRTYPINNEDDATA_RCX;
+typedef struct _RECON_CCSETDIRTYPINNEDDATA_RCX* PRECON_CCSETDIRTYPINNEDDATA_RCX;
+struct _RECON_EXACQUIRERESOURCEEXCLUSIVELITE_R9;
+typedef struct _RECON_EXACQUIRERESOURCEEXCLUSIVELITE_R9 RECON_EXACQUIRERESOURCEEXCLUSIVELITE_R9;
+typedef struct _RECON_EXACQUIRERESOURCEEXCLUSIVELITE_R9* PRECON_EXACQUIRERESOURCEEXCLUSIVELITE_R9;
+struct _RECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R8;
+typedef struct _RECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R8 RECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R8;
+typedef struct _RECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R8* PRECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R8;
+struct _RECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R9;
+typedef struct _RECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R9 RECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R9;
+typedef struct _RECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R9* PRECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R9;
+struct _RECON_EXGETEXCLUSIVEWAITERCOUNT_RCX;
+typedef struct _RECON_EXGETEXCLUSIVEWAITERCOUNT_RCX RECON_EXGETEXCLUSIVEWAITERCOUNT_RCX;
+typedef struct _RECON_EXGETEXCLUSIVEWAITERCOUNT_RCX* PRECON_EXGETEXCLUSIVEWAITERCOUNT_RCX;
+struct _RECON_EXGETSHAREDWAITERCOUNT_RCX;
+typedef struct _RECON_EXGETSHAREDWAITERCOUNT_RCX RECON_EXGETSHAREDWAITERCOUNT_RCX;
+typedef struct _RECON_EXGETSHAREDWAITERCOUNT_RCX* PRECON_EXGETSHAREDWAITERCOUNT_RCX;
+struct _RECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RCX;
+typedef struct _RECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RCX RECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RCX;
+typedef struct _RECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RCX* PRECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RCX;
+struct _RECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RDX;
+typedef struct _RECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RDX RECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RDX;
+typedef struct _RECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RDX* PRECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RDX;
+struct _RECON_EXRELEASERESOURCELITE_RDX;
+typedef struct _RECON_EXRELEASERESOURCELITE_RDX RECON_EXRELEASERESOURCELITE_RDX;
+typedef struct _RECON_EXRELEASERESOURCELITE_RDX* PRECON_EXRELEASERESOURCELITE_RDX;
+struct _RECON_FSRTLINITIALIZEFILELOCK_RCX;
+typedef struct _RECON_FSRTLINITIALIZEFILELOCK_RCX RECON_FSRTLINITIALIZEFILELOCK_RCX;
+typedef struct _RECON_FSRTLINITIALIZEFILELOCK_RCX* PRECON_FSRTLINITIALIZEFILELOCK_RCX;
+struct _RECON_IOGETACTIVITYIDIRP_RCX;
+typedef struct _RECON_IOGETACTIVITYIDIRP_RCX RECON_IOGETACTIVITYIDIRP_RCX;
+typedef struct _RECON_IOGETACTIVITYIDIRP_RCX* PRECON_IOGETACTIVITYIDIRP_RCX;
+struct _RECON_IOGETIOATTRIBUTIONHANDLE_RCX;
+typedef struct _RECON_IOGETIOATTRIBUTIONHANDLE_RCX RECON_IOGETIOATTRIBUTIONHANDLE_RCX;
+typedef struct _RECON_IOGETIOATTRIBUTIONHANDLE_RCX* PRECON_IOGETIOATTRIBUTIONHANDLE_RCX;
 struct _RECON_IOIS32BITPROCESS_RDX;
 typedef struct _RECON_IOIS32BITPROCESS_RDX RECON_IOIS32BITPROCESS_RDX;
 typedef struct _RECON_IOIS32BITPROCESS_RDX* PRECON_IOIS32BITPROCESS_RDX;
+struct _RECON_KEINITIALIZESEMAPHORE_RCX;
+typedef struct _RECON_KEINITIALIZESEMAPHORE_RCX RECON_KEINITIALIZESEMAPHORE_RCX;
+typedef struct _RECON_KEINITIALIZESEMAPHORE_RCX* PRECON_KEINITIALIZESEMAPHORE_RCX;
+struct _RECON_KESETEVENT_R8;
+typedef struct _RECON_KESETEVENT_R8 RECON_KESETEVENT_R8;
+typedef struct _RECON_KESETEVENT_R8* PRECON_KESETEVENT_R8;
+struct _RECON_KESETEVENT_RCX;
+typedef struct _RECON_KESETEVENT_RCX RECON_KESETEVENT_RCX;
+typedef struct _RECON_KESETEVENT_RCX* PRECON_KESETEVENT_RCX;
+struct _RECON_KESETEVENT_RDX;
+typedef struct _RECON_KESETEVENT_RDX RECON_KESETEVENT_RDX;
+typedef struct _RECON_KESETEVENT_RDX* PRECON_KESETEVENT_RDX;
 struct _RECON_KISYSTEMCALL64_RCX;
 typedef struct _RECON_KISYSTEMCALL64_RCX RECON_KISYSTEMCALL64_RCX;
 typedef struct _RECON_KISYSTEMCALL64_RCX* PRECON_KISYSTEMCALL64_RCX;
-struct _RTL_BITMAP;
-typedef struct _RTL_BITMAP RTL_BITMAP;
-typedef struct _RTL_BITMAP* PRTL_BITMAP;
+struct _RECON_KISYSTEMSTARTUP_R8;
+typedef struct _RECON_KISYSTEMSTARTUP_R8 RECON_KISYSTEMSTARTUP_R8;
+typedef struct _RECON_KISYSTEMSTARTUP_R8* PRECON_KISYSTEMSTARTUP_R8;
+struct _RECON_KISYSTEMSTARTUP_RDX;
+typedef struct _RECON_KISYSTEMSTARTUP_RDX RECON_KISYSTEMSTARTUP_RDX;
+typedef struct _RECON_KISYSTEMSTARTUP_RDX* PRECON_KISYSTEMSTARTUP_RDX;
+struct _RECON_POGETSYSTEMWAKE_R8;
+typedef struct _RECON_POGETSYSTEMWAKE_R8 RECON_POGETSYSTEMWAKE_R8;
+typedef struct _RECON_POGETSYSTEMWAKE_R8* PRECON_POGETSYSTEMWAKE_R8;
+struct _RTL_DYNAMIC_HASH_TABLE;
+typedef struct _RTL_DYNAMIC_HASH_TABLE RTL_DYNAMIC_HASH_TABLE;
+typedef struct _RTL_DYNAMIC_HASH_TABLE* PRTL_DYNAMIC_HASH_TABLE;
+struct _RTL_DYNAMIC_HASH_TABLE_ENTRY;
+typedef struct _RTL_DYNAMIC_HASH_TABLE_ENTRY RTL_DYNAMIC_HASH_TABLE_ENTRY;
+typedef struct _RTL_DYNAMIC_HASH_TABLE_ENTRY* PRTL_DYNAMIC_HASH_TABLE_ENTRY;
+struct _RTL_DYNAMIC_HASH_TABLE_ENUMERATOR;
+typedef struct _RTL_DYNAMIC_HASH_TABLE_ENUMERATOR RTL_DYNAMIC_HASH_TABLE_ENUMERATOR;
+typedef struct _RTL_DYNAMIC_HASH_TABLE_ENUMERATOR* PRTL_DYNAMIC_HASH_TABLE_ENUMERATOR;
+struct _RTL_HASH_TABLE_ITERATOR;
+typedef struct _RTL_HASH_TABLE_ITERATOR RTL_HASH_TABLE_ITERATOR;
+typedef struct _RTL_HASH_TABLE_ITERATOR* PRTL_HASH_TABLE_ITERATOR;
+struct _SECURITY_DESCRIPTOR;
+typedef struct _SECURITY_DESCRIPTOR SECURITY_DESCRIPTOR;
+typedef struct _SECURITY_DESCRIPTOR* PSECURITY_DESCRIPTOR;
+struct _LOGGED_STREAM_CALLBACK_V1;
+typedef struct _LOGGED_STREAM_CALLBACK_V1 LOGGED_STREAM_CALLBACK_V1;
+typedef struct _LOGGED_STREAM_CALLBACK_V1* PLOGGED_STREAM_CALLBACK_V1;
+struct _LOGGED_STREAM_CALLBACK_V2;
+typedef struct _LOGGED_STREAM_CALLBACK_V2 LOGGED_STREAM_CALLBACK_V2;
+typedef struct _LOGGED_STREAM_CALLBACK_V2* PLOGGED_STREAM_CALLBACK_V2;
+struct _FAST_MUTEX;
+typedef struct _FAST_MUTEX FAST_MUTEX;
+typedef struct _FAST_MUTEX* PFAST_MUTEX;
+struct _PRIVATE_CACHE_MAP_FLAGS;
+typedef struct _PRIVATE_CACHE_MAP_FLAGS PRIVATE_CACHE_MAP_FLAGS;
+typedef struct _PRIVATE_CACHE_MAP_FLAGS* PPRIVATE_CACHE_MAP_FLAGS;
+struct _PRIVATE_CACHE_MAP;
+typedef struct _PRIVATE_CACHE_MAP PRIVATE_CACHE_MAP;
+typedef struct _PRIVATE_CACHE_MAP* PPRIVATE_CACHE_MAP;
+struct _SHARED_CACHE_MAP;
+typedef struct _SHARED_CACHE_MAP SHARED_CACHE_MAP;
+typedef struct _SHARED_CACHE_MAP* PSHARED_CACHE_MAP;
 struct _STRING;
 typedef struct _STRING STRING;
 typedef struct _STRING* PSTRING;
@@ -311,6 +599,9 @@ typedef struct _TOKEN_AUDIT_POLICY* PTOKEN_AUDIT_POLICY;
 struct _SEP_AUDIT_POLICY;
 typedef struct _SEP_AUDIT_POLICY SEP_AUDIT_POLICY;
 typedef struct _SEP_AUDIT_POLICY* PSEP_AUDIT_POLICY;
+struct _SID_AND_ATTRIBUTES_HASH;
+typedef struct _SID_AND_ATTRIBUTES_HASH SID_AND_ATTRIBUTES_HASH;
+typedef struct _SID_AND_ATTRIBUTES_HASH* PSID_AND_ATTRIBUTES_HASH;
 struct _TOKEN;
 typedef struct _TOKEN TOKEN;
 typedef struct _TOKEN* PTOKEN;
@@ -321,8 +612,14 @@ struct _UMS_CONTROL_BLOCK;
 typedef struct _UMS_CONTROL_BLOCK UMS_CONTROL_BLOCK;
 typedef struct _UMS_CONTROL_BLOCK* PUMS_CONTROL_BLOCK;
 struct _ACL;
+struct _ACTIVATION_CONTEXT_DATA;
+struct _ASSEMBLY_STORAGE_MAP;
 struct _AUTHZBASEP_CLAIM_ATTRIBUTES_COLLECTION;
 struct _AUTHZBASEP_SECURITY_ATTRIBUTES_INFORMATION;
+struct _CACHE_MANAGER_CALLBACKS;
+struct _CACHE_UNINITIALIZE_EVENT;
+struct _CC_ASYNC_READ_CONTEXT;
+struct _CC_PARTITION;
 struct _CM_INDEX_HINT_BLOCK;
 struct _CM_KCB_LAYER_INFO;
 struct _CM_KCB_UOW;
@@ -330,7 +627,6 @@ struct _CM_KEY_BODY;
 struct _CM_KEY_SECURITY_CACHE;
 struct _CM_NAME_CONTROL_BLOCK;
 struct _CM_TRANS;
-struct _CONTEXT;
 struct _DEVOBJ_EXTENSION;
 struct _DRIVER_OBJECT;
 struct _EJOB;
@@ -338,37 +634,52 @@ struct _EPROCESS_QUOTA_BLOCK;
 struct _ERESOURCE;
 struct _EWOW64PROCESS;
 struct _EXCEPTION_REGISTRATION_RECORD;
-struct _FILE_OBJECT;
-struct _GENERAL_LOOKASIDE;
-struct _GUID;
+struct _FLS_CALLBACK_INFO;
 struct _HANDLE_TABLE;
-struct _HHIVE;
+struct _HBASE_BLOCK;
+struct _HMAP_DIRECTORY;
+struct _HMAP_TABLE;
+struct _HVIEW_MAP_DIRECTORY;
 struct _INVERTED_FUNCTION_TABLE;
+struct _IO_COMPLETION_CONTEXT;
+struct _IO_SECURITY_CONTEXT;
 struct _IO_STACK_LOCATION;
 struct _IO_TIMER;
-struct _KENTROPY_TIMING_STATE;
-struct _KNODE;
-struct _KPROCESSOR_STATE;
 struct _KSCB;
 struct _KSCHEDULING_GROUP;
-struct _KSHARED_READY_QUEUE;
 struct _KTHREAD_COUNTERS;
 struct _KTIMER_TABLE;
 struct _KTRAP_FRAME;
 struct _KTSS64;
 struct _KUMS_CONTEXT_HEADER;
-struct _MMSUPPORT_FULL;
-struct _MM_SESSION_SPACE;
+struct _MBCB;
+struct _MI_CACHED_PTES;
 struct _OBJECT_CREATE_INFORMATION;
 struct _OBJECT_NAME_INFORMATION;
 struct _PAGEFAULT_HISTORY;
-struct _PEB;
+struct _PEB_LDR_DATA;
+struct _POOL_DESCRIPTOR;
+struct _POP_FX_DEVICE;
 struct _PO_DIAG_STACK_RECORD;
 struct _PO_PROCESS_ENERGY_CONTEXT;
-struct _PROCESSOR_POWER_STATE;
+struct _PPM_CONCURRENCY_ACCOUNTING;
+struct _PPM_IDLE_STATES;
+struct _PPM_VETO_ACCOUNTING;
+struct _PRIVILEGE_SET;
 struct _PROCESSOR_PROFILE_CONTROL_AREA;
 struct _PROCESS_DISK_COUNTERS;
+struct _PROC_FEEDBACK_COUNTER;
+struct _PROC_PERF_CHECK;
+struct _PROC_PERF_CONSTRAINT;
+struct _PROC_PERF_DOMAIN;
+struct _PROC_PERF_HISTORY;
+struct _PROC_PERF_LOAD;
+struct _RTL_CRITICAL_SECTION;
+struct _RTL_HASH_ENTRY;
+struct _RTL_HASH_TABLE;
 struct _RTL_UMS_CONTEXT;
+struct _RTL_USER_PROCESS_PARAMETERS;
+struct _SECTION_OBJECT_POINTERS;
 struct _SEP_CACHED_HANDLES_ENTRY;
 struct _SEP_LOGON_SESSION_REFERENCES;
 struct _SEP_LOWBOX_NUMBER_ENTRY;
@@ -376,12 +687,12 @@ struct _SEP_LUID_TO_INDEX_MAP_ENTRY;
 struct _SEP_SID_VALUES_BLOCK;
 struct _SEP_TOKEN_DIAG_TRACK_ENTRY;
 struct _SID_AND_ATTRIBUTES;
-struct _SID_AND_ATTRIBUTES_HASH;
 struct _TERMINATION_PORT;
 struct _THREAD_ENERGY_VALUES;
+struct _VACB;
+struct _VOLUME_CACHE_MAP;
 struct _VPB;
 struct _XSAVE_AREA;
-struct _XSAVE_FORMAT;
 struct _XSTATE_SAVE;
 union _KGDTENTRY64;
 union _KIDTENTRY64;
@@ -390,10 +701,25 @@ static inline struct _KPRCB* KeGetCurrentPrcb(void) {
     return (struct _KPRCB*)(uintptr_t)__ntrev_readgsqword(0x20);
 }
 
-/* Source: pdb | Size: 0x10 (16 bytes) */
-struct __attribute__((packed)) _LIST_ENTRY {
-    struct _LIST_ENTRY* Flink; /* +0x0 */
-    struct _LIST_ENTRY* Blink; /* +0x8 */
+/* Source: pdb | Size: 0x20 (32 bytes) */
+struct __attribute__((packed)) _ANON_TAG_1411 {
+    struct _IO_SECURITY_CONTEXT* SecurityContext; /* +0x0 */
+    uint32_t Options; /* +0x8 */
+    uint8_t _pad_l0_0_0xc[0x4];
+    uint16_t FileAttributes; /* +0x10 */
+    uint16_t ShareAccess; /* +0x12 */
+    uint8_t _pad_l0_1_0x14[0x4];
+    uint32_t EaLength; /* +0x18 */
+    uint8_t _pad_l0_tail_0x1c[0x4];
+};
+
+/* Source: pdb | Size: 0x20 (32 bytes) */
+struct __attribute__((packed)) _ANON_TAG_147d {
+    uint64_t ProviderId; /* +0x0 */
+    void* DataPath; /* +0x8 */
+    uint32_t BufferSize; /* +0x10 */
+    uint8_t _pad_l0_0_0x14[0x4];
+    void* Buffer; /* +0x18 */
 };
 
 /* Source: pdb | Size: 0x8 (8 bytes) */
@@ -409,6 +735,71 @@ union _LARGE_INTEGER {
     struct _ANON_TAG_1117 u; /* +0x0 */
     int64_t QuadPart; /* +0x0 */
     uint8_t _raw_bytes[0x8];
+};
+
+/* Source: pdb | Size: 0x68 (104 bytes) */
+struct __attribute__((packed)) _ANON_TAG_1ba4 {
+    struct _SHARED_CACHE_MAP* SharedCacheMap; /* +0x0 */
+    union _LARGE_INTEGER FileOffset; /* +0x8 */
+    struct _FILE_OBJECT* FileObject; /* +0x10 */
+    uint32_t Length; /* +0x18 */
+    uint8_t _pad_l0_0_0x1c[0x4];
+    struct _SINGLE_LIST_ENTRY* PrefetchList; /* +0x20 */
+    uint32_t PrefetchPagePriority; /* +0x28 */
+    uint8_t _pad_l0_1_0x2c[0x4];
+    struct _MDL* Mdl; /* +0x30 */
+    struct _IO_STATUS_BLOCK* IoStatusBlock; /* +0x38 */
+    struct _CC_ASYNC_READ_CONTEXT* CallbackContext; /* +0x40 */
+    struct _EPROCESS* OriginatingProcess; /* +0x48 */
+    struct _ETHREAD* IoIssuerThread; /* +0x50 */
+    void* DiskIoAttribution; /* +0x58 */
+    char RequestorMode; /* +0x60 */
+    uint8_t _pad_l0_2_0x61[0x3];
+    uint32_t NestingLevel; /* +0x64 */
+};
+
+/* Source: pdb | Size: 0x10 (16 bytes) */
+struct __attribute__((packed)) _GENERIC_MAPPING {
+    uint32_t GenericRead; /* +0x0 */
+    uint32_t GenericWrite; /* +0x4 */
+    uint32_t GenericExecute; /* +0x8 */
+    uint32_t GenericAll; /* +0xc */
+};
+
+/* Source: pdb | Size: 0x10 (16 bytes) */
+struct __attribute__((packed)) _GUID {
+    uint32_t Data1; /* +0x0 */
+    uint16_t Data2; /* +0x4 */
+    uint16_t Data3; /* +0x6 */
+    uint8_t Data4[8]; /* +0x8 */
+};
+
+/* Source: pdb | Size: 0x80 (128 bytes) */
+struct __attribute__((packed)) _ACCESS_REASONS {
+    uint32_t Data[32]; /* +0x0 */
+};
+
+/* Source: pdb | Size: 0xe0 (224 bytes) */
+struct __attribute__((packed)) _AUX_ACCESS_DATA {
+    struct _PRIVILEGE_SET* PrivilegesUsed; /* +0x0 */
+    struct _GENERIC_MAPPING GenericMapping; /* +0x8 */
+    uint32_t AccessesToAudit; /* +0x18 */
+    uint32_t MaximumAuditMask; /* +0x1c */
+    struct _GUID TransactionId; /* +0x20 */
+    void* NewSecurityDescriptor; /* +0x30 */
+    void* ExistingSecurityDescriptor; /* +0x38 */
+    void* ParentSecurityDescriptor; /* +0x40 */
+    void** DeRefSecurityDescriptor; /* +0x48 */
+    void* SDLock; /* +0x50 */
+    struct _ACCESS_REASONS AccessReasons; /* +0x58 */
+    uint8_t GenerateStagingEvents; /* +0xd8 */
+    uint8_t _pad_l0_tail_0xd9[0x7];
+};
+
+/* Source: pdb | Size: 0x10 (16 bytes) */
+struct __attribute__((packed)) _LIST_ENTRY {
+    struct _LIST_ENTRY* Flink; /* +0x0 */
+    struct _LIST_ENTRY* Blink; /* +0x8 */
 };
 
 /* Source: pdb | Size: 0x4 (4 bytes) */
@@ -582,6 +973,34 @@ struct __attribute__((packed)) _DISPATCHER_HEADER {
             uint8_t Hand; /* +0x2 */
             uint8_t MutantReserved; /* +0x3 */
             uint8_t _pad_l3_tail_0x4[0x14];
+        };
+        struct __attribute__((packed)) {
+            uint8_t ThreadType; /* +0x0 */
+            uint8_t Signalling; /* +0x1 */
+            uint8_t QueueSize; /* +0x2 */
+            uint8_t QueueReserved; /* +0x3 */
+            uint8_t _pad_l4_tail_0x4[0x14];
+        };
+        struct __attribute__((packed)) {
+            uint8_t Timer2Type; /* +0x0 */
+            uint8_t ThreadReserved; /* +0x1 */
+            uint8_t Size; /* +0x2 */
+            uint8_t Reserved1; /* +0x3 */
+            uint8_t _pad_l5_tail_0x4[0x14];
+        };
+        struct __attribute__((packed)) {
+            uint8_t TimerType; /* +0x0 */
+            uint8_t Timer2Flags; /* +0x1 */
+            uint8_t ThreadControlFlags; /* +0x2 */
+            uint8_t Timer2RelativeId; /* +0x3 */
+            uint8_t _pad_l6_tail_0x4[0x14];
+        };
+        struct __attribute__((packed)) {
+            uint8_t Type; /* +0x0 */
+            uint8_t TimerControlFlags; /* +0x1 */
+            uint8_t Timer2ComponentId; /* +0x2 */
+            uint8_t TimerMiscFlags; /* +0x3 */
+            uint8_t _pad_l7_tail_0x4[0x14];
         };
     };
 };
@@ -775,6 +1194,65 @@ struct __attribute__((packed)) _SE_AUDIT_PROCESS_CREATION_INFO {
     struct _OBJECT_NAME_INFORMATION* ImageFileName; /* +0x0 */
 };
 
+/* Source: pdb | Size: 0x8 (8 bytes) */
+union _ANON_TAG_25c8 {
+    void* InstancedWorkingSet; /* +0x0 */
+    uint8_t _raw_bytes[0x8];
+};
+
+/* Source: pdb | Size: 0x4 (4 bytes) */
+struct __attribute__((packed)) _MMSUPPORT_FLAGS {
+    uint16_t u1; /* +0x0 */
+    uint8_t MemoryPriority; /* +0x2 */
+    uint8_t u2; /* +0x3 */
+};
+
+/* Source: pdb | Size: 0xc8 (200 bytes) */
+struct __attribute__((packed)) _MMSUPPORT_INSTANCE {
+    uint16_t NextPageColor; /* +0x0 */
+    uint16_t LastTrimStamp; /* +0x2 */
+    uint32_t PageFaultCount; /* +0x4 */
+    uint64_t TrimmedPageCount; /* +0x8 */
+    struct _MMWSL_INSTANCE* VmWorkingSetList; /* +0x10 */
+    struct _LIST_ENTRY WorkingSetExpansionLinks; /* +0x18 */
+    uint64_t AgeDistribution[8]; /* +0x28 */
+    struct _KGATE* ExitOutswapGate; /* +0x68 */
+    uint64_t MinimumWorkingSetSize; /* +0x70 */
+    uint64_t WorkingSetLeafSize; /* +0x78 */
+    uint64_t WorkingSetLeafPrivateSize; /* +0x80 */
+    uint64_t WorkingSetSize; /* +0x88 */
+    uint64_t WorkingSetPrivateSize; /* +0x90 */
+    uint64_t MaximumWorkingSetSize; /* +0x98 */
+    uint64_t PeakWorkingSetSize; /* +0xa0 */
+    uint32_t HardFaultCount; /* +0xa8 */
+    uint16_t PartitionId; /* +0xac */
+    uint16_t Pad0; /* +0xae */
+    union _ANON_TAG_25c8 u1; /* +0xb0 */
+    uint64_t Reserved0; /* +0xb8 */
+    struct _MMSUPPORT_FLAGS Flags; /* +0xc0 */
+    uint8_t _pad_l0_tail_0xc4[0x4];
+};
+
+/* Source: pdb | Size: 0x48 (72 bytes) */
+struct __attribute__((packed)) _MMSUPPORT_SHARED {
+    int32_t WorkingSetLock; /* +0x0 */
+    int32_t GoodCitizenWaiting; /* +0x4 */
+    uint64_t ReleasedCommitDebt; /* +0x8 */
+    uint64_t ResetPagesRepurposedCount; /* +0x10 */
+    void* WsSwapSupport; /* +0x18 */
+    void* CommitReleaseContext; /* +0x20 */
+    void* AccessLog; /* +0x28 */
+    uint64_t ChargedWslePages; /* +0x30 */
+    uint64_t ActualWslePages; /* +0x38 */
+    uint64_t Reserved0; /* +0x40 */
+};
+
+/* Source: pdb | Size: 0x110 (272 bytes) */
+struct __attribute__((packed)) _MMSUPPORT_FULL {
+    struct _MMSUPPORT_INSTANCE Instance; /* +0x0 */
+    struct _MMSUPPORT_SHARED Shared; /* +0xc8 */
+};
+
 /* Source: pdb | Size: 0x20 (32 bytes) */
 struct __attribute__((packed)) _ALPC_PROCESS_CONTEXT {
     struct _EX_PUSH_LOCK Lock; /* +0x0 */
@@ -894,7 +1372,7 @@ struct __attribute__((packed)) _EPROCESS {
             uint64_t CommitChargeLimit; /* +0x4e8 */
             uint64_t CommitCharge; /* +0x4f0 */
             uint64_t CommitChargePeak; /* +0x4f8 */
-            uint8_t Vm[0x110]; /* struct _MMSUPPORT_FULL +0x500 */
+            struct _MMSUPPORT_FULL Vm; /* +0x500 */
             struct _LIST_ENTRY MmProcessLinks; /* +0x610 */
             uint32_t ModifiedPageCount; /* +0x620 */
             int32_t ExitStatus; /* +0x624 */
@@ -1302,6 +1780,48 @@ struct __attribute__((packed)) _KTHREAD {
             struct _KPRCB* WaitPrcb; /* +0x2c8 */
             uint8_t _pad_l3_tail_0x2d0[0x320];
         };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l4_0_0x0[0x140];
+            uint8_t WaitBlockFill6[116]; /* +0x140 */
+            uint32_t WaitTime; /* +0x1b4 */
+            uint8_t _pad_l4_1_0x1b8[0xd0];
+            uint8_t SchedulerApcFill2[4]; /* +0x288 */
+            uint32_t KernelTime; /* +0x28c */
+            uint8_t _pad_l4_tail_0x290[0x360];
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l5_0_0x0[0x140];
+            uint8_t WaitBlockFill9[88]; /* +0x140 */
+            struct _XSTATE_SAVE* XStateSave; /* +0x198 */
+            uint8_t _pad_l5_1_0x1a0[0xe8];
+            uint8_t SchedulerApcFill1[3]; /* +0x288 */
+            uint8_t QuantumReset; /* +0x28b */
+            uint8_t _pad_l5_tail_0x28c[0x364];
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l6_0_0x0[0x140];
+            uint8_t WaitBlockFill5[68]; /* +0x140 */
+            uint8_t State; /* +0x184 */
+            char Spare13; /* +0x185 */
+            uint8_t WaitIrql; /* +0x186 */
+            char WaitMode; /* +0x187 */
+            uint8_t _pad_l6_1_0x188[0x100];
+            uint8_t SchedulerApcFill0[1]; /* +0x288 */
+            uint8_t ResourceIndex; /* +0x289 */
+            uint8_t _pad_l6_tail_0x28a[0x366];
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l7_0_0x0[0x140];
+            uint8_t WaitBlockFill8[40]; /* +0x140 */
+            struct _KTHREAD_COUNTERS* ThreadCounters; /* +0x168 */
+            uint8_t _pad_l7_tail_0x170[0x480];
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l8_0_0x0[0x140];
+            uint8_t WaitBlockFill4[20]; /* +0x140 */
+            uint32_t ContextSwitches; /* +0x154 */
+            uint8_t _pad_l8_tail_0x158[0x498];
+        };
     };
 };
 
@@ -1424,6 +1944,197 @@ struct __attribute__((packed)) _ETHREAD {
     };
 };
 
+/* Source: pdb | Size: 0x10 (16 bytes) */
+struct __attribute__((packed)) _EXT_SET_PARAMETERS_V0 {
+    uint32_t Version; /* +0x0 */
+    uint32_t Reserved; /* +0x4 */
+    int64_t NoWakeTolerance; /* +0x8 */
+};
+
+/* Source: pdb | Size: 0x10 (16 bytes) */
+struct __attribute__((packed)) _UNICODE_STRING {
+    uint16_t Length; /* +0x0 */
+    uint16_t MaximumLength; /* +0x2 */
+    uint8_t _pad_l0_0_0x4[0x4];
+    uint16_t* Buffer; /* +0x8 */
+};
+
+/* Source: pdb | Size: 0xd8 (216 bytes) */
+struct __attribute__((packed)) _FILE_OBJECT {
+    int16_t Type; /* +0x0 */
+    int16_t Size; /* +0x2 */
+    uint8_t _pad_l0_0_0x4[0x4];
+    struct _DEVICE_OBJECT* DeviceObject; /* +0x8 */
+    struct _VPB* Vpb; /* +0x10 */
+    void* FsContext; /* +0x18 */
+    void* FsContext2; /* +0x20 */
+    struct _SECTION_OBJECT_POINTERS* SectionObjectPointer; /* +0x28 */
+    void* PrivateCacheMap; /* +0x30 */
+    int32_t FinalStatus; /* +0x38 */
+    uint8_t _pad_l0_1_0x3c[0x4];
+    struct _FILE_OBJECT* RelatedFileObject; /* +0x40 */
+    uint8_t LockOperation; /* +0x48 */
+    uint8_t DeletePending; /* +0x49 */
+    uint8_t ReadAccess; /* +0x4a */
+    uint8_t WriteAccess; /* +0x4b */
+    uint8_t DeleteAccess; /* +0x4c */
+    uint8_t SharedRead; /* +0x4d */
+    uint8_t SharedWrite; /* +0x4e */
+    uint8_t SharedDelete; /* +0x4f */
+    uint32_t Flags; /* +0x50 */
+    uint8_t _pad_l0_2_0x54[0x4];
+    struct _UNICODE_STRING FileName; /* +0x58 */
+    union _LARGE_INTEGER CurrentByteOffset; /* +0x68 */
+    uint32_t Waiters; /* +0x70 */
+    uint32_t Busy; /* +0x74 */
+    void* LastLock; /* +0x78 */
+    struct _KEVENT Lock; /* +0x80 */
+    struct _KEVENT Event; /* +0x98 */
+    struct _IO_COMPLETION_CONTEXT* CompletionContext; /* +0xb0 */
+    uint64_t IrpListLock; /* +0xb8 */
+    struct _LIST_ENTRY IrpList; /* +0xc0 */
+    void* FileObjectExtension; /* +0xd0 */
+};
+
+/* Source: pdb | Size: 0x10 (16 bytes) */
+struct __attribute__((packed)) _RTL_BITMAP {
+    uint32_t SizeOfBitMap; /* +0x0 */
+    uint8_t _pad_l0_0_0x4[0x4];
+    uint32_t* Buffer; /* +0x8 */
+};
+
+/* Source: pdb | Size: 0x48 (72 bytes) */
+struct __attribute__((packed)) _HVIEW_MAP_PIN_LOG_ENTRY {
+    uint32_t ViewOffset; /* +0x0 */
+    uint8_t Pinned; /* +0x4 */
+    uint8_t _pad_l0_0_0x5[0x3];
+    uint64_t PinMask; /* +0x8 */
+    struct _KTHREAD* Thread; /* +0x10 */
+    void* Stack[6]; /* +0x18 */
+};
+
+/* Source: pdb | Size: 0x488 (1160 bytes) */
+struct __attribute__((packed)) _HVIEW_MAP_PIN_LOG {
+    uint32_t Next; /* +0x0 */
+    uint32_t Size; /* +0x4 */
+    struct _HVIEW_MAP_PIN_LOG_ENTRY Entries[16]; /* +0x8 */
+};
+
+/* Source: pdb | Size: 0x4b0 (1200 bytes) */
+struct __attribute__((packed)) _HVIEW_MAP {
+    uint32_t MappedLength; /* +0x0 */
+    uint8_t _pad_l0_0_0x4[0x4];
+    struct _EX_PUSH_LOCK Lock; /* +0x8 */
+    struct _FILE_OBJECT* FileObject; /* +0x10 */
+    struct _HVIEW_MAP_DIRECTORY* Directory; /* +0x18 */
+    uint32_t PagesCharged; /* +0x20 */
+    uint8_t _pad_l0_1_0x24[0x4];
+    struct _HVIEW_MAP_PIN_LOG PinLog; /* +0x28 */
+};
+
+/* Source: pdb | Size: 0x18 (24 bytes) */
+struct __attribute__((packed)) _FREE_DISPLAY {
+    uint32_t RealVectorSize; /* +0x0 */
+    uint32_t Hint; /* +0x4 */
+    struct _RTL_BITMAP Display; /* +0x8 */
+};
+
+/* Source: pdb | Size: 0x278 (632 bytes) */
+struct __attribute__((packed)) _DUAL {
+    uint32_t Length; /* +0x0 */
+    uint8_t _pad_l0_0_0x4[0x4];
+    struct _HMAP_DIRECTORY* Map; /* +0x8 */
+    struct _HMAP_TABLE* SmallDir; /* +0x10 */
+    uint32_t Guard; /* +0x18 */
+    uint8_t _pad_l0_1_0x1c[0x4];
+    struct _FREE_DISPLAY FreeDisplay[24]; /* +0x20 */
+    struct _LIST_ENTRY FreeBins; /* +0x260 */
+    uint32_t FreeSummary; /* +0x270 */
+    uint8_t _pad_l0_tail_0x274[0x4];
+};
+
+/* Source: pdb | Size: 0xa68 (2664 bytes) */
+struct __attribute__((packed)) _HHIVE {
+    uint32_t Signature; /* +0x0 */
+    uint8_t _pad_l0_0_0x4[0x4];
+    void** GetCellRoutine; /* +0x8 */
+    void** ReleaseCellRoutine; /* +0x10 */
+    void** Allocate; /* +0x18 */
+    void** Free; /* +0x20 */
+    void** FileWrite; /* +0x28 */
+    void** FileRead; /* +0x30 */
+    void* HiveLoadFailure; /* +0x38 */
+    struct _HBASE_BLOCK* BaseBlock; /* +0x40 */
+    struct _RTL_BITMAP DirtyVector; /* +0x48 */
+    uint32_t DirtyCount; /* +0x58 */
+    uint32_t DirtyAlloc; /* +0x5c */
+    struct _RTL_BITMAP UnreconciledVector; /* +0x60 */
+    uint32_t UnreconciledCount; /* +0x70 */
+    uint32_t BaseBlockAlloc; /* +0x74 */
+    uint32_t Cluster; /* +0x78 */
+    uint8_t _pad_l0_1_0x7c[0x1];
+    uint8_t DirtyFlag; /* +0x7d */
+    uint8_t _pad_l0_2_0x7e[0x2];
+    uint32_t HvBinHeadersUse; /* +0x80 */
+    uint32_t HvFreeCellsUse; /* +0x84 */
+    uint32_t HvUsedCellsUse; /* +0x88 */
+    uint32_t CmUsedCellsUse; /* +0x8c */
+    uint32_t HiveFlags; /* +0x90 */
+    uint32_t CurrentLog; /* +0x94 */
+    uint32_t CurrentLogSequence; /* +0x98 */
+    uint32_t CurrentLogMinimumSequence; /* +0x9c */
+    uint32_t CurrentLogOffset; /* +0xa0 */
+    uint32_t MinimumLogSequence; /* +0xa4 */
+    uint32_t LogFileSizeCap; /* +0xa8 */
+    uint8_t LogDataPresent[2]; /* +0xac */
+    uint8_t PrimaryFileValid; /* +0xae */
+    uint8_t BaseBlockDirty; /* +0xaf */
+    union _LARGE_INTEGER LastLogSwapTime; /* +0xb0 */
+    uint16_t RecoveryInformation; /* +0xb8 */
+    uint8_t LogEntriesRecovered[2]; /* +0xba */
+    uint32_t RefreshCount; /* +0xbc */
+    uint32_t StorageTypeCount; /* +0xc0 */
+    uint32_t Version; /* +0xc4 */
+    struct _HVIEW_MAP ViewMap; /* +0xc8 */
+    struct _DUAL Storage[2]; /* +0x578 */
+};
+
+/* Source: pdb | Size: 0x80 (128 bytes) */
+struct __attribute__((packed)) _IOV_IRP_TRACE {
+    union {
+        struct __attribute__((packed)) {
+            struct _IRP* Irp; /* +0x0 */
+            struct _KTHREAD* Thread; /* +0x8 */
+            uint32_t CombinedApcDisable; /* +0x10 */
+            uint8_t Irql; /* +0x14 */
+            uint8_t _pad_l0_0_0x15[0x3];
+            void* StackTrace[13]; /* +0x18 */
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l1_0_0x0[0x10];
+            int16_t KernelApcDisable; /* +0x10 */
+            int16_t SpecialApcDisable; /* +0x12 */
+            uint8_t _pad_l1_tail_0x14[0x6c];
+        };
+    };
+};
+
+/* Source: pdb | Size: 0x50 (80 bytes) */
+struct __attribute__((packed)) _IO_MINI_COMPLETION_PACKET_USER {
+    struct _LIST_ENTRY ListEntry; /* +0x0 */
+    uint32_t PacketType; /* +0x10 */
+    uint8_t _pad_l0_0_0x14[0x4];
+    void* KeyContext; /* +0x18 */
+    void* ApcContext; /* +0x20 */
+    int32_t IoStatus; /* +0x28 */
+    uint8_t _pad_l0_1_0x2c[0x4];
+    uint64_t IoStatusInformation; /* +0x30 */
+    void** MiniPacketCallback; /* +0x38 */
+    void* Context; /* +0x40 */
+    uint8_t Allocated; /* +0x48 */
+    uint8_t _pad_l0_tail_0x49[0x7];
+};
+
 /* Source: pdb | Size: 0x8 (8 bytes) */
 union _ANON_TAG_13f7 {
     struct _IRP* MasterIrp; /* +0x0 */
@@ -1524,6 +2235,58 @@ struct __attribute__((packed)) _IRP {
     union _ANON_TAG_140a Tail; /* +0x78 */
 };
 
+/* Source: pdb | Size: 0x1 (1 bytes) */
+struct __attribute__((packed)) _flags {
+    uint8_t _pad_l0_tail_0x0[0x1];
+};
+
+/* Source: pdb | Size: 0x18 (24 bytes) */
+struct __attribute__((packed)) _KHETERO_PROCESSOR_SET {
+    uint64_t IdealMask; /* +0x0 */
+    uint64_t PreferredMask; /* +0x8 */
+    uint64_t AvailableMask; /* +0x10 */
+};
+
+/* Source: pdb | Size: 0x140 (320 bytes) */
+struct __attribute__((packed)) _KNODE {
+    union {
+        struct __attribute__((packed)) {
+            uint64_t IdleNonParkedCpuSet; /* +0x0 */
+            uint64_t IdleSmtSet; /* +0x8 */
+            uint64_t IdleCpuSet; /* +0x10 */
+            uint8_t _pad_l0_0_0x18[0x28];
+            uint64_t DeepIdleSet; /* +0x40 */
+            uint64_t IdleConstrainedSet; /* +0x48 */
+            uint64_t NonParkedSet; /* +0x50 */
+            int32_t ParkLock; /* +0x58 */
+            uint32_t Seed; /* +0x5c */
+            uint8_t _pad_l0_1_0x60[0x20];
+            uint32_t SiblingMask; /* +0x80 */
+            uint8_t _pad_l0_2_0x84[0x4];
+            struct _GROUP_AFFINITY Affinity; /* +0x88 */
+            uint64_t SharedReadyQueueLeaders; /* +0x98 */
+            uint32_t ProximityId; /* +0xa0 */
+            uint32_t Lowest; /* +0xa4 */
+            uint32_t Highest; /* +0xa8 */
+            uint8_t MaximumProcessors; /* +0xac */
+            struct _flags Flags; /* +0xad */
+            uint8_t Spare10; /* +0xae */
+            uint8_t _pad_l0_3_0xaf[0x1];
+            struct _KHETERO_PROCESSOR_SET HeteroSets[5]; /* +0xb0 */
+            uint64_t PpmConfiguredQosSets[3]; /* +0x128 */
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l1_0_0x0[0x88];
+            uint8_t AffinityFill[10]; /* +0x88 */
+            uint16_t NodeNumber; /* +0x92 */
+            uint16_t PrimaryNodeNumber; /* +0x94 */
+            uint8_t Stride; /* +0x96 */
+            uint8_t Spare0; /* +0x97 */
+            uint8_t _pad_l1_tail_0x98[0xa8];
+        };
+    };
+};
+
 /* Source: pdb | Size: 0x10 (16 bytes) */
 struct __attribute__((packed)) _ANON_TAG_1293 {
     uint8_t _pad_l0_tail_0x0[0x10];
@@ -1535,6 +2298,155 @@ union _SLIST_HEADER {
     uint64_t Region; /* +0x8 */
     struct _ANON_TAG_1293 HeaderX64; /* +0x0 */
     uint8_t _raw_bytes[0x10];
+};
+
+/* Source: pdb | Size: 0x10 (16 bytes) */
+struct __attribute__((packed)) _KDESCRIPTOR {
+    uint16_t Pad[3]; /* +0x0 */
+    uint16_t Limit; /* +0x6 */
+    void* Base; /* +0x8 */
+};
+
+/* Source: pdb | Size: 0xf0 (240 bytes) */
+struct __attribute__((packed)) _KSPECIAL_REGISTERS {
+    uint64_t Cr0; /* +0x0 */
+    uint64_t Cr2; /* +0x8 */
+    uint64_t Cr3; /* +0x10 */
+    uint64_t Cr4; /* +0x18 */
+    uint64_t KernelDr0; /* +0x20 */
+    uint64_t KernelDr1; /* +0x28 */
+    uint64_t KernelDr2; /* +0x30 */
+    uint64_t KernelDr3; /* +0x38 */
+    uint64_t KernelDr6; /* +0x40 */
+    uint64_t KernelDr7; /* +0x48 */
+    struct _KDESCRIPTOR Gdtr; /* +0x50 */
+    struct _KDESCRIPTOR Idtr; /* +0x60 */
+    uint16_t Tr; /* +0x70 */
+    uint16_t Ldtr; /* +0x72 */
+    uint32_t MxCsr; /* +0x74 */
+    uint64_t DebugControl; /* +0x78 */
+    uint64_t LastBranchToRip; /* +0x80 */
+    uint64_t LastBranchFromRip; /* +0x88 */
+    uint64_t LastExceptionToRip; /* +0x90 */
+    uint64_t LastExceptionFromRip; /* +0x98 */
+    uint64_t Cr8; /* +0xa0 */
+    uint64_t MsrGsBase; /* +0xa8 */
+    uint64_t MsrGsSwap; /* +0xb0 */
+    uint64_t MsrStar; /* +0xb8 */
+    uint64_t MsrLStar; /* +0xc0 */
+    uint64_t MsrCStar; /* +0xc8 */
+    uint64_t MsrSyscallMask; /* +0xd0 */
+    uint64_t Xcr0; /* +0xd8 */
+    uint64_t MsrFsBase; /* +0xe0 */
+    uint64_t SpecialPadding0; /* +0xe8 */
+};
+
+/* Source: pdb | Size: 0x10 (16 bytes) */
+struct __attribute__((packed)) _M128A {
+    uint64_t Low; /* +0x0 */
+    int64_t High; /* +0x8 */
+};
+
+/* Source: pdb | Size: 0x200 (512 bytes) */
+struct __attribute__((packed)) _XSAVE_FORMAT {
+    uint16_t ControlWord; /* +0x0 */
+    uint16_t StatusWord; /* +0x2 */
+    uint8_t TagWord; /* +0x4 */
+    uint8_t Reserved1; /* +0x5 */
+    uint16_t ErrorOpcode; /* +0x6 */
+    uint32_t ErrorOffset; /* +0x8 */
+    uint16_t ErrorSelector; /* +0xc */
+    uint16_t Reserved2; /* +0xe */
+    uint32_t DataOffset; /* +0x10 */
+    uint16_t DataSelector; /* +0x14 */
+    uint16_t Reserved3; /* +0x16 */
+    uint32_t MxCsr; /* +0x18 */
+    uint32_t MxCsr_Mask; /* +0x1c */
+    struct _M128A FloatRegisters[8]; /* +0x20 */
+    struct _M128A XmmRegisters[16]; /* +0xa0 */
+    uint8_t Reserved4[96]; /* +0x1a0 */
+};
+
+/* Source: pdb | Size: 0x4d0 (1232 bytes) */
+struct __attribute__((packed)) _CONTEXT {
+    union {
+        struct __attribute__((packed)) {
+            uint64_t P1Home; /* +0x0 */
+            uint64_t P2Home; /* +0x8 */
+            uint64_t P3Home; /* +0x10 */
+            uint64_t P4Home; /* +0x18 */
+            uint64_t P5Home; /* +0x20 */
+            uint64_t P6Home; /* +0x28 */
+            uint32_t ContextFlags; /* +0x30 */
+            uint32_t MxCsr; /* +0x34 */
+            uint16_t SegCs; /* +0x38 */
+            uint16_t SegDs; /* +0x3a */
+            uint16_t SegEs; /* +0x3c */
+            uint16_t SegFs; /* +0x3e */
+            uint16_t SegGs; /* +0x40 */
+            uint16_t SegSs; /* +0x42 */
+            uint32_t EFlags; /* +0x44 */
+            uint64_t Dr0; /* +0x48 */
+            uint64_t Dr1; /* +0x50 */
+            uint64_t Dr2; /* +0x58 */
+            uint64_t Dr3; /* +0x60 */
+            uint64_t Dr6; /* +0x68 */
+            uint64_t Dr7; /* +0x70 */
+            uint64_t Rax; /* +0x78 */
+            uint64_t Rcx; /* +0x80 */
+            uint64_t Rdx; /* +0x88 */
+            uint64_t Rbx; /* +0x90 */
+            uint64_t Rsp; /* +0x98 */
+            uint64_t Rbp; /* +0xa0 */
+            uint64_t Rsi; /* +0xa8 */
+            uint64_t Rdi; /* +0xb0 */
+            uint64_t R8; /* +0xb8 */
+            uint64_t R9; /* +0xc0 */
+            uint64_t R10; /* +0xc8 */
+            uint64_t R11; /* +0xd0 */
+            uint64_t R12; /* +0xd8 */
+            uint64_t R13; /* +0xe0 */
+            uint64_t R14; /* +0xe8 */
+            uint64_t R15; /* +0xf0 */
+            uint64_t Rip; /* +0xf8 */
+            struct _XSAVE_FORMAT FltSave; /* +0x100 */
+            struct _M128A VectorRegister[26]; /* +0x300 */
+            uint64_t VectorControl; /* +0x4a0 */
+            uint64_t DebugControl; /* +0x4a8 */
+            uint64_t LastBranchToRip; /* +0x4b0 */
+            uint64_t LastBranchFromRip; /* +0x4b8 */
+            uint64_t LastExceptionToRip; /* +0x4c0 */
+            uint64_t LastExceptionFromRip; /* +0x4c8 */
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l1_0_0x0[0x100];
+            struct _M128A Header[2]; /* +0x100 */
+            struct _M128A Legacy[8]; /* +0x120 */
+            struct _M128A Xmm0; /* +0x1a0 */
+            struct _M128A Xmm1; /* +0x1b0 */
+            struct _M128A Xmm2; /* +0x1c0 */
+            struct _M128A Xmm3; /* +0x1d0 */
+            struct _M128A Xmm4; /* +0x1e0 */
+            struct _M128A Xmm5; /* +0x1f0 */
+            struct _M128A Xmm6; /* +0x200 */
+            struct _M128A Xmm7; /* +0x210 */
+            struct _M128A Xmm8; /* +0x220 */
+            struct _M128A Xmm9; /* +0x230 */
+            struct _M128A Xmm10; /* +0x240 */
+            struct _M128A Xmm11; /* +0x250 */
+            struct _M128A Xmm12; /* +0x260 */
+            struct _M128A Xmm13; /* +0x270 */
+            struct _M128A Xmm14; /* +0x280 */
+            struct _M128A Xmm15; /* +0x290 */
+            uint8_t _pad_l1_tail_0x2a0[0x230];
+        };
+    };
+};
+
+/* Source: pdb | Size: 0x5c0 (1472 bytes) */
+struct __attribute__((packed)) _KPROCESSOR_STATE {
+    struct _KSPECIAL_REGISTERS SpecialRegisters; /* +0x0 */
+    struct _CONTEXT ContextFrame; /* +0xf0 */
 };
 
 /* Source: pdb | Size: 0x10 (16 bytes) */
@@ -1606,6 +2518,129 @@ struct __attribute__((packed)) _KGATE {
     struct _DISPATCHER_HEADER Header; /* +0x0 */
 };
 
+/* Source: pdb | Size: 0x6 (6 bytes) */
+struct __attribute__((packed)) _PROC_IDLE_POLICY {
+    uint8_t PromotePercent; /* +0x0 */
+    uint8_t DemotePercent; /* +0x1 */
+    uint8_t PromotePercentBase; /* +0x2 */
+    uint8_t DemotePercentBase; /* +0x3 */
+    uint8_t AllowScaling; /* +0x4 */
+    uint8_t ForceLightIdle; /* +0x5 */
+};
+
+/* Source: pdb | Size: 0x4 (4 bytes) */
+union _PPM_IDLE_SYNCHRONIZATION_STATE {
+    int32_t AsLong; /* +0x0 */
+    uint8_t _raw_bytes[0x4];
+};
+
+/* Source: pdb | Size: 0x90 (144 bytes) */
+struct __attribute__((packed)) _PROC_FEEDBACK {
+    uint64_t Lock; /* +0x0 */
+    uint64_t CyclesLast; /* +0x8 */
+    uint64_t CyclesActive; /* +0x10 */
+    struct _PROC_FEEDBACK_COUNTER* Counters[2]; /* +0x18 */
+    uint64_t LastUpdateTime; /* +0x28 */
+    uint64_t UnscaledTime; /* +0x30 */
+    int64_t UnaccountedTime; /* +0x38 */
+    uint64_t ScaledTime[2]; /* +0x40 */
+    uint64_t UnaccountedKernelTime; /* +0x50 */
+    uint64_t PerformanceScaledKernelTime; /* +0x58 */
+    uint32_t UserTimeLast; /* +0x60 */
+    uint32_t KernelTimeLast; /* +0x64 */
+    uint64_t IdleGenerationNumberLast; /* +0x68 */
+    uint64_t HvActiveTimeLast; /* +0x70 */
+    uint64_t StallCyclesLast; /* +0x78 */
+    uint64_t StallTime; /* +0x80 */
+    uint8_t KernelTimesIndex; /* +0x88 */
+    uint8_t CounterDiscardsIdleTime; /* +0x89 */
+    uint8_t _pad_l0_tail_0x8a[0x6];
+};
+
+/* Source: pdb | Size: 0x20 (32 bytes) */
+struct __attribute__((packed)) _PPM_FFH_THROTTLE_STATE_INFO {
+    uint8_t EnableLogging; /* +0x0 */
+    uint8_t _pad_l0_0_0x1[0x3];
+    uint32_t MismatchCount; /* +0x4 */
+    uint8_t Initialized; /* +0x8 */
+    uint8_t _pad_l0_1_0x9[0x7];
+    uint64_t LastValue; /* +0x10 */
+    union _LARGE_INTEGER LastLogTickCount; /* +0x18 */
+};
+
+/* Source: pdb | Size: 0x10 (16 bytes) */
+struct __attribute__((packed)) _PROC_IDLE_SNAP {
+    uint64_t Time; /* +0x0 */
+    uint64_t Idle; /* +0x8 */
+};
+
+/* Source: pdb | Size: 0x200 (512 bytes) */
+struct __attribute__((packed)) _PROCESSOR_POWER_STATE {
+    union {
+        struct __attribute__((packed)) {
+            struct _PPM_IDLE_STATES* IdleStates; /* +0x0 */
+            struct _PROC_IDLE_ACCOUNTING* IdleAccounting; /* +0x8 */
+            uint64_t IdleTimeLast; /* +0x10 */
+            uint64_t IdleTimeTotal; /* +0x18 */
+            uint64_t IdleTimeEntry; /* +0x20 */
+            uint64_t IdleTimeExpiration; /* +0x28 */
+            uint8_t NonInterruptibleTransition; /* +0x30 */
+            uint8_t PepWokenTransition; /* +0x31 */
+            uint8_t EfficiencyClass; /* +0x32 */
+            uint8_t SchedulingClass; /* +0x33 */
+            uint32_t TargetIdleState; /* +0x34 */
+            struct _PROC_IDLE_POLICY IdlePolicy; /* +0x38 */
+            uint8_t _pad_l0_0_0x3e[0x2];
+            union _PPM_IDLE_SYNCHRONIZATION_STATE Synchronization; /* +0x40 */
+            uint8_t _pad_l0_1_0x44[0x4];
+            struct _PROC_FEEDBACK PerfFeedback; /* +0x48 */
+            int32_t Hypervisor; /* +0xd8 */
+            uint32_t LastSysTime; /* +0xdc */
+            uint64_t WmiDispatchPtr; /* +0xe0 */
+            int32_t WmiInterfaceEnabled; /* +0xe8 */
+            uint8_t _pad_l0_2_0xec[0x4];
+            struct _PPM_FFH_THROTTLE_STATE_INFO FFHThrottleStateInfo; /* +0xf0 */
+            struct _KDPC PerfActionDpc; /* +0x110 */
+            int32_t PerfActionMask; /* +0x150 */
+            uint8_t _pad_l0_3_0x154[0x4];
+            struct _PROC_IDLE_SNAP HvIdleCheck; /* +0x158 */
+            struct _PROC_PERF_CHECK* PerfCheck; /* +0x168 */
+            struct _PROC_PERF_DOMAIN* Domain; /* +0x170 */
+            struct _PROC_PERF_CONSTRAINT* PerfConstraint; /* +0x178 */
+            struct _PPM_CONCURRENCY_ACCOUNTING* Concurrency; /* +0x180 */
+            struct _PPM_CONCURRENCY_ACCOUNTING* ClassConcurrency; /* +0x188 */
+            struct _PROC_PERF_LOAD* Load; /* +0x190 */
+            struct _PROC_PERF_HISTORY* PerfHistory; /* +0x198 */
+            uint8_t GuaranteedPerformancePercent; /* +0x1a0 */
+            uint8_t HvTargetState; /* +0x1a1 */
+            uint8_t Parked; /* +0x1a2 */
+            uint8_t LongPriorQosPeriod; /* +0x1a3 */
+            uint32_t LatestPerformancePercent; /* +0x1a4 */
+            uint32_t AveragePerformancePercent; /* +0x1a8 */
+            uint32_t LatestAffinitizedPercent; /* +0x1ac */
+            uint32_t RelativePerformance; /* +0x1b0 */
+            uint32_t Utility; /* +0x1b4 */
+            uint32_t AffinitizedUtility; /* +0x1b8 */
+            uint8_t _pad_l0_4_0x1bc[0x4];
+            uint64_t EnergyConsumed; /* +0x1c0 */
+            uint64_t ActiveTime; /* +0x1c8 */
+            uint64_t TotalTime; /* +0x1d0 */
+            struct _POP_FX_DEVICE* FxDevice; /* +0x1d8 */
+            uint64_t LastQosTranstionTsc; /* +0x1e0 */
+            uint64_t QosTransitionHysteresis; /* +0x1e8 */
+            int32_t RequestedQosClass; /* +0x1f0 */
+            int32_t ResolvedQosClass; /* +0x1f4 */
+            uint32_t QosEquivalencyMask; /* +0x1f8 */
+            uint8_t _pad_l0_tail_0x1fc[0x4];
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l1_0_0x0[0x1c0];
+            uint64_t SnapTimeLast; /* +0x1c0 */
+            uint8_t _pad_l1_tail_0x1c8[0x38];
+        };
+    };
+};
+
 /* Source: pdb | Size: 0xc (12 bytes) */
 struct __attribute__((packed)) _CACHE_DESCRIPTOR {
     uint8_t Level; /* +0x0 */
@@ -1671,6 +2706,16 @@ struct __attribute__((packed)) _FILESYSTEM_DISK_COUNTERS {
     uint64_t FsBytesWritten; /* +0x8 */
 };
 
+/* Source: pdb | Size: 0x150 (336 bytes) */
+struct __attribute__((packed)) _KENTROPY_TIMING_STATE {
+    uint32_t EntropyCount; /* +0x0 */
+    uint32_t Buffer[64]; /* +0x4 */
+    uint8_t _pad_l0_0_0x104[0x4];
+    struct _KDPC Dpc; /* +0x108 */
+    uint32_t LastDeliveredBuffer; /* +0x148 */
+    uint8_t _pad_l0_tail_0x14c[0x4];
+};
+
 /* Source: pdb | Size: 0x54 (84 bytes) */
 struct __attribute__((packed)) _IOP_IRP_STACK_PROFILER {
     uint32_t Profile[20]; /* +0x0 */
@@ -1681,6 +2726,25 @@ struct __attribute__((packed)) _IOP_IRP_STACK_PROFILER {
 struct __attribute__((packed)) _KSECURE_FAULT_INFORMATION {
     uint64_t FaultCode; /* +0x0 */
     uint64_t FaultVa; /* +0x8 */
+};
+
+/* Source: pdb | Size: 0x270 (624 bytes) */
+struct __attribute__((packed)) _KSHARED_READY_QUEUE {
+    uint64_t Lock; /* +0x0 */
+    uint32_t ReadySummary; /* +0x8 */
+    uint8_t _pad_l0_0_0xc[0x4];
+    struct _LIST_ENTRY ReadyListHead[32]; /* +0x10 */
+    char RunningSummary[64]; /* +0x210 */
+    uint8_t Span; /* +0x250 */
+    uint8_t LowProcIndex; /* +0x251 */
+    uint8_t QueueIndex; /* +0x252 */
+    uint8_t ProcCount; /* +0x253 */
+    uint8_t ScanOwner; /* +0x254 */
+    uint8_t Spare[3]; /* +0x255 */
+    uint64_t Affinity; /* +0x258 */
+    uint32_t ReadyThreadCount; /* +0x260 */
+    uint8_t _pad_l0_1_0x264[0x4];
+    uint64_t ReadyQueueExpectedRunTime; /* +0x268 */
 };
 
 /* Source: pdb | Size: 0x10 (16 bytes) */
@@ -1749,7 +2813,7 @@ struct __attribute__((packed)) _KPRCB {
             uint32_t CFlushSize; /* +0xe8 */
             int32_t BamFlags; /* +0xec */
             uint64_t PrcbPad11[2]; /* +0xf0 */
-            uint8_t ProcessorState[0x5c0]; /* struct _KPROCESSOR_STATE +0x100 */
+            struct _KPROCESSOR_STATE ProcessorState; /* +0x100 */
             uint64_t PrcbPad12[6]; /* +0x6c0 */
             struct _KSPIN_LOCK_QUEUE LockQueue[17]; /* +0x6f0 */
             struct _PP_LOOKASIDE_LIST PPLookasideList[16]; /* +0x800 */
@@ -1898,7 +2962,7 @@ struct __attribute__((packed)) _KPRCB {
             int32_t MmCacheReadCount; /* +0x5cec */
             int32_t MmCacheIoCount; /* +0x5cf0 */
             uint32_t PrcbPad91[3]; /* +0x5cf4 */
-            uint8_t PowerState[0x200]; /* struct _PROCESSOR_POWER_STATE +0x5d00 */
+            struct _PROCESSOR_POWER_STATE PowerState; /* +0x5d00 */
             void* HyperPte; /* +0x5f00 */
             struct _LIST_ENTRY ScbList; /* +0x5f08 */
             struct _KDPC ForceIdleDpc; /* +0x5f18 */
@@ -1948,7 +3012,7 @@ struct __attribute__((packed)) _KPRCB {
             uint32_t PrcbPad115; /* +0x62cc */
             struct _XSAVE_AREA* ExtendedState; /* +0x62d0 */
             void* IsrStack; /* +0x62d8 */
-            uint8_t EntropyTimingState[0x150]; /* struct _KENTROPY_TIMING_STATE +0x62e0 */
+            struct _KENTROPY_TIMING_STATE EntropyTimingState; /* +0x62e0 */
             struct _SINGLE_LIST_ENTRY AbSelfIoBoostsList; /* +0x6430 */
             struct _SINGLE_LIST_ENTRY AbPropagateBoostsList; /* +0x6438 */
             struct _KDPC AbDpc; /* +0x6440 */
@@ -1956,7 +3020,7 @@ struct __attribute__((packed)) _KPRCB {
             struct _IOP_IRP_STACK_PROFILER IoIrpStackProfilerPrevious; /* +0x64d4 */
             struct _KSECURE_FAULT_INFORMATION SecureFault; /* +0x6528 */
             uint64_t PrcbPad120; /* +0x6538 */
-            uint8_t LocalSharedReadyQueue[0x270]; /* struct _KSHARED_READY_QUEUE +0x6540 */
+            struct _KSHARED_READY_QUEUE LocalSharedReadyQueue; /* +0x6540 */
             uint64_t PrcbPad125[2]; /* +0x67b0 */
             uint32_t TimerExpirationTraceCount; /* +0x67c0 */
             uint32_t PrcbPad127; /* +0x67c4 */
@@ -2043,6 +3107,44 @@ struct __attribute__((packed)) _KPCR {
     };
 };
 
+/* Source: pdb | Size: 0x18 (24 bytes) */
+struct __attribute__((packed)) _DIRTY_PAGE_STATISTICS {
+    uint64_t DirtyPages; /* +0x0 */
+    uint64_t DirtyPagesLastScan; /* +0x8 */
+    uint32_t DirtyPagesScheduledLastScan; /* +0x10 */
+    uint8_t _pad_l0_tail_0x14[0x4];
+};
+
+/* Source: pdb | Size: 0x38 (56 bytes) */
+struct __attribute__((packed)) _DIRTY_PAGE_THRESHOLDS {
+    uint64_t DirtyPageThreshold; /* +0x0 */
+    uint64_t DirtyPageThresholdTop; /* +0x8 */
+    uint64_t DirtyPageThresholdBottom; /* +0x10 */
+    uint32_t DirtyPageTarget; /* +0x18 */
+    uint8_t _pad_l0_0_0x1c[0x4];
+    uint64_t AggregateAvailablePages; /* +0x20 */
+    uint64_t AggregateDirtyPages; /* +0x28 */
+    uint32_t AvailableHistory; /* +0x30 */
+    uint8_t _pad_l0_tail_0x34[0x4];
+};
+
+/* Source: pdb | Size: 0x98 (152 bytes) */
+struct __attribute__((packed)) _LOG_HANDLE_CONTEXT {
+    void* LogHandle; /* +0x0 */
+    void** FlushToLsnRoutine; /* +0x8 */
+    void** QueryLogHandleInfoRoutine; /* +0x10 */
+    struct _DIRTY_PAGE_STATISTICS DirtyPageStatistics; /* +0x18 */
+    struct _DIRTY_PAGE_THRESHOLDS DirtyPageThresholds; /* +0x30 */
+    uint32_t AdditionalPagesToWrite; /* +0x68 */
+    uint32_t CcLWScanDPThreshold; /* +0x6c */
+    union _LARGE_INTEGER LargestLsnForCurrentLWScan; /* +0x70 */
+    struct _FILE_OBJECT* RelatedFileObject; /* +0x78 */
+    uint64_t LargestLsnFileObjectKey; /* +0x80 */
+    union _LARGE_INTEGER LastLWTimeStamp; /* +0x88 */
+    uint32_t Flags; /* +0x90 */
+    uint8_t _pad_l0_tail_0x94[0x4];
+};
+
 /* Source: pdb | Size: 0x8 (8 bytes) */
 struct __attribute__((packed)) _LUID {
     uint32_t LowPart; /* +0x0 */
@@ -2061,6 +3163,270 @@ struct __attribute__((packed)) _MDL {
     void* StartVa; /* +0x20 */
     uint32_t ByteCount; /* +0x28 */
     uint32_t ByteOffset; /* +0x2c */
+};
+
+/* Source: pdb | Size: 0x4 (4 bytes) */
+struct __attribute__((packed)) _MM_SESSION_SPACE_FLAGS {
+    uint8_t _pad_l0_tail_0x0[0x4];
+};
+
+/* Source: pdb | Size: 0x4 (4 bytes) */
+union _ANON_TAG_1fcc {
+    uint32_t LongFlags; /* +0x0 */
+    struct _MM_SESSION_SPACE_FLAGS Flags; /* +0x0 */
+    uint8_t _raw_bytes[0x4];
+};
+
+/* Source: pdb | Size: 0x10 (16 bytes) */
+struct __attribute__((packed)) _RTL_BITMAP_EX {
+    uint64_t SizeOfBitMap; /* +0x0 */
+    uint64_t* Buffer; /* +0x8 */
+};
+
+/* Source: pdb | Size: 0x38 (56 bytes) */
+struct __attribute__((packed)) _MM_PAGED_POOL_INFO {
+    struct _EX_PUSH_LOCK Lock; /* +0x0 */
+    struct _RTL_BITMAP_EX PagedPoolAllocationMap; /* +0x8 */
+    struct _MMPTE* FirstPteForPagedPool; /* +0x18 */
+    uint64_t MaximumSize; /* +0x20 */
+    uint64_t PagedPoolHint; /* +0x28 */
+    uint64_t AllocatedPagedPool; /* +0x30 */
+};
+
+/* Source: pdb | Size: 0x80 (128 bytes) */
+struct __attribute__((packed)) _GENERAL_LOOKASIDE {
+    union {
+        struct __attribute__((packed)) {
+            union _SLIST_HEADER ListHead; /* +0x0 */
+            uint16_t Depth; /* +0x10 */
+            uint16_t MaximumDepth; /* +0x12 */
+            uint32_t TotalAllocates; /* +0x14 */
+            uint32_t AllocateHits; /* +0x18 */
+            uint32_t TotalFrees; /* +0x1c */
+            uint32_t FreeHits; /* +0x20 */
+            int32_t Type; /* +0x24 */
+            uint32_t Tag; /* +0x28 */
+            uint32_t Size; /* +0x2c */
+            void** Allocate; /* +0x30 */
+            void** Free; /* +0x38 */
+            struct _LIST_ENTRY ListEntry; /* +0x40 */
+            uint32_t LastTotalAllocates; /* +0x50 */
+            uint32_t LastAllocateHits; /* +0x54 */
+            uint32_t Future[2]; /* +0x58 */
+            uint8_t _pad_l0_tail_0x60[0x20];
+        };
+        struct __attribute__((packed)) {
+            struct _SINGLE_LIST_ENTRY SingleListHead; /* +0x0 */
+            uint8_t _pad_l1_0_0x8[0x10];
+            uint32_t AllocateMisses; /* +0x18 */
+            uint8_t _pad_l1_1_0x1c[0x4];
+            uint32_t FreeMisses; /* +0x20 */
+            uint8_t _pad_l1_2_0x24[0xc];
+            void** AllocateEx; /* +0x30 */
+            void** FreeEx; /* +0x38 */
+            uint8_t _pad_l1_3_0x40[0x14];
+            uint32_t LastAllocateMisses; /* +0x54 */
+            uint8_t _pad_l1_tail_0x58[0x28];
+        };
+    };
+};
+
+/* Source: pdb | Size: 0x20 (32 bytes) */
+struct __attribute__((packed)) _MMSESSION {
+    struct _EX_PUSH_LOCK SystemSpaceViewLock; /* +0x0 */
+    struct _EX_PUSH_LOCK* SystemSpaceViewLockPointer; /* +0x8 */
+    struct _RTL_AVL_TREE ViewRoot; /* +0x10 */
+    uint32_t ViewCount; /* +0x18 */
+    uint32_t BitmapFailures; /* +0x1c */
+};
+
+/* Source: pdb | Size: 0x28 (40 bytes) */
+struct __attribute__((packed)) _MMWSL_INSTANCE {
+    struct _MMPTE* NextPteToTrim; /* +0x0 */
+    struct _MMPTE* NextPteToAge; /* +0x8 */
+    struct _MMPTE* NextPteToAccessClear; /* +0x10 */
+    uint32_t LastAccessClearingRemainder; /* +0x18 */
+    uint32_t LastAgingRemainder; /* +0x1c */
+    uint64_t LockedEntries; /* +0x20 */
+};
+
+/* Source: pdb | Size: 0x20 (32 bytes) */
+struct __attribute__((packed)) _MMSUPPORT_AGGREGATION {
+    uint32_t PageFaultCount; /* +0x0 */
+    uint8_t _pad_l0_0_0x4[0x4];
+    uint64_t WorkingSetSize; /* +0x8 */
+    uint64_t WorkingSetLeafSize; /* +0x10 */
+    uint64_t PeakWorkingSetSize; /* +0x18 */
+};
+
+/* Source: pdb | Size: 0x8 (8 bytes) */
+struct __attribute__((packed)) _MI_SESSION_DRIVER_UNLOAD {
+    union {
+        struct __attribute__((packed)) {
+            void** Function; /* +0x0 */
+        };
+        struct __attribute__((packed)) {
+            uint64_t FunctionValue; /* +0x0 */
+        };
+    };
+};
+
+/* Source: pdb | Size: 0x8 (8 bytes) */
+struct __attribute__((packed)) _MMPTE_HARDWARE {
+    uint8_t _pad_l0_tail_0x0[0x8];
+};
+
+/* Source: pdb | Size: 0x8 (8 bytes) */
+struct __attribute__((packed)) _HARDWARE_PTE {
+    uint8_t _pad_l0_tail_0x0[0x8];
+};
+
+/* Source: pdb | Size: 0x8 (8 bytes) */
+struct __attribute__((packed)) _MMPTE_PROTOTYPE {
+    uint8_t _pad_l0_tail_0x0[0x8];
+};
+
+/* Source: pdb | Size: 0x8 (8 bytes) */
+struct __attribute__((packed)) _MMPTE_SOFTWARE {
+    uint8_t _pad_l0_tail_0x0[0x8];
+};
+
+/* Source: pdb | Size: 0x8 (8 bytes) */
+struct __attribute__((packed)) _MMPTE_TIMESTAMP {
+    uint8_t _pad_l0_tail_0x0[0x8];
+};
+
+/* Source: pdb | Size: 0x8 (8 bytes) */
+struct __attribute__((packed)) _MMPTE_TRANSITION {
+    uint8_t _pad_l0_tail_0x0[0x8];
+};
+
+/* Source: pdb | Size: 0x8 (8 bytes) */
+struct __attribute__((packed)) _MMPTE_SUBSECTION {
+    uint8_t _pad_l0_tail_0x0[0x8];
+};
+
+/* Source: pdb | Size: 0x8 (8 bytes) */
+struct __attribute__((packed)) _MMPTE_LIST {
+    uint8_t _pad_l0_tail_0x0[0x8];
+};
+
+/* Source: pdb | Size: 0x8 (8 bytes) */
+union _ANON_TAG_16eb {
+    uint64_t Long; /* +0x0 */
+    uint64_t VolatileLong; /* +0x0 */
+    struct _MMPTE_HARDWARE Hard; /* +0x0 */
+    struct _HARDWARE_PTE Flush; /* +0x0 */
+    struct _MMPTE_PROTOTYPE Proto; /* +0x0 */
+    struct _MMPTE_SOFTWARE Soft; /* +0x0 */
+    struct _MMPTE_TIMESTAMP TimeStamp; /* +0x0 */
+    struct _MMPTE_TRANSITION Trans; /* +0x0 */
+    struct _MMPTE_SUBSECTION Subsect; /* +0x0 */
+    struct _MMPTE_LIST List; /* +0x0 */
+    uint8_t _raw_bytes[0x8];
+};
+
+/* Source: pdb | Size: 0x8 (8 bytes) */
+struct __attribute__((packed)) _MMPTE {
+    union _ANON_TAG_16eb u; /* +0x0 */
+};
+
+/* Source: pdb | Size: 0x18 (24 bytes) */
+struct __attribute__((packed)) _MI_PTE_CHAIN_HEAD {
+    struct _MMPTE Flink; /* +0x0 */
+    struct _MMPTE Blink; /* +0x8 */
+    struct _MMPTE* PteBase; /* +0x10 */
+};
+
+/* Source: pdb | Size: 0x40 (64 bytes) */
+struct __attribute__((packed)) _MI_SPECIAL_POOL {
+    uint64_t Lock; /* +0x0 */
+    struct _MI_PTE_CHAIN_HEAD Paged; /* +0x8 */
+    struct _MI_PTE_CHAIN_HEAD NonPaged; /* +0x20 */
+    uint64_t PagesInUse; /* +0x38 */
+};
+
+/* Source: pdb | Size: 0x68 (104 bytes) */
+struct __attribute__((packed)) _MI_SYSTEM_PTE_TYPE {
+    union {
+        struct __attribute__((packed)) {
+            struct _RTL_BITMAP_EX Bitmap; /* +0x0 */
+            struct _MMPTE* BasePte; /* +0x10 */
+            uint32_t Flags; /* +0x18 */
+            int32_t VaType; /* +0x1c */
+            uint32_t* FailureCount; /* +0x20 */
+            uint32_t PteFailures; /* +0x28 */
+            uint8_t _pad_l0_0_0x2c[0x4];
+            struct _EX_PUSH_LOCK* GlobalPushLock; /* +0x30 */
+            struct _MMSUPPORT_INSTANCE* Vm; /* +0x38 */
+            uint64_t TotalSystemPtes; /* +0x40 */
+            uint64_t Hint; /* +0x48 */
+            uint64_t LowestBitEverAllocated; /* +0x50 */
+            struct _MI_CACHED_PTES* CachedPtes; /* +0x58 */
+            uint64_t TotalFreeSystemPtes; /* +0x60 */
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l1_0_0x0[0x30];
+            uint64_t SpinLock; /* +0x30 */
+            uint8_t _pad_l1_tail_0x38[0x30];
+        };
+    };
+};
+
+/* Source: pdb | Size: 0x4000 (16384 bytes) */
+struct __attribute__((packed)) _MM_SESSION_SPACE {
+    int32_t ReferenceCount; /* +0x0 */
+    union _ANON_TAG_1fcc u; /* +0x4 */
+    uint32_t SessionId; /* +0x8 */
+    int32_t ProcessReferenceToSession; /* +0xc */
+    struct _LIST_ENTRY ProcessList; /* +0x10 */
+    uint64_t SessionPageDirectoryIndex; /* +0x20 */
+    uint64_t NonPagablePages; /* +0x28 */
+    uint64_t CommittedPages; /* +0x30 */
+    void* PagedPoolStart; /* +0x38 */
+    void* PagedPoolEnd; /* +0x40 */
+    void* SessionObject; /* +0x48 */
+    void* SessionObjectHandle; /* +0x50 */
+    uint32_t SessionPoolAllocationFailures[4]; /* +0x58 */
+    struct _RTL_AVL_TREE ImageTree; /* +0x68 */
+    uint32_t LocaleId; /* +0x70 */
+    uint32_t AttachCount; /* +0x74 */
+    struct _KGATE AttachGate; /* +0x78 */
+    struct _LIST_ENTRY WsListEntry; /* +0x90 */
+    struct _MM_PAGED_POOL_INFO PagedPoolInfo; /* +0xa0 */
+    uint8_t _pad_l0_0_0xd8[0x28];
+    struct _GENERAL_LOOKASIDE Lookaside[21]; /* +0x100 */
+    struct _MMSESSION Session; /* +0xb80 */
+    uint8_t _pad_l0_1_0xba0[0x20];
+    struct _MMSUPPORT_FULL Vm; /* +0xbc0 */
+    uint8_t _pad_l0_2_0xcd0[0x30];
+    struct _MMWSL_INSTANCE WorkingSetList; /* +0xd00 */
+    uint8_t _pad_l0_3_0xd28[0x18];
+    struct _MMSUPPORT_AGGREGATION AggregateSessionWs; /* +0xd40 */
+    uint8_t _pad_l0_4_0xd60[0x20];
+    uint8_t PagedPool[0x1140]; /* struct _POOL_DESCRIPTOR +0xd80 */
+    struct _MI_SESSION_DRIVER_UNLOAD DriverUnload; /* +0x1ec0 */
+    struct _MMPTE PageDirectory; /* +0x1ec8 */
+    struct _EX_PUSH_LOCK SessionVaLock; /* +0x1ed0 */
+    struct _RTL_BITMAP_EX DynamicVaBitMap; /* +0x1ed8 */
+    uint64_t DynamicVaHint; /* +0x1ee8 */
+    struct _MI_SPECIAL_POOL SpecialPool; /* +0x1ef0 */
+    struct _EX_PUSH_LOCK SessionPteLock; /* +0x1f30 */
+    int32_t PoolBigEntriesInUse; /* +0x1f38 */
+    uint32_t PagedPoolPdeCount; /* +0x1f3c */
+    uint32_t SpecialPoolPdeCount; /* +0x1f40 */
+    uint32_t DynamicSessionPdeCount; /* +0x1f44 */
+    struct _MI_SYSTEM_PTE_TYPE SystemPteInfo; /* +0x1f48 */
+    void* PoolTrackTableExpansion; /* +0x1fb0 */
+    uint64_t PoolTrackTableExpansionSize; /* +0x1fb8 */
+    void* PoolTrackBigPages; /* +0x1fc0 */
+    uint64_t PoolTrackBigPagesSize; /* +0x1fc8 */
+    int32_t IoState; /* +0x1fd0 */
+    uint32_t IoStateSequence; /* +0x1fd4 */
+    struct _KEVENT IoNotificationEvent; /* +0x1fd8 */
+    struct _EJOB* ServerSilo; /* +0x1ff0 */
+    uint64_t CreateTime; /* +0x1ff8 */
+    uint8_t PoolTags[8192]; /* +0x2000 */
 };
 
 /* Source: pdb | Size: 0x8 (8 bytes) */
@@ -2099,22 +3465,6 @@ struct __attribute__((packed)) _OBJECT_HEADER {
             uint8_t _pad_l1_tail_0x28[0x10];
         };
     };
-};
-
-/* Source: pdb | Size: 0x10 (16 bytes) */
-struct __attribute__((packed)) _UNICODE_STRING {
-    uint16_t Length; /* +0x0 */
-    uint16_t MaximumLength; /* +0x2 */
-    uint8_t _pad_l0_0_0x4[0x4];
-    uint16_t* Buffer; /* +0x8 */
-};
-
-/* Source: pdb | Size: 0x10 (16 bytes) */
-struct __attribute__((packed)) _GENERIC_MAPPING {
-    uint32_t GenericRead; /* +0x0 */
-    uint32_t GenericWrite; /* +0x4 */
-    uint32_t GenericExecute; /* +0x8 */
-    uint32_t GenericAll; /* +0xc */
 };
 
 /* Source: pdb | Size: 0x78 (120 bytes) */
@@ -2170,11 +3520,301 @@ struct __attribute__((packed)) _OBJECT_TYPE {
     struct _LIST_ENTRY CallbackList; /* +0xc8 */
 };
 
+/* Source: pdb | Size: 0x7b0 (1968 bytes) */
+struct __attribute__((packed)) _PEB {
+    union {
+        struct __attribute__((packed)) {
+            uint8_t InheritedAddressSpace; /* +0x0 */
+            uint8_t ReadImageFileExecOptions; /* +0x1 */
+            uint8_t BeingDebugged; /* +0x2 */
+            uint8_t BitField; /* +0x3 */
+            uint8_t Padding0[4]; /* +0x4 */
+            void* Mutant; /* +0x8 */
+            void* ImageBaseAddress; /* +0x10 */
+            struct _PEB_LDR_DATA* Ldr; /* +0x18 */
+            struct _RTL_USER_PROCESS_PARAMETERS* ProcessParameters; /* +0x20 */
+            void* SubSystemData; /* +0x28 */
+            void* ProcessHeap; /* +0x30 */
+            struct _RTL_CRITICAL_SECTION* FastPebLock; /* +0x38 */
+            union _SLIST_HEADER* AtlThunkSListPtr; /* +0x40 */
+            void* IFEOKey; /* +0x48 */
+            uint32_t CrossProcessFlags; /* +0x50 */
+            uint8_t Padding1[4]; /* +0x54 */
+            void* KernelCallbackTable; /* +0x58 */
+            uint32_t SystemReserved; /* +0x60 */
+            uint32_t AtlThunkSListPtr32; /* +0x64 */
+            void* ApiSetMap; /* +0x68 */
+            uint32_t TlsExpansionCounter; /* +0x70 */
+            uint8_t Padding2[4]; /* +0x74 */
+            void* TlsBitmap; /* +0x78 */
+            uint32_t TlsBitmapBits[2]; /* +0x80 */
+            void* ReadOnlySharedMemoryBase; /* +0x88 */
+            void* SharedData; /* +0x90 */
+            void** ReadOnlyStaticServerData; /* +0x98 */
+            void* AnsiCodePageData; /* +0xa0 */
+            void* OemCodePageData; /* +0xa8 */
+            void* UnicodeCaseTableData; /* +0xb0 */
+            uint32_t NumberOfProcessors; /* +0xb8 */
+            uint32_t NtGlobalFlag; /* +0xbc */
+            union _LARGE_INTEGER CriticalSectionTimeout; /* +0xc0 */
+            uint64_t HeapSegmentReserve; /* +0xc8 */
+            uint64_t HeapSegmentCommit; /* +0xd0 */
+            uint64_t HeapDeCommitTotalFreeThreshold; /* +0xd8 */
+            uint64_t HeapDeCommitFreeBlockThreshold; /* +0xe0 */
+            uint32_t NumberOfHeaps; /* +0xe8 */
+            uint32_t MaximumNumberOfHeaps; /* +0xec */
+            void** ProcessHeaps; /* +0xf0 */
+            void* GdiSharedHandleTable; /* +0xf8 */
+            void* ProcessStarterHelper; /* +0x100 */
+            uint32_t GdiDCAttributeList; /* +0x108 */
+            uint8_t Padding3[4]; /* +0x10c */
+            struct _RTL_CRITICAL_SECTION* LoaderLock; /* +0x110 */
+            uint32_t OSMajorVersion; /* +0x118 */
+            uint32_t OSMinorVersion; /* +0x11c */
+            uint16_t OSBuildNumber; /* +0x120 */
+            uint16_t OSCSDVersion; /* +0x122 */
+            uint32_t OSPlatformId; /* +0x124 */
+            uint32_t ImageSubsystem; /* +0x128 */
+            uint32_t ImageSubsystemMajorVersion; /* +0x12c */
+            uint32_t ImageSubsystemMinorVersion; /* +0x130 */
+            uint8_t Padding4[4]; /* +0x134 */
+            uint64_t ActiveProcessAffinityMask; /* +0x138 */
+            uint32_t GdiHandleBuffer[60]; /* +0x140 */
+            void** PostProcessInitRoutine; /* +0x230 */
+            void* TlsExpansionBitmap; /* +0x238 */
+            uint32_t TlsExpansionBitmapBits[32]; /* +0x240 */
+            uint32_t SessionId; /* +0x2c0 */
+            uint8_t Padding5[4]; /* +0x2c4 */
+            union _ULARGE_INTEGER AppCompatFlags; /* +0x2c8 */
+            union _ULARGE_INTEGER AppCompatFlagsUser; /* +0x2d0 */
+            void* pShimData; /* +0x2d8 */
+            void* AppCompatInfo; /* +0x2e0 */
+            struct _UNICODE_STRING CSDVersion; /* +0x2e8 */
+            const struct _ACTIVATION_CONTEXT_DATA* ActivationContextData; /* +0x2f8 */
+            struct _ASSEMBLY_STORAGE_MAP* ProcessAssemblyStorageMap; /* +0x300 */
+            const struct _ACTIVATION_CONTEXT_DATA* SystemDefaultActivationContextData; /* +0x308 */
+            struct _ASSEMBLY_STORAGE_MAP* SystemAssemblyStorageMap; /* +0x310 */
+            uint64_t MinimumStackCommit; /* +0x318 */
+            struct _FLS_CALLBACK_INFO* FlsCallback; /* +0x320 */
+            struct _LIST_ENTRY FlsListHead; /* +0x328 */
+            void* FlsBitmap; /* +0x338 */
+            uint32_t FlsBitmapBits[4]; /* +0x340 */
+            uint32_t FlsHighIndex; /* +0x350 */
+            uint8_t _pad_l0_0_0x354[0x4];
+            void* WerRegistrationData; /* +0x358 */
+            void* WerShipAssertPtr; /* +0x360 */
+            void* pUnused; /* +0x368 */
+            void* pImageHeaderHash; /* +0x370 */
+            uint32_t TracingFlags; /* +0x378 */
+            uint8_t Padding6[4]; /* +0x37c */
+            uint64_t CsrServerReadOnlySharedMemoryBase; /* +0x380 */
+            uint64_t TppWorkerpListLock; /* +0x388 */
+            struct _LIST_ENTRY TppWorkerpList; /* +0x390 */
+            void* WaitOnAddressHashTable[128]; /* +0x3a0 */
+            void* TelemetryCoverageHeader; /* +0x7a0 */
+            uint32_t CloudFileFlags; /* +0x7a8 */
+            uint8_t _pad_l0_tail_0x7ac[0x4];
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l1_0_0x0[0x58];
+            void* UserSharedInfoPtr; /* +0x58 */
+            uint8_t _pad_l1_tail_0x60[0x750];
+        };
+    };
+};
+
 /* Source: pdb | Size: 0x4 (4 bytes) */
 struct __attribute__((packed)) _PROCESSOR_NUMBER {
     uint16_t Group; /* +0x0 */
     uint8_t Number; /* +0x2 */
     uint8_t Reserved; /* +0x3 */
+};
+
+/* Source: pdb | Size: 0x80 (128 bytes) */
+struct __attribute__((packed)) _PPM_SELECTION_STATISTICS {
+    uint64_t SelectedCount; /* +0x0 */
+    uint64_t VetoCount; /* +0x8 */
+    uint64_t PreVetoCount; /* +0x10 */
+    uint64_t WrongProcessorCount; /* +0x18 */
+    uint64_t LatencyCount; /* +0x20 */
+    uint64_t IdleDurationCount; /* +0x28 */
+    uint64_t DeviceDependencyCount; /* +0x30 */
+    uint64_t ProcessorDependencyCount; /* +0x38 */
+    uint64_t PlatformOnlyCount; /* +0x40 */
+    uint64_t InterruptibleCount; /* +0x48 */
+    uint64_t LegacyOverrideCount; /* +0x50 */
+    uint64_t CstateCheckCount; /* +0x58 */
+    uint64_t NoCStateCount; /* +0x60 */
+    uint64_t CoordinatedDependencyCount; /* +0x68 */
+    uint64_t NotClockOwnerCount; /* +0x70 */
+    struct _PPM_VETO_ACCOUNTING* PreVetoAccounting; /* +0x78 */
+};
+
+/* Source: pdb | Size: 0x20 (32 bytes) */
+struct __attribute__((packed)) _PROC_IDLE_STATE_BUCKET {
+    uint64_t TotalTime; /* +0x0 */
+    uint64_t MinTime; /* +0x8 */
+    uint64_t MaxTime; /* +0x10 */
+    uint32_t Count; /* +0x18 */
+    uint8_t _pad_l0_tail_0x1c[0x4];
+};
+
+/* Source: pdb | Size: 0x3e8 (1000 bytes) */
+struct __attribute__((packed)) _PROC_IDLE_STATE_ACCOUNTING {
+    uint64_t TotalTime; /* +0x0 */
+    uint32_t CancelCount; /* +0x8 */
+    uint32_t FailureCount; /* +0xc */
+    uint32_t SuccessCount; /* +0x10 */
+    uint32_t InvalidBucketIndex; /* +0x14 */
+    uint64_t MinTime; /* +0x18 */
+    uint64_t MaxTime; /* +0x20 */
+    struct _PPM_SELECTION_STATISTICS SelectionStatistics; /* +0x28 */
+    struct _PROC_IDLE_STATE_BUCKET IdleTimeBuckets[26]; /* +0xa8 */
+};
+
+/* Source: pdb | Size: 0x410 (1040 bytes) */
+struct __attribute__((packed)) _PROC_IDLE_ACCOUNTING {
+    uint32_t StateCount; /* +0x0 */
+    uint32_t TotalTransitions; /* +0x4 */
+    uint32_t ResetCount; /* +0x8 */
+    uint32_t AbortCount; /* +0xc */
+    uint64_t StartTime; /* +0x10 */
+    uint64_t PriorIdleTime; /* +0x18 */
+    int32_t TimeUnit; /* +0x20 */
+    uint8_t _pad_l0_0_0x24[0x4];
+    struct _PROC_IDLE_STATE_ACCOUNTING State[1]; /* +0x28 */
+};
+
+/* Source: reconstructed | Size: 0x20 (32 bytes) */
+struct __attribute__((packed)) _RECON_ALPCPGETMESSAGEATTRIBUTEOFFSET32_RDX {
+    uint8_t _pad_l0_0_0x0[0x8];
+    uint64_t field_0x8; /* +0x8 */
+    uint8_t _pad_l0_1_0x10[0x4];
+    uint64_t field_0x14; /* +0x14 */
+    uint8_t _pad_l0_tail_0x1c[0x4];
+};
+
+/* Source: reconstructed | Size: 0x710 (1808 bytes) */
+struct __attribute__((packed)) _RECON_CCSETDIRTYPINNEDDATA_RCX {
+    uint16_t field_0x0; /* +0x0 */
+    uint8_t _pad_l0_0_0x2[0x706];
+    uint64_t field_0x708; /* +0x708 */
+};
+
+/* Source: reconstructed | Size: 0x1e8 (488 bytes) */
+struct __attribute__((packed)) _RECON_EXACQUIRERESOURCEEXCLUSIVELITE_R9 {
+    uint8_t _pad_l0_0_0x0[0x74];
+    uint32_t field_0x74; /* +0x74 */
+    uint8_t _pad_l0_1_0x78[0x48];
+    uint8_t field_0xc0; /* +0xc0 */
+    uint8_t _pad_l0_2_0xc1[0x123];
+    uint32_t field_0x1e4; /* +0x1e4 */
+};
+
+/* Source: reconstructed | Size: 0x1e8 (488 bytes) */
+struct __attribute__((packed)) _RECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R8 {
+    uint8_t _pad_l0_0_0x0[0x74];
+    uint32_t field_0x74; /* +0x74 */
+    uint8_t _pad_l0_1_0x78[0x48];
+    uint8_t field_0xc0; /* +0xc0 */
+    uint8_t _pad_l0_2_0xc1[0x123];
+    uint32_t field_0x1e4; /* +0x1e4 */
+};
+
+/* Source: reconstructed | Size: 0x18 (24 bytes) */
+struct __attribute__((packed)) _RECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R9 {
+    union {
+        struct __attribute__((packed)) {
+            uint8_t _pad_l0_0_0x0[0x5];
+            uint32_t field_0x5; /* +0x5 */
+            uint8_t _pad_l0_1_0x9[0x6];
+            uint32_t field_0xf; /* +0xf */
+            uint8_t _pad_l0_tail_0x13[0x5];
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l1_0_0x0[0x6];
+            uint32_t field_0x6; /* +0x6 */
+            uint8_t _pad_l1_tail_0xa[0xe];
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l2_0_0x0[0x7];
+            uint32_t field_0x7; /* +0x7 */
+            uint8_t _pad_l2_tail_0xb[0xd];
+        };
+    };
+};
+
+/* Source: reconstructed | Size: 0x50 (80 bytes) */
+struct __attribute__((packed)) _RECON_EXGETEXCLUSIVEWAITERCOUNT_RCX {
+    uint8_t _pad_l0_0_0x0[0x1a];
+    uint8_t field_0x1a; /* +0x1a */
+    uint8_t _pad_l0_1_0x1b[0x31];
+    uint32_t field_0x4c; /* +0x4c */
+};
+
+/* Source: reconstructed | Size: 0x50 (80 bytes) */
+struct __attribute__((packed)) _RECON_EXGETSHAREDWAITERCOUNT_RCX {
+    uint8_t _pad_l0_0_0x0[0x1a];
+    uint8_t field_0x1a; /* +0x1a */
+    uint8_t _pad_l0_1_0x1b[0x2d];
+    uint32_t field_0x48; /* +0x48 */
+    uint8_t _pad_l0_tail_0x4c[0x4];
+};
+
+/* Source: reconstructed | Size: 0x1e8 (488 bytes) */
+struct __attribute__((packed)) _RECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RCX {
+    uint64_t field_0x0; /* +0x0 */
+    uint8_t _pad_l0_0_0x8[0x12];
+    uint16_t field_0x1a; /* +0x1a */
+    uint8_t _pad_l0_1_0x1c[0x7c];
+    uint64_t field_0x98; /* +0x98 */
+    uint8_t _pad_l0_2_0xa0[0x144];
+    uint16_t field_0x1e4; /* +0x1e4 */
+    uint16_t field_0x1e6; /* +0x1e6 */
+};
+
+/* Source: reconstructed | Size: 0x1e8 (488 bytes) */
+struct __attribute__((packed)) _RECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RDX {
+    uint8_t _pad_l0_0_0x0[0x74];
+    uint32_t field_0x74; /* +0x74 */
+    uint8_t _pad_l0_1_0x78[0x16c];
+    uint32_t field_0x1e4; /* +0x1e4 */
+};
+
+/* Source: reconstructed | Size: 0x1e8 (488 bytes) */
+struct __attribute__((packed)) _RECON_EXRELEASERESOURCELITE_RDX {
+    uint8_t _pad_l0_0_0x0[0x74];
+    uint32_t field_0x74; /* +0x74 */
+    uint8_t _pad_l0_1_0x78[0x16c];
+    uint32_t field_0x1e4; /* +0x1e4 */
+};
+
+/* Source: reconstructed | Size: 0x60 (96 bytes) */
+struct __attribute__((packed)) _RECON_FSRTLINITIALIZEFILELOCK_RCX {
+    uint64_t field_0x0; /* +0x0 */
+    uint64_t field_0x8; /* +0x8 */
+    uint8_t field_0x10; /* +0x10 */
+    uint8_t _pad_l0_0_0x11[0x7];
+    uint64_t field_0x18; /* +0x18 */
+    uint8_t _pad_l0_1_0x20[0x38];
+    uint32_t field_0x58; /* +0x58 */
+    uint8_t _pad_l0_tail_0x5c[0x4];
+};
+
+/* Source: reconstructed | Size: 0xd0 (208 bytes) */
+struct __attribute__((packed)) _RECON_IOGETACTIVITYIDIRP_RCX {
+    uint8_t _pad_l0_0_0x0[0x47];
+    uint8_t field_0x47; /* +0x47 */
+    uint8_t _pad_l0_1_0x48[0x80];
+    uint64_t field_0xc8; /* +0xc8 */
+};
+
+/* Source: reconstructed | Size: 0xd0 (208 bytes) */
+struct __attribute__((packed)) _RECON_IOGETIOATTRIBUTIONHANDLE_RCX {
+    uint8_t _pad_l0_0_0x0[0x47];
+    uint8_t field_0x47; /* +0x47 */
+    uint8_t _pad_l0_1_0x48[0x80];
+    uint64_t field_0xc8; /* +0xc8 */
 };
 
 /* Source: reconstructed | Size: 0x228 (552 bytes) */
@@ -2183,6 +3823,58 @@ struct __attribute__((packed)) _RECON_IOIS32BITPROCESS_RDX {
     uint64_t field_0xb8; /* +0xb8 */
     uint8_t _pad_l0_1_0xc0[0x160];
     uint64_t field_0x220; /* +0x220 */
+};
+
+/* Source: reconstructed | Size: 0x20 (32 bytes) */
+struct __attribute__((packed)) _RECON_KEINITIALIZESEMAPHORE_RCX {
+    uint8_t field_0x0; /* +0x0 */
+    uint8_t _pad_l0_0_0x1[0x1];
+    uint8_t field_0x2; /* +0x2 */
+    uint8_t _pad_l0_1_0x3[0x1];
+    uint32_t field_0x4; /* +0x4 */
+    uint64_t field_0x8; /* +0x8 */
+    uint8_t _pad_l0_2_0x10[0x8];
+    uint32_t field_0x18; /* +0x18 */
+    uint8_t _pad_l0_tail_0x1c[0x4];
+};
+
+/* Source: reconstructed | Size: 0x288 (648 bytes) */
+struct __attribute__((packed)) _RECON_KESETEVENT_R8 {
+    uint64_t field_0x0; /* +0x0 */
+    uint64_t field_0x8; /* +0x8 */
+    uint8_t _pad_l0_0_0x10[0xd8];
+    uint64_t field_0xe8; /* +0xe8 */
+    uint8_t _pad_l0_1_0xf0[0x193];
+    uint8_t field_0x283; /* +0x283 */
+    uint8_t _pad_l0_tail_0x284[0x4];
+};
+
+/* Source: reconstructed | Size: 0x30 (48 bytes) */
+struct __attribute__((packed)) _RECON_KESETEVENT_RCX {
+    uint32_t field_0x0; /* +0x0 */
+    uint32_t field_0x4; /* +0x4 */
+    uint64_t field_0x8; /* +0x8 */
+    uint8_t _pad_l0_0_0x10[0x8];
+    uint64_t field_0x18; /* +0x18 */
+    uint8_t _pad_l0_1_0x20[0x8];
+    uint32_t field_0x28; /* +0x28 */
+    uint32_t field_0x2c; /* +0x2c */
+};
+
+/* Source: reconstructed | Size: 0x288 (648 bytes) */
+struct __attribute__((packed)) _RECON_KESETEVENT_RDX {
+    uint64_t field_0x0; /* +0x0 */
+    uint64_t field_0x8; /* +0x8 */
+    uint8_t field_0x10; /* +0x10 */
+    uint8_t field_0x11; /* +0x11 */
+    uint16_t field_0x12; /* +0x12 */
+    uint8_t _pad_l0_0_0x14[0x4];
+    uint64_t field_0x18; /* +0x18 */
+    uint8_t _pad_l0_1_0x20[0xc8];
+    uint64_t field_0xe8; /* +0xe8 */
+    uint8_t _pad_l0_2_0xf0[0x193];
+    uint8_t field_0x283; /* +0x283 */
+    uint8_t _pad_l0_tail_0x284[0x4];
 };
 
 /* Source: reconstructed | Size: 0xc8 (200 bytes) */
@@ -2203,11 +3895,238 @@ struct __attribute__((packed)) _RECON_KISYSTEMCALL64_RCX {
     };
 };
 
-/* Source: pdb | Size: 0x10 (16 bytes) */
-struct __attribute__((packed)) _RTL_BITMAP {
-    uint32_t SizeOfBitMap; /* +0x0 */
+/* Source: reconstructed | Size: 0x58 (88 bytes) */
+struct __attribute__((packed)) _RECON_KISYSTEMSTARTUP_R8 {
+    uint8_t _pad_l0_0_0x0[0x4];
+    uint64_t field_0x4; /* +0x4 */
+    uint8_t _pad_l0_1_0xc[0x36];
+    uint16_t field_0x42; /* +0x42 */
+    uint8_t field_0x44; /* +0x44 */
+    uint8_t _pad_l0_2_0x45[0x2];
+    uint8_t field_0x47; /* +0x47 */
+    uint32_t field_0x48; /* +0x48 */
+    uint8_t _pad_l0_3_0x4c[0x4];
+    uint16_t field_0x50; /* +0x50 */
+    uint8_t _pad_l0_tail_0x52[0x6];
+};
+
+/* Source: reconstructed | Size: 0x2f8 (760 bytes) */
+struct __attribute__((packed)) _RECON_KISYSTEMSTARTUP_RDX {
+    union {
+        struct __attribute__((packed)) {
+            uint64_t field_0x0; /* +0x0 */
+            uint16_t field_0x8; /* +0x8 */
+            uint8_t field_0xa; /* +0xa */
+            uint8_t field_0xb; /* +0xb */
+            uint32_t field_0xc; /* +0xc */
+            uint8_t _pad_l0_0_0x10[0x8];
+            uint64_t field_0x18; /* +0x18 */
+            uint64_t field_0x20; /* +0x20 */
+            uint8_t _pad_l0_1_0x28[0x10];
+            uint64_t field_0x38; /* +0x38 */
+            uint8_t _pad_l0_2_0x40[0x48];
+            uint64_t field_0x88; /* +0x88 */
+            uint8_t _pad_l0_3_0x90[0xf0];
+            uint32_t field_0x180; /* +0x180 */
+            uint8_t _pad_l0_4_0x184[0xfc];
+            uint64_t field_0x280; /* +0x280 */
+            uint64_t field_0x288; /* +0x288 */
+            uint64_t field_0x290; /* +0x290 */
+            uint64_t field_0x298; /* +0x298 */
+            uint8_t _pad_l0_5_0x2a0[0x36];
+            uint64_t field_0x2d6; /* +0x2d6 */
+            uint8_t _pad_l0_6_0x2e0[0x6];
+            uint64_t field_0x2e6; /* +0x2e6 */
+            uint16_t field_0x2f0; /* +0x2f0 */
+            uint16_t field_0x2f2; /* +0x2f2 */
+            uint8_t _pad_l0_tail_0x2f4[0x4];
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l1_0_0x0[0x2d8];
+            uint64_t field_0x2d8; /* +0x2d8 */
+            uint8_t _pad_l1_1_0x2e0[0x8];
+            uint64_t field_0x2e8; /* +0x2e8 */
+            uint8_t _pad_l1_tail_0x2f0[0x8];
+        };
+    };
+};
+
+/* Source: reconstructed | Size: 0xf8 (248 bytes) */
+struct __attribute__((packed)) _RECON_POGETSYSTEMWAKE_R8 {
+    uint8_t _pad_l0_0_0x0[0xb8];
+    uint8_t field_0xb8; /* +0xb8 */
+    uint8_t _pad_l0_1_0xb9[0x37];
+    uint8_t field_0xf0; /* +0xf0 */
+    uint8_t _pad_l0_tail_0xf1[0x7];
+};
+
+/* Source: pdb | Size: 0x28 (40 bytes) */
+struct __attribute__((packed)) _RTL_DYNAMIC_HASH_TABLE {
+    uint32_t Flags; /* +0x0 */
+    uint32_t Shift; /* +0x4 */
+    uint32_t TableSize; /* +0x8 */
+    uint32_t Pivot; /* +0xc */
+    uint32_t DivisorMask; /* +0x10 */
+    uint32_t NumEntries; /* +0x14 */
+    uint32_t NonEmptyBuckets; /* +0x18 */
+    uint32_t NumEnumerators; /* +0x1c */
+    void* Directory; /* +0x20 */
+};
+
+/* Source: pdb | Size: 0x18 (24 bytes) */
+struct __attribute__((packed)) _RTL_DYNAMIC_HASH_TABLE_ENTRY {
+    struct _LIST_ENTRY Linkage; /* +0x0 */
+    uint64_t Signature; /* +0x10 */
+};
+
+/* Source: pdb | Size: 0x28 (40 bytes) */
+struct __attribute__((packed)) _RTL_DYNAMIC_HASH_TABLE_ENUMERATOR {
+    union {
+        struct __attribute__((packed)) {
+            struct _RTL_DYNAMIC_HASH_TABLE_ENTRY HashEntry; /* +0x0 */
+            struct _LIST_ENTRY* ChainHead; /* +0x18 */
+            uint32_t BucketIndex; /* +0x20 */
+            uint8_t _pad_l0_tail_0x24[0x4];
+        };
+        struct __attribute__((packed)) {
+            struct _LIST_ENTRY* CurEntry; /* +0x0 */
+            uint8_t _pad_l1_tail_0x8[0x20];
+        };
+    };
+};
+
+/* Source: pdb | Size: 0x18 (24 bytes) */
+struct __attribute__((packed)) _RTL_HASH_TABLE_ITERATOR {
+    struct _RTL_HASH_TABLE* Hash; /* +0x0 */
+    struct _RTL_HASH_ENTRY* HashEntry; /* +0x8 */
+    struct _SINGLE_LIST_ENTRY* Bucket; /* +0x10 */
+};
+
+/* Source: pdb | Size: 0x28 (40 bytes) */
+struct __attribute__((packed)) _SECURITY_DESCRIPTOR {
+    uint8_t Revision; /* +0x0 */
+    uint8_t Sbz1; /* +0x1 */
+    uint16_t Control; /* +0x2 */
     uint8_t _pad_l0_0_0x4[0x4];
-    uint32_t* Buffer; /* +0x8 */
+    void* Owner; /* +0x8 */
+    void* Group; /* +0x10 */
+    struct _ACL* Sacl; /* +0x18 */
+    struct _ACL* Dacl; /* +0x20 */
+};
+
+/* Source: pdb | Size: 0x10 (16 bytes) */
+struct __attribute__((packed)) _LOGGED_STREAM_CALLBACK_V1 {
+    void* LogHandle; /* +0x0 */
+    void** FlushToLsnRoutine; /* +0x8 */
+};
+
+/* Source: pdb | Size: 0x8 (8 bytes) */
+struct __attribute__((packed)) _LOGGED_STREAM_CALLBACK_V2 {
+    struct _LOG_HANDLE_CONTEXT* LogHandleContext; /* +0x0 */
+};
+
+/* Source: pdb | Size: 0x38 (56 bytes) */
+struct __attribute__((packed)) _FAST_MUTEX {
+    int32_t Count; /* +0x0 */
+    uint8_t _pad_l0_0_0x4[0x4];
+    void* Owner; /* +0x8 */
+    uint32_t Contention; /* +0x10 */
+    uint8_t _pad_l0_1_0x14[0x4];
+    struct _KEVENT Event; /* +0x18 */
+    uint32_t OldIrql; /* +0x30 */
+    uint8_t _pad_l0_tail_0x34[0x4];
+};
+
+/* Source: pdb | Size: 0x4 (4 bytes) */
+struct __attribute__((packed)) _PRIVATE_CACHE_MAP_FLAGS {
+    uint8_t _pad_l0_tail_0x0[0x4];
+};
+
+/* Source: pdb | Size: 0x78 (120 bytes) */
+struct __attribute__((packed)) _PRIVATE_CACHE_MAP {
+    union {
+        struct __attribute__((packed)) {
+            struct _PRIVATE_CACHE_MAP_FLAGS Flags; /* +0x0 */
+            uint32_t ReadAheadMask; /* +0x4 */
+            struct _FILE_OBJECT* FileObject; /* +0x8 */
+            union _LARGE_INTEGER FileOffset1; /* +0x10 */
+            union _LARGE_INTEGER BeyondLastByte1; /* +0x18 */
+            union _LARGE_INTEGER FileOffset2; /* +0x20 */
+            union _LARGE_INTEGER BeyondLastByte2; /* +0x28 */
+            uint32_t SequentialReadCount; /* +0x30 */
+            uint32_t ReadAheadLength; /* +0x34 */
+            union _LARGE_INTEGER ReadAheadOffset; /* +0x38 */
+            union _LARGE_INTEGER ReadAheadBeyondLastByte; /* +0x40 */
+            uint64_t PrevReadAheadBeyondLastByte; /* +0x48 */
+            uint64_t ReadAheadSpinLock; /* +0x50 */
+            uint32_t PipelinedReadAheadRequestSize; /* +0x58 */
+            uint32_t ReadAheadGrowth; /* +0x5c */
+            struct _LIST_ENTRY PrivateLinks; /* +0x60 */
+            void* ReadAheadWorkItem; /* +0x70 */
+        };
+        struct __attribute__((packed)) {
+            int16_t NodeTypeCode; /* +0x0 */
+            uint8_t _pad_l1_tail_0x2[0x76];
+        };
+    };
+};
+
+/* Source: pdb | Size: 0x218 (536 bytes) */
+struct __attribute__((packed)) _SHARED_CACHE_MAP {
+    union {
+        struct __attribute__((packed)) {
+            int16_t NodeTypeCode; /* +0x0 */
+            int16_t NodeByteSize; /* +0x2 */
+            uint32_t OpenCount; /* +0x4 */
+            union _LARGE_INTEGER FileSize; /* +0x8 */
+            struct _LIST_ENTRY BcbList; /* +0x10 */
+            union _LARGE_INTEGER SectionSize; /* +0x20 */
+            union _LARGE_INTEGER ValidDataLength; /* +0x28 */
+            union _LARGE_INTEGER ValidDataGoal; /* +0x30 */
+            struct _VACB* InitialVacbs[4]; /* +0x38 */
+            struct _VACB** Vacbs; /* +0x58 */
+            struct _EX_FAST_REF FileObjectFastRef; /* +0x60 */
+            struct _EX_PUSH_LOCK VacbLock; /* +0x68 */
+            uint32_t DirtyPages; /* +0x70 */
+            uint8_t _pad_l0_0_0x74[0x4];
+            struct _LIST_ENTRY LoggedStreamLinks; /* +0x78 */
+            struct _LIST_ENTRY SharedCacheMapLinks; /* +0x88 */
+            uint32_t Flags; /* +0x98 */
+            int32_t Status; /* +0x9c */
+            struct _MBCB* Mbcb; /* +0xa0 */
+            void* Section; /* +0xa8 */
+            struct _KEVENT* CreateEvent; /* +0xb0 */
+            struct _KEVENT* WaitOnActiveCount; /* +0xb8 */
+            uint32_t PagesToWrite; /* +0xc0 */
+            uint8_t _pad_l0_1_0xc4[0x4];
+            int64_t BeyondLastFlush; /* +0xc8 */
+            struct _CACHE_MANAGER_CALLBACKS* Callbacks; /* +0xd0 */
+            void* LazyWriteContext; /* +0xd8 */
+            struct _LIST_ENTRY PrivateList; /* +0xe0 */
+            struct _LOGGED_STREAM_CALLBACK_V1 V1; /* +0xf0 */
+            union _LARGE_INTEGER LargestLSN; /* +0x100 */
+            uint32_t DirtyPageThreshold; /* +0x108 */
+            uint32_t LazyWritePassCount; /* +0x10c */
+            struct _CACHE_UNINITIALIZE_EVENT* UninitializeEvent; /* +0x110 */
+            struct _FAST_MUTEX BcbLock; /* +0x118 */
+            union _LARGE_INTEGER LastUnmapBehindOffset; /* +0x150 */
+            struct _KEVENT Event; /* +0x158 */
+            union _LARGE_INTEGER HighWaterMappingOffset; /* +0x170 */
+            struct _PRIVATE_CACHE_MAP PrivateCacheMap; /* +0x178 */
+            void* WriteBehindWorkQueueEntry; /* +0x1f0 */
+            struct _VOLUME_CACHE_MAP* VolumeCacheMap; /* +0x1f8 */
+            uint32_t ProcImagePathHash; /* +0x200 */
+            uint32_t WritesInProgress; /* +0x204 */
+            uint32_t AsyncReadRequestCount; /* +0x208 */
+            uint8_t _pad_l0_2_0x20c[0x4];
+            struct _CC_PARTITION* Partition; /* +0x210 */
+        };
+        struct __attribute__((packed)) {
+            uint8_t _pad_l1_0_0x0[0xf0];
+            struct _LOGGED_STREAM_CALLBACK_V2 V2; /* +0xf0 */
+            uint8_t _pad_l1_tail_0xf8[0x120];
+        };
+    };
 };
 
 /* Source: pdb | Size: 0x10 (16 bytes) */
@@ -2240,6 +4159,14 @@ struct __attribute__((packed)) _TOKEN_AUDIT_POLICY {
 struct __attribute__((packed)) _SEP_AUDIT_POLICY {
     struct _TOKEN_AUDIT_POLICY AdtTokenPolicy; /* +0x0 */
     uint8_t PolicySetStatus; /* +0x1e */
+};
+
+/* Source: pdb | Size: 0x110 (272 bytes) */
+struct __attribute__((packed)) _SID_AND_ATTRIBUTES_HASH {
+    uint32_t SidCount; /* +0x0 */
+    uint8_t _pad_l0_0_0x4[0x4];
+    struct _SID_AND_ATTRIBUTES* SidAttr; /* +0x8 */
+    uint64_t Hash[32]; /* +0x10 */
 };
 
 /* Source: pdb | Size: 0x498 (1176 bytes) */
@@ -2276,14 +4203,14 @@ struct __attribute__((packed)) _TOKEN {
     uint32_t MandatoryPolicy; /* +0xd4 */
     struct _SEP_LOGON_SESSION_REFERENCES* LogonSession; /* +0xd8 */
     struct _LUID OriginatingLogonSession; /* +0xe0 */
-    uint8_t SidHash[0x110]; /* struct _SID_AND_ATTRIBUTES_HASH +0xe8 */
-    uint8_t RestrictedSidHash[0x110]; /* struct _SID_AND_ATTRIBUTES_HASH +0x1f8 */
+    struct _SID_AND_ATTRIBUTES_HASH SidHash; /* +0xe8 */
+    struct _SID_AND_ATTRIBUTES_HASH RestrictedSidHash; /* +0x1f8 */
     struct _AUTHZBASEP_SECURITY_ATTRIBUTES_INFORMATION* pSecurityAttributes; /* +0x308 */
     void* Package; /* +0x310 */
     struct _SID_AND_ATTRIBUTES* Capabilities; /* +0x318 */
     uint32_t CapabilityCount; /* +0x320 */
     uint8_t _pad_l0_3_0x324[0x4];
-    uint8_t CapabilitiesHash[0x110]; /* struct _SID_AND_ATTRIBUTES_HASH +0x328 */
+    struct _SID_AND_ATTRIBUTES_HASH CapabilitiesHash; /* +0x328 */
     struct _SEP_LOWBOX_NUMBER_ENTRY* LowboxNumberEntry; /* +0x438 */
     struct _SEP_CACHED_HANDLES_ENTRY* LowboxHandlesEntry; /* +0x440 */
     struct _AUTHZBASEP_CLAIM_ATTRIBUTES_COLLECTION* pClaimAttributes; /* +0x448 */
@@ -2345,8 +4272,87 @@ extern uint64_t SeAliasAdminsSid;
 extern uint8_t KdPitchDebugger;
 extern const uint8_t __nt_rodata_1401715d0[];
 extern uint8_t KdDebuggerNotPresent;
+extern uint32_t KiClockStats;
+extern uint8_t KiNxForceEnable;
+extern uint32_t KiClockTimerOwner;
+extern uint32_t KeLargestCacheLine;
+extern uint32_t KeMaximumIncrement;
+extern uint8_t KiLastBranchRecordInUse;
+extern uint8_t KiProfileIrql;
+extern uint32_t KiSystemFullyCoherent;
+extern uint64_t __nt_data_14037f730;
+extern uint64_t __nt_data_1403f93e8;
+extern uint16_t KiMaximumGroups;
+extern uint16_t KeNumberNodes;
+extern uint8_t __nt_data_14037f728;
+extern uint8_t KiProcessorBlock[];
+extern uint32_t KeTimeIncrement;
+extern uint32_t KiLastRequestedTimeIncrement;
+extern uint8_t KiProcessorIndexToNumberMappingTable[];
+extern uint8_t KeActiveProcessors[];
+extern uint32_t KeNumberProcessors;
+extern uint8_t __nt_rodata_1403f93e8[];
+extern uint32_t KiDefaultHeteroCpuPolicy;
+extern uint32_t PsDisableDiskCounters;
+extern uint64_t PspLegoNotifyRoutine;
+extern uint64_t PsInitialSystemProcess;
+extern uint8_t __nt_data_1403f8130;
+extern uint64_t ViVerifierDriverAddedThunkListHead;
+extern uint32_t MmVerifierData;
+extern uint8_t __nt_rodata_1403802b8[];
+extern uint64_t __nt_data_140380458;
+extern uint8_t MiSystemPartition[];
+extern uint8_t __nt_rodata_1407ea710[];
+extern const uint8_t __nt_rodata_1407835d0[];
+extern uint32_t __nt_data_140356610;
+extern uint32_t ExpManufacturingInformation;
+extern uint32_t ExpRealTimeIsUniversal;
+extern uint8_t __nt_data_140356618;
+extern uint64_t ExpTimeZoneBias;
+extern uint32_t KeMinimumIncrement;
+extern uint64_t PspSystemPartition;
+extern uint32_t NtGlobalFlag;
+extern uint32_t __nt_data_14034e510;
+extern uint16_t NlsAnsiCodePage;
+extern uint16_t NlsOemCodePage;
+extern const uint8_t Crc32Ctrl[];
+extern uint64_t __nt_data_14034b150;
+extern uint8_t RtlpIsDrainRequired;
+extern uint64_t CmpGlobalQuota;
+extern uint64_t CmpGlobalQuotaAllowed;
+extern uint8_t CmpMiniNTBoot;
+extern uint32_t CmpGlobalFlushControlFlags;
+extern uint64_t CmpFreezeListLock;
+extern uint8_t CmpFreezeThawWaitListHead[];
+extern uint32_t CmFreezeThawTimeoutInSeconds;
+extern uint64_t __nt_data_14037ee48;
+extern uint8_t CmpDelayDerefKCBTimer[];
+extern const uint8_t __nt_rodata_14013f350[];
+extern const uint8_t __nt_rodata_1401da7a0[];
+extern uint8_t FsRtlpVolumeStartupApplicationsComplete;
+extern uint64_t FltMgrCallbacks;
+extern uint64_t pFsRtlpMupCalls;
+extern uint32_t FsRtlPagingIoResourceSelector;
+extern uint64_t FsRtlPagingIoResources;
+extern uint8_t PopEnergyEstimationEnabled;
+extern uint32_t PopFixedWakeSourceMask;
+extern uint32_t PopBsdShutdownInProgress;
+extern uint64_t PpmIntSteerTriggerMax;
+extern uint8_t PopTransitionLock[];
+extern uint8_t PopTelemetryOsState[];
+extern uint32_t __nt_data_14035cd88;
+extern uint64_t ExCbPowerState;
+extern uint8_t KdEventLoggingPresent;
+extern uint8_t KdDebugDevice[];
+extern uint64_t HvlpHypercallCodeVa;
+extern uint32_t HvlpFlags;
+extern uint32_t HvlpLogicalProcessorCount;
+extern uint32_t WheaPendingDrsInterrupt;
+extern uint8_t WheaDrsDpc[];
+extern const uint8_t __nt_rodata_1401702f0[];
 
 /* Reconstructed Function Prototypes */
+void KiSystemStartup(void);
 KIRQL __attribute__((ms_abi)) KeGetCurrentIrql(void);
 KIRQL __attribute__((ms_abi)) KzRaiseIrql(KIRQL NewIrql);
 void __attribute__((ms_abi)) KzLowerIrql(KIRQL NewIrql);
@@ -2416,19 +4422,552 @@ BOOLEAN __attribute__((ms_abi)) SeTokenIsRestricted(struct _TOKEN* Token);
 BOOLEAN __attribute__((ms_abi)) SeTokenIsAdmin(struct _TOKEN* Token);
 NTSTATUS __attribute__((ms_abi)) SeQueryAuthenticationIdToken(struct _TOKEN* Token, struct _LUID* AuthenticationId);
 BOOLEAN __attribute__((ms_abi)) KdRefreshDebuggerNotPresent(void);
+uint64_t __attribute__((ms_abi)) KeRestoreFloatingPointState(void);
+void __attribute__((ms_abi)) KeSweepLocalCaches(void);
+void __attribute__((ms_abi)) KeSignalCallDpcDone(uint32_t* arg1);
+void __attribute__((ms_abi)) HalExamineMBR(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t* arg4);
+void __attribute__((ms_abi)) KeClockTimerPowerChange(void);
+uint8_t __attribute__((ms_abi)) KeForceEnableNx(void);
+uint32_t __attribute__((ms_abi)) KeGetClockOwner(void);
+uint32_t __attribute__((ms_abi)) KeGetRecommendedSharedDataAlignment(void);
+uint32_t __attribute__((ms_abi)) KeQueryTimeIncrement(void);
+void __attribute__((ms_abi)) KeSetLastBranchRecordInUse(uint8_t arg1);
+void __attribute__((ms_abi)) KeSetProfileIrql(uint8_t arg1);
+uint32_t __attribute__((ms_abi)) KeSystemFullyCacheCoherent(void);
+void __attribute__((ms_abi)) InbvInstallDisplayStringFilter(uint64_t arg1);
+uint32_t __attribute__((ms_abi)) KeQueryActiveGroupCount(void);
+uint64_t __attribute__((ms_abi)) KeQueryActiveProcessors(void);
+uint32_t __attribute__((ms_abi)) KeQueryMaximumGroupCount(void);
+uint32_t __attribute__((ms_abi)) KeQueryHighestNodeNumber(void);
+void __attribute__((ms_abi)) KeReportCacheIncoherentDevice(void);
+uint8_t __attribute__((ms_abi)) InbvEnableDisplayString(uint8_t arg1);
+void __attribute__((ms_abi)) KeInitializeEnumerationContextFromAffinity(PIOV_IRP_TRACE arg1, uint16_t arg2, uint64_t arg3);
+uint32_t __attribute__((ms_abi)) KeIsExecutingDpc(void);
+uint64_t __attribute__((ms_abi)) KeQueryPrcbAddress(uint64_t* arg1);
+uint32_t __attribute__((ms_abi)) KeQueryRuntimeThread(PKTHREAD arg1, uint32_t* arg2);
+BOOLEAN __attribute__((ms_abi)) KeIsWaitListEmpty(uint64_t* arg1);
+BOOLEAN __attribute__((ms_abi)) KeTestSpinLock(uint64_t* SpinLock);
+uint64_t __attribute__((ms_abi)) KeEnterCriticalRegion(void);
+uint64_t __attribute__((ms_abi)) KeEnterGuardedRegion(void);
+uint32_t __attribute__((ms_abi)) KeGetClockTimerResolution(uint32_t* arg1, uint32_t* arg2);
+uint64_t __attribute__((ms_abi)) KeQueryGroupAffinityEx(uint16_t* arg1, uint16_t arg2);
+uint64_t __attribute__((ms_abi)) KeInitializeEnumerationContext(PIOV_IRP_TRACE arg1, uint64_t* arg2);
+uint64_t __attribute__((ms_abi)) KeAreApcsDisabled(void);
+uint32_t __attribute__((ms_abi)) KeCountSetBitsAffinityEx(uint16_t* arg1);
+uint32_t __attribute__((ms_abi)) KeInitializeEnumerationContextFromGroup(PIOV_IRP_TRACE arg1, PMDL arg2);
+uint64_t __attribute__((ms_abi)) KeIsAttachedProcess(void);
+uint64_t __attribute__((ms_abi)) KeSetHeteroCpuPolicyThread(uint64_t arg1, uint64_t arg2, uint32_t arg3);
+uint32_t __attribute__((ms_abi)) KeReleaseInStackQueuedSpinLock(uint64_t arg1);
+uint64_t __attribute__((ms_abi)) KeGetCurrentNodeNumber(void);
+uint64_t __attribute__((ms_abi)) KeInitializeThreadedDpc(PKDPC arg1, uint64_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) KeSetTimer(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) KeAddProcessorGroupAffinity(uint64_t* arg1, uint32_t* arg2);
+uint64_t __attribute__((ms_abi)) KeGetEffectiveIrql(void);
+uint64_t __attribute__((ms_abi)) KeInitializeSemaphore(struct _RECON_KEINITIALIZESEMAPHORE_RCX* arg1, uint32_t arg2, uint32_t arg3);
+uint64_t __attribute__((ms_abi)) KeRemoveProcessorGroupAffinity(uint64_t* arg1, uint32_t* arg2);
+void __attribute__((ms_abi)) KeInitializeEvent(struct _KEVENT* Event, uint32_t Type, BOOLEAN State);
+uint32_t __attribute__((ms_abi)) KeQueryActiveProcessorAffinity(void);
+uint64_t __attribute__((ms_abi)) KeQueryGroupAffinity(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) KeInitializeTimer(PPEB arg1);
+uint32_t __attribute__((ms_abi)) KeQueryHeteroCpuPolicyThread(PKTHREAD arg1, uint32_t arg2);
+uint64_t __attribute__((ms_abi)) KeInitializeTimerEx(PPEB arg1, uint8_t arg2);
+uint64_t __attribute__((ms_abi)) KeSetEvent(struct _RECON_KESETEVENT_RCX* arg1, struct _RECON_KESETEVENT_RDX* arg2, struct _RECON_KESETEVENT_R8* arg3);
+uint32_t __attribute__((ms_abi)) KeAcquireSpinLockRaiseToSynch(void);
+uint64_t __attribute__((ms_abi)) KeExpandKernelStackAndCalloutEx(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint32_t arg4);
+uint64_t __attribute__((ms_abi)) KeInitializeDeviceQueue(PKDPC arg1);
+uint32_t __attribute__((ms_abi)) PsGetSiloMonitorContextSlot(uint32_t* arg1);
+uint64_t __attribute__((ms_abi)) PsGetJobLock(uint64_t* arg1);
+uint32_t __attribute__((ms_abi)) PsGetJobUIRestrictionsClass(uint32_t* arg1);
+uint8_t __attribute__((ms_abi)) PsGetProcessPriorityClass(uint8_t* arg1);
+uint8_t __attribute__((ms_abi)) PsGetProcessProtection(uint8_t* arg1);
+void __attribute__((ms_abi)) PsSetProcessPriorityClass(uint8_t* arg1, uint8_t arg2);
+uint64_t __attribute__((ms_abi)) PsGetProcessCreateTimeQuadPart(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) PsGetProcessDebugPort(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) PsGetProcessDxgProcess(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) PsGetProcessJob(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) PsGetProcessSecurityPort(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) PsGetProcessSequenceNumber(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) PsGetProcessServerSilo(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) PsGetProcessWin32Process(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) PsGetProcessWin32WindowStation(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) PsGetThreadCreateTime(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) PsGetThreadWin32Thread(uint64_t* arg1);
+void __attribute__((ms_abi)) PsReferenceKernelStack(uint32_t* arg1);
+void __attribute__((ms_abi)) PsSetProcessDxgProcess(uint64_t* arg1, uint64_t arg2);
+void __attribute__((ms_abi)) PsSetProcessWindowStation(uint64_t* arg1, uint64_t arg2);
+uint32_t __attribute__((ms_abi)) PsIsThreadTerminating(uint32_t* arg1);
+void __attribute__((ms_abi)) PsLookupThreadByThreadId(void);
+uint64_t __attribute__((ms_abi)) PsSetProcessSecurityPort(uint64_t* arg1, uint64_t arg2);
+BOOLEAN __attribute__((ms_abi)) PsIsDiskCountersEnabled(void);
+uint8_t __attribute__((ms_abi)) PsIsHostSilo(uint64_t arg1);
+uint32_t __attribute__((ms_abi)) PsGetProcessExitProcessCalled(uint32_t* arg1);
+uint8_t __attribute__((ms_abi)) PsGetThreadHardErrorsAreDisabled(uint8_t* arg1);
+BOOLEAN __attribute__((ms_abi)) PsIsProcessBeingDebugged(uint64_t* arg1);
+uint32_t __attribute__((ms_abi)) PsIsProcessCommitRelinquished(uint32_t* arg1);
+uint32_t __attribute__((ms_abi)) PsIsThreadImpersonating(uint32_t* arg1);
+uint32_t __attribute__((ms_abi)) PsIsWin32KFilterAuditEnabledForProcess(uint32_t* arg1);
+uint32_t __attribute__((ms_abi)) PsIsWin32KFilterEnabledForProcess(uint32_t* arg1);
+uint32_t __attribute__((ms_abi)) PsSetLegoNotifyRoutine(uint64_t arg1);
+uint64_t __attribute__((ms_abi)) PsGetCurrentThreadStackBase(void);
+uint64_t __attribute__((ms_abi)) PsGetCurrentThreadStackLimit(void);
+uint64_t __attribute__((ms_abi)) PsGetCurrentThreadPreviousMode(void);
+uint32_t __attribute__((ms_abi)) PsGetJobSessionId(uint32_t* arg1);
+uint64_t __attribute__((ms_abi)) PsDetachSiloFromCurrentThread(uint64_t arg1);
+uint64_t __attribute__((ms_abi)) PsGetCurrentProcessId(void);
+uint64_t __attribute__((ms_abi)) PsGetCurrentThreadId(void);
+uint64_t __attribute__((ms_abi)) PsGetCurrentThreadProcess(void);
+uint64_t __attribute__((ms_abi)) PsGetCurrentThreadWin32Thread(void);
+uint64_t __attribute__((ms_abi)) PsIsCurrentThreadPrefetching(void);
+void __attribute__((ms_abi)) PsSetThreadHardErrorsAreDisabled(uint32_t* arg1, uint8_t arg2);
+uint64_t __attribute__((ms_abi)) PsGetWin32KFilterSet(void);
+void __attribute__((ms_abi)) PsRestoreImpersonation(void);
+uint64_t __attribute__((ms_abi)) PsWow64GetProcessMachine(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) PsAttachSiloToCurrentThread(uint64_t arg1);
+uint64_t __attribute__((ms_abi)) PsGetCurrentProcessWin32Process(void);
+uint64_t __attribute__((ms_abi)) PsGetProcessExitTime(void);
+uint64_t __attribute__((ms_abi)) PsGetProcessStartKey(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) PsChargeProcessNonPagedPoolQuota(uint64_t arg1, uint64_t arg2);
+uint32_t __attribute__((ms_abi)) PsGetThreadFreezeCount(uint64_t* arg1, PKPROCESS arg2);
+uint64_t __attribute__((ms_abi)) PsIsWin32KFilterAuditEnabled(void);
+uint64_t __attribute__((ms_abi)) PsIsWin32KFilterEnabled(void);
+uint64_t __attribute__((ms_abi)) PsEnterPriorityRegion(void);
+uint64_t __attribute__((ms_abi)) PsGetCurrentThreadWin32ThreadAndEnterCriticalRegion(uint64_t* arg1);
+NTSTATUS __attribute__((ms_abi)) MmMapUserAddressesToPage(void);
+uint32_t __attribute__((ms_abi)) MmQuerySystemSize(void);
+NTSTATUS __attribute__((ms_abi)) MmSetBankedSection(void);
+uint8_t __attribute__((ms_abi)) MmIsThisAnNtAsSystem(void);
+uint64_t __attribute__((ms_abi)) MmIsDriverVerifying(uint64_t* arg1);
+NTSTATUS __attribute__((ms_abi)) MmIsVerifierEnabled(uint32_t* arg1);
+uint8_t __attribute__((ms_abi)) MmIsRecursiveIoFault(PETHREAD arg1);
+uint32_t __attribute__((ms_abi)) MmProbeAndLockPages(uint64_t arg1, uint32_t arg2, uint32_t arg3);
+uint64_t __attribute__((ms_abi)) MmMapViewInSystemSpaceEx(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+NTSTATUS __attribute__((ms_abi)) MmLoadSystemImage(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint32_t arg4);
+uint64_t __attribute__((ms_abi)) MmMapViewInSystemSpace(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) MmUnloadSystemImage(uint64_t arg1);
+uint64_t __attribute__((ms_abi)) MmAllocateContiguousMemory(uint64_t arg1, uint64_t arg2);
+uint64_t __attribute__((ms_abi)) MmGetVirtualForPhysical(uint64_t arg1);
+uint32_t __attribute__((ms_abi)) MmDisableModifiedWriteOfSection(void);
+uint64_t __attribute__((ms_abi)) MmAddPhysicalMemory(uint64_t* arg1, uint64_t arg2);
+uint64_t __attribute__((ms_abi)) MmCanFileBeTruncated(uint64_t arg1, uint64_t* arg2);
+uint64_t __attribute__((ms_abi)) MmAllocatePagesForMdl(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+int32_t __attribute__((ms_abi)) ObReferenceSecurityDescriptor(uint64_t* arg1, uint32_t arg2);
+uint64_t __attribute__((ms_abi)) ObCreateObjectType(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) ObpLookupDirectoryEntry(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+int64_t __attribute__((ms_abi)) ObpIncrPointerCount(PAUX_ACCESS_DATA arg1, PRTL_DYNAMIC_HASH_TABLE arg2);
+int64_t __attribute__((ms_abi)) ObpIncrPointerCountEx(PAUX_ACCESS_DATA arg1, PRTL_DYNAMIC_HASH_TABLE arg2);
+uint64_t __attribute__((ms_abi)) ObpDirectoryTeardownCallback(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) ObDeassignSecurity(uint64_t* arg1);
+uint32_t __attribute__((ms_abi)) ObpReferenceNamedObject(uint64_t arg1);
+uint8_t __attribute__((ms_abi)) IoIsFileOriginRemote(uint8_t* arg1);
+uint32_t __attribute__((ms_abi)) IoSizeofGenericIrpExtension(void);
+uint32_t __attribute__((ms_abi)) IoSizeofWorkItem(void);
+uint64_t __attribute__((ms_abi)) IoGetConfigurationInformation(void);
+uint64_t __attribute__((ms_abi)) IoGetDeviceToVerify(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) IoGetFileObjectGenericMapping(void);
+void __attribute__((ms_abi)) IoSetDeviceToVerify(uint64_t* arg1, uint64_t arg2);
+uint32_t __attribute__((ms_abi)) IoClearIrpExtraCreateParameter(PIRP arg1);
+uint64_t __attribute__((ms_abi)) IoGetInitialStack(void);
+uint64_t __attribute__((ms_abi)) IoClearActivityIdThread(uint64_t arg1);
+uint64_t __attribute__((ms_abi)) IoGetActivityIdThread(void);
+uint64_t __attribute__((ms_abi)) IoGetTopLevelIrp(void);
+uint64_t __attribute__((ms_abi)) IoSetTopLevelIrp(uint64_t arg1);
+uint8_t __attribute__((ms_abi)) IoIsWdmVersionAvailable(uint8_t arg1, uint8_t arg2);
+void __attribute__((ms_abi)) IoInitializeMiniCompletionPacket(PIO_MINI_COMPLETION_PACKET_USER arg1, uint64_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) IoPropagateIrpExtension(uint64_t arg1, uint64_t arg2, uint32_t arg3);
+uint64_t __attribute__((ms_abi)) IoSetHardErrorOrVerifyDevice(uint64_t* arg1, uint64_t arg2);
+uint64_t __attribute__((ms_abi)) IoSetActivityIdThread(uint64_t arg1);
+uint64_t __attribute__((ms_abi)) IoQueueWorkItemEx(uint64_t arg1, uint32_t arg2, uint64_t arg3, uint64_t arg4);
+uint32_t __attribute__((ms_abi)) IoGetPagingIoPriority(uint32_t* arg1);
+NTSTATUS __attribute__((ms_abi)) IoSetIoPriorityHint(uint32_t* arg1, uint32_t arg2);
+uint64_t __attribute__((ms_abi)) IoQueryFileInformation(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) IoQueryVolumeInformation(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) IoQueueWorkItem(uint32_t* arg1, uint32_t arg2, uint64_t arg3, uint64_t arg4);
+uint32_t __attribute__((ms_abi)) IoReleaseCancelSpinLock(uint64_t arg1);
+NTSTATUS __attribute__((ms_abi)) IoGetActivityIdIrp(struct _RECON_IOGETACTIVITYIDIRP_RCX* arg1, void* arg2);
+NTSTATUS __attribute__((ms_abi)) IoGetIoAttributionHandle(struct _RECON_IOGETIOATTRIBUTIONHANDLE_RCX* arg1, uint64_t* arg2);
+int32_t __attribute__((ms_abi)) IoSizeOfIrpEx(uint32_t* arg1, int8_t arg2);
+void __attribute__((ms_abi)) ExCleanupRundownProtectionCacheAware(void);
+uint32_t __attribute__((ms_abi)) ExSizeOfAutoExpandPushLock(void);
+uint32_t __attribute__((ms_abi)) ExGetFirmwareType(void);
+uint32_t __attribute__((ms_abi)) ExRundownCompleted(uint64_t* arg1);
+uint32_t __attribute__((ms_abi)) ExIsManufacturingModeEnabled(void);
+BOOLEAN __attribute__((ms_abi)) ExRealTimeIsUniversal(void);
+uint8_t __attribute__((ms_abi)) ExIsSoftBoot(void);
+uint32_t __attribute__((ms_abi)) ExConvertPushLockExclusiveToShared(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) ExSystemTimeToLocalTime(uint64_t* arg1, uint64_t* arg2);
+uint64_t __attribute__((ms_abi)) ExGetPreviousMode(void);
+void __attribute__((ms_abi)) ExLocalTimeToSystemTime(uint64_t* arg1, uint64_t* arg2);
+BOOLEAN __attribute__((ms_abi)) ExSystemExceptionFilter(void);
+uint64_t __attribute__((ms_abi)) ExInitializeAutoExpandPushLock(struct _ANON_TAG_1411* arg1, uint8_t arg2);
+uint32_t __attribute__((ms_abi)) ExQueryTimerResolution(uint32_t* arg1, uint32_t* arg2, uint32_t* arg3);
+uint64_t __attribute__((ms_abi)) ExAllocateTimer(uint32_t arg1, uint32_t arg2, uint32_t* arg3);
+uint64_t __attribute__((ms_abi)) ExpInterlockedFlushSList(PLIST_ENTRY arg1);
+uint32_t __attribute__((ms_abi)) ExTryConvertPushLockSharedToExclusiveEx(uint64_t* arg1, uint32_t* arg2);
+uint64_t __attribute__((ms_abi)) ExTryQueueWorkItem(uint64_t arg1, uint64_t arg2);
+uint32_t __attribute__((ms_abi)) ExAcquireSpinLockExclusive(uint64_t arg1);
+uint32_t __attribute__((ms_abi)) ExReleaseSpinLockExclusive(uint32_t* arg1, uint64_t arg2);
+uint64_t __attribute__((ms_abi)) ExReleaseResourceAndLeaveCriticalRegion(struct _RECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RCX* arg1, struct _RECON_EXRELEASERESOURCEANDLEAVECRITICALREGION_RDX* arg2);
+uint32_t __attribute__((ms_abi)) ExGetExclusiveWaiterCount(struct _RECON_EXGETEXCLUSIVEWAITERCOUNT_RCX* arg1);
+uint32_t __attribute__((ms_abi)) ExGetSharedWaiterCount(struct _RECON_EXGETSHAREDWAITERCOUNT_RCX* arg1);
+uint32_t __attribute__((ms_abi)) ExReleaseSpinLockShared(uint32_t* arg1, uint64_t arg2);
+uint64_t __attribute__((ms_abi)) ExGetCurrentProcessorCounts(uint32_t* arg1, uint32_t* arg2, uint32_t* arg3);
+uint64_t __attribute__((ms_abi)) ExEnterCriticalRegionAndAcquireSharedWaitForExclusive(void);
+uint64_t __attribute__((ms_abi)) ExEnterCriticalRegionAndAcquireResourceShared(uint16_t* arg1, uint32_t* arg2, struct _RECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R8* arg3, struct _RECON_EXENTERCRITICALREGIONANDACQUIRERESOURCESHARED_R9* arg4);
+uint32_t __attribute__((ms_abi)) ExReleaseResourceLite(uint16_t* arg1, struct _RECON_EXRELEASERESOURCELITE_RDX* arg2);
+uint32_t __attribute__((ms_abi)) ExIsFastResourceHeldExclusive(uint16_t* arg1);
+uint64_t __attribute__((ms_abi)) ExInitializeFastOwnerEntry(uint64_t arg1);
+uint32_t __attribute__((ms_abi)) ExAcquireResourceExclusiveLite(uint16_t* arg1, uint64_t arg2, uint64_t arg3, struct _RECON_EXACQUIRERESOURCEEXCLUSIVELITE_R9* arg4);
+uint32_t __attribute__((ms_abi)) RtlNumberGenericTableElements(uint32_t* arg1);
+uint32_t __attribute__((ms_abi)) RtlNumberGenericTableElementsAvl(uint32_t* arg1);
+void __attribute__((ms_abi)) RtlRunOnceInitialize(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) RtlSubAuthorityCountSid(uint64_t* arg1);
+BOOLEAN __attribute__((ms_abi)) RtlAreAnyAccessesGranted(uint32_t arg1, uint32_t arg2);
+BOOLEAN __attribute__((ms_abi)) RtlEqualWnfChangeStamps(uint32_t arg1, uint32_t arg2);
+NTSTATUS __attribute__((ms_abi)) XIPDispatch(void);
+uint64_t __attribute__((ms_abi)) FirstEntrySList(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) RtlCopyLuid(uint64_t* arg1, uint64_t* arg2);
+uint32_t __attribute__((ms_abi)) RtlGetNtGlobalFlags(void);
+void __attribute__((ms_abi)) srand(uint32_t arg1);
+BOOLEAN __attribute__((ms_abi)) RtlAreAllAccessesGranted(uint32_t arg1, uint32_t arg2);
+void __attribute__((ms_abi)) RtlInitializeBitMapEx(PLIST_ENTRY arg1, uint64_t arg2, uint64_t arg3);
+BOOLEAN __attribute__((ms_abi)) RtlIsGenericTableEmpty(uint64_t* arg1);
+BOOLEAN __attribute__((ms_abi)) RtlIsGenericTableEmptyAvl(uint32_t* arg1);
+uint64_t __attribute__((ms_abi)) RtlClearBitEx(uint64_t* arg1, uint64_t arg2);
+uint64_t __attribute__((ms_abi)) RtlSetBitEx(uint64_t* arg1, uint64_t arg2);
+void __attribute__((ms_abi)) RtlClearBits(uint64_t arg1, uint64_t arg2, uint32_t arg3);
+void __attribute__((ms_abi)) RtlClearBitsEx(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) RtlGetNonVolatileToken(uint64_t arg1, uint64_t arg2, uint64_t* arg3);
+BOOLEAN __attribute__((ms_abi)) RtlIsPartialPlaceholder(uint32_t arg1);
+void __attribute__((ms_abi)) RtlSetBits(uint64_t arg1, uint64_t arg2, uint32_t arg3);
+void __attribute__((ms_abi)) PfxInitialize(PRTL_BITMAP arg1);
+uint64_t __attribute__((ms_abi)) RtlSubAuthoritySid(uint64_t* arg1, uint32_t arg2);
+uint32_t __attribute__((ms_abi)) RtlLengthSid(uint8_t* arg1);
+uint64_t __attribute__((ms_abi)) RtlTestBitEx(uint64_t* arg1, uint64_t arg2);
+uint64_t __attribute__((ms_abi)) RtlGetEnabledExtendedFeatures(uint64_t arg1);
+uint32_t __attribute__((ms_abi)) RtlFreeNonVolatileToken(uint8_t arg1);
+uint32_t __attribute__((ms_abi)) RtlIsMultiUsersInSessionSku(void);
+uint32_t __attribute__((ms_abi)) RtlIsStateSeparationEnabled(void);
+uint64_t __attribute__((ms_abi)) RtlFindNextForwardRunClearEx(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) RtlInitializeRangeList(struct _ANON_TAG_1ba4* arg1);
+uint64_t __attribute__((ms_abi)) RtlInitializeUnicodePrefix(PKDPC arg1);
+uint64_t __attribute__((ms_abi)) RtlOpenImageFileOptionsKey(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) RtlCheckTokenMembership(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint32_t __attribute__((ms_abi)) RtlEqualLuid(PLARGE_INTEGER arg1, PLARGE_INTEGER arg2);
+uint8_t __attribute__((ms_abi)) RtlIsNonEmptyDirectoryReparsePointAllowed(uint32_t arg1);
+uint32_t __attribute__((ms_abi)) RtlLengthRequiredSid(uint32_t arg1);
+uint64_t __attribute__((ms_abi)) vsprintf(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint32_t __attribute__((ms_abi)) RtlCopyUnicodeString(uint16_t* arg1, PUNICODE_STRING arg2);
+uint64_t __attribute__((ms_abi)) RtlFindNextForwardRunClear(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint32_t __attribute__((ms_abi)) RtlGetDefaultCodePage(uint16_t* arg1, uint16_t* arg2);
+uint64_t __attribute__((ms_abi)) LdrFindResource_U(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) RtlFindFirstRunClear(uint64_t arg1, uint64_t arg2, uint32_t arg3);
+uint64_t __attribute__((ms_abi)) RtlCrc32(uint64_t arg1, uint64_t arg2, uint32_t arg3);
+uint32_t __attribute__((ms_abi)) RtlIsNtDdiVersionAvailable(uint32_t arg1);
+uint64_t __attribute__((ms_abi)) LdrFindResourceDirectory_U(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) RtlCreateHashTable(uint64_t arg1, uint32_t arg2, uint32_t arg3);
+uint8_t __attribute__((ms_abi)) RtlIsCloudFilesPlaceholder(uint32_t arg1, uint32_t arg2);
+NTSTATUS __attribute__((ms_abi)) RtlGetControlSecurityDescriptor(PSECURITY_DESCRIPTOR arg1, uint16_t* arg2, uint32_t* arg3);
+uint32_t __attribute__((ms_abi)) RtlIsServicePackVersionInstalled(uint32_t arg1);
+uint64_t __attribute__((ms_abi)) RtlGetSystemBootStatusEx(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) RtlGetTokenNamedObjectPath(uint64_t arg1, uint8_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) RtlSetSystemBootStatusEx(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) SkAcquirePushLockExclusive(void);
+int64_t __attribute__((ms_abi)) isdigit(int64_t arg1, uint32_t arg2);
+int64_t __attribute__((ms_abi)) islower(int64_t arg1, uint32_t arg2);
+int64_t __attribute__((ms_abi)) isspace(int64_t arg1, uint32_t arg2);
+int64_t __attribute__((ms_abi)) isupper(int64_t arg1, uint32_t arg2);
+uint64_t __attribute__((ms_abi)) sprintf_s(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) swprintf_s(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) RtlAddAccessAllowedAce(uint64_t arg1, uint64_t arg2, uint32_t arg3, uint64_t arg4);
+int32_t __attribute__((ms_abi)) rand(void);
+NTSTATUS __attribute__((ms_abi)) RtlDrainNonVolatileFlush(uint8_t arg1);
+uint32_t __attribute__((ms_abi)) RtlEqualUnicodeString(PUNICODE_STRING arg1, PUNICODE_STRING arg2);
+void __attribute__((ms_abi)) SeShouldCheckForAccessRightsFromParent(void);
+uint32_t __attribute__((ms_abi)) SeTokenImpersonationLevel(uint32_t* arg1);
+uint32_t __attribute__((ms_abi)) SeTokenType(uint32_t* arg1);
+uint32_t __attribute__((ms_abi)) SeTokenIsWriteRestricted(uint32_t* arg1);
+uint64_t __attribute__((ms_abi)) SeSetAccessStateGenericMapping(uint64_t* arg1, void* arg2);
+uint64_t __attribute__((ms_abi)) SeCaptureSubjectContextEx(uint64_t arg1, uint64_t* arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) SeAdjustAccessStateForTrustLabel(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) SeSetSecurityAttributesToken(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) SeCaptureSubjectContext(uint64_t arg1);
+uint32_t __attribute__((ms_abi)) SeComputeAutoInheritByObjectType(void);
+uint64_t __attribute__((ms_abi)) SeReportSecurityEvent(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint32_t* arg4);
+uint64_t __attribute__((ms_abi)) SeDeassignSecurity(uint64_t* arg1);
+NTSTATUS __attribute__((ms_abi)) SeSetSecurityDescriptorInfoEx(uint64_t arg1, uint32_t* arg2, uint64_t arg3, uint64_t* arg4);
+uint64_t __attribute__((ms_abi)) SeCreateAccessStateEx(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) SeQuerySessionIdToken(uint64_t* arg1, uint64_t arg2);
+BOOLEAN __attribute__((ms_abi)) CmpTryAcquireIXLockExclusive(uint32_t* arg1);
+BOOLEAN __attribute__((ms_abi)) CmpCommitDiscardReplacePre(uint32_t* arg1);
+uint32_t __attribute__((ms_abi)) CmpGetEffectiveKcbSemantics(PCM_KEY_CONTROL_BLOCK arg1);
+uint64_t __attribute__((ms_abi)) CmpSetGlobalQuotaAllowed(void);
+uint8_t __attribute__((ms_abi)) CmpTransSilentIgnore(void);
+uint32_t __attribute__((ms_abi)) CmGetCallbackVersion(uint32_t* arg1, uint32_t* arg2);
+uint64_t __attribute__((ms_abi)) CmGetBoundTransaction(uint64_t arg1, uint64_t* arg2);
+uint32_t __attribute__((ms_abi)) CmpFlushNotifiesPreCallback(uint32_t* arg1, uint8_t* arg2);
+void __attribute__((ms_abi)) CmpValidateGlobalFlushControlFlags(void);
+uint64_t __attribute__((ms_abi)) CmpValueEnumStackGetCurrentValueHive(uint16_t* arg1);
+uint64_t __attribute__((ms_abi)) CmpComputeKcbConvKey(PMM_SESSION_SPACE arg1);
+uint32_t __attribute__((ms_abi)) CmpInitializeKcbStack(uint64_t arg1);
+uint64_t __attribute__((ms_abi)) CmpGetComponentNameAtIndex(uint64_t* arg1, uint32_t* arg2);
+int64_t __attribute__((ms_abi)) CmpKeyNodeStackGetEntryAtLayerHeight(uint64_t* arg1, int32_t* arg2);
+int64_t __attribute__((ms_abi)) CmpSortedValueEnumStackGetEntryAtLayerHeight(uint64_t* arg1, int32_t* arg2);
+uint32_t __attribute__((ms_abi)) CmpSetRespectIoPriorityThread(uint32_t* arg1, uint32_t arg2);
+uint64_t __attribute__((ms_abi)) CmpFindValueByName(uint64_t arg1, uint64_t arg2);
+uint64_t __attribute__((ms_abi)) CmpInitializeDiscardReplaceContext(uint64_t arg1);
+uint64_t __attribute__((ms_abi)) CmpInitializeFreezeThaw(void);
+uint64_t __attribute__((ms_abi)) CmpSystemQuotaWarningWorker(void);
+uint64_t __attribute__((ms_abi)) CmpArmDelayDerefKCBWorker(void);
+NTSTATUS __attribute__((ms_abi)) CcTestControl(void);
+uint64_t __attribute__((ms_abi)) CcSetReadAheadGranularity(uint64_t* arg1, uint32_t arg2);
+uint64_t __attribute__((ms_abi)) CcMapAndRead(uint64_t arg1, uint64_t arg2, uint8_t arg3);
+uint64_t __attribute__((ms_abi)) CcGetFileObjectFromBcb(uint64_t* arg1);
+uint8_t __attribute__((ms_abi)) CcNotifyWriteBehindHelper(void);
+uint32_t __attribute__((ms_abi)) CcGetCachedDirtyPageCountForFile(PFILE_OBJECT arg1);
+uint64_t __attribute__((ms_abi)) CcFlushCache(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) CcFlushCacheToLsn(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint32_t __attribute__((ms_abi)) CcIncrementVacbActiveCount(uint32_t* arg1);
+uint64_t __attribute__((ms_abi)) CcSetDirtyPageThreshold(PKPRCB arg1, uint32_t arg2);
+uint64_t __attribute__((ms_abi)) CcCopyReadExceptionFilter(uint64_t* arg1, uint32_t* arg2);
+uint32_t __attribute__((ms_abi)) CcWaitForCurrentLazyWriterActivity(void);
+uint32_t __attribute__((ms_abi)) CcFastCopyWrite(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) CcGetPartition(PSHARED_CACHE_MAP arg1);
+uint8_t __attribute__((ms_abi)) CcIsThereDirtyData(uint64_t arg1);
+uint64_t __attribute__((ms_abi)) CcSetDirtyPinnedData(struct _RECON_CCSETDIRTYPINNEDDATA_RCX* arg1, struct _ANON_TAG_147d* arg2);
+void __attribute__((ms_abi)) FsRtlInitializeOplock(void);
+uint64_t __attribute__((ms_abi)) FsRtlSyncVolumes(void);
+void __attribute__((ms_abi)) FsRtlAcknowledgeEcp(uint32_t* arg1);
+void __attribute__((ms_abi)) FsRtlPrepareToReuseEcp(uint32_t* arg1);
+void __attribute__((ms_abi)) FsRtlResetBaseMcb(uint32_t* arg1);
+uint8_t __attribute__((ms_abi)) FsRtlAreVolumeStartupApplicationsComplete(void);
+void __attribute__((ms_abi)) FsRtlRegisterFltMgrCalls(uint64_t arg1);
+void __attribute__((ms_abi)) FsRtlRegisterMupCalls(uint64_t arg1);
+uint32_t __attribute__((ms_abi)) FsRtlIsEcpAcknowledged(uint32_t* arg1);
+uint32_t __attribute__((ms_abi)) FsRtlIsEcpFromUserMode(uint32_t* arg1);
+uint64_t __attribute__((ms_abi)) FsRtlLookupReservedPerFileContext(uint64_t* arg1);
+uint8_t __attribute__((ms_abi)) FsRtlMdlReadCompleteDev(void);
+uint64_t __attribute__((ms_abi)) FsRtlInitializeFileLock(struct _RECON_FSRTLINITIALIZEFILELOCK_RCX* arg1, uint64_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) FsRtlAddMcbEntry(uint64_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
+NTSTATUS __attribute__((ms_abi)) FsRtlGetEcpListFromIrp(PIRP arg1, uint64_t* arg2);
+BOOLEAN __attribute__((ms_abi)) FsRtlAreThereWaitingFileLocks(PKDPC arg1);
+uint64_t __attribute__((ms_abi)) FsRtlRemoveReservedPerFileContext(uint64_t* arg1);
+uint64_t __attribute__((ms_abi)) FsRtlFastUnlockAll(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) FsRtlAllocateResource(void);
+uint64_t __attribute__((ms_abi)) FsRtlIsDaxVolume(uint64_t* arg1);
+NTSTATUS __attribute__((ms_abi)) FsRtlSetEcpListIntoIrp(PIRP arg1, uint64_t arg2);
+uint8_t __attribute__((ms_abi)) FsRtlIsTotalDeviceFailure(uint32_t arg1);
+uint64_t __attribute__((ms_abi)) FsRtlAreThereCurrentOrInProgressFileLocks(PHHIVE arg1);
+NTSTATUS __attribute__((ms_abi)) FsRtlInitializeExtraCreateParameterList(PEXT_SET_PARAMETERS_V0 arg1);
+void __attribute__((ms_abi)) PoEndDeviceBusy(uint32_t* arg1);
+void __attribute__((ms_abi)) PoSetDeviceBusyEx(uint32_t* arg1);
+uint8_t __attribute__((ms_abi)) PoEnergyEstimationEnabled(void);
+void __attribute__((ms_abi)) PoSetFixedWakeSource(uint32_t arg1);
+BOOLEAN __attribute__((ms_abi)) PoIsRunningStopWatch(uint64_t* arg1);
+void __attribute__((ms_abi)) PoStartDeviceBusy(PRTL_DYNAMIC_HASH_TABLE arg1);
+void __attribute__((ms_abi)) PopSetShutdownMarker(void);
+uint32_t __attribute__((ms_abi)) PopIsUserInitiatedMonitorRequestReason(uint32_t arg1);
+uint64_t __attribute__((ms_abi)) PopExecutionRequiredCallback(uint64_t arg1, uint64_t arg2);
+NTSTATUS __attribute__((ms_abi)) PopIntSteerSetTimeUnparkTrigger(uint64_t arg1, uint32_t* arg2, uint32_t arg3);
+uint64_t __attribute__((ms_abi)) PoFxIssueComponentPerfStateChange(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+BOOLEAN __attribute__((ms_abi)) PoGetThermalRequestSupport(uint64_t* arg1, uint32_t arg2, PLOG_HANDLE_CONTEXT arg3);
+uint64_t __attribute__((ms_abi)) PopAcquireTransitionLock(void);
+int32_t __attribute__((ms_abi)) PoGetSystemWake(uint8_t* arg1, uint64_t arg2, struct _RECON_POGETSYSTEMWAKE_R8* arg3);
+uint64_t __attribute__((ms_abi)) PoGetProcessorIdleAccounting(uint64_t* arg1);
+uint32_t __attribute__((ms_abi)) PopGetTransitionsToOnCount(void);
+uint64_t __attribute__((ms_abi)) PopDispatchCallback(uint64_t arg1);
+int64_t __attribute__((ms_abi)) AlpcpLockForCachedReferenceBlob(uint64_t arg1);
+uint32_t __attribute__((ms_abi)) AlpcpSetOwnerPortMessage(uint64_t arg1, uint64_t arg2, uint8_t arg3);
+void __attribute__((ms_abi)) TmCancelPropagationRequest(void);
+void __attribute__((ms_abi)) TmCommitComplete(void);
+void __attribute__((ms_abi)) TmCommitEnlistment(void);
+void __attribute__((ms_abi)) TmCommitTransaction(void);
+void __attribute__((ms_abi)) TmCreateEnlistment(void);
+void __attribute__((ms_abi)) TmCurrentTransaction(void);
+void __attribute__((ms_abi)) TmDereferenceEnlistmentKey(void);
+void __attribute__((ms_abi)) TmEnableCallbacks(void);
+void __attribute__((ms_abi)) TmEndPropagationRequest(void);
+void __attribute__((ms_abi)) TmFreezeTransactions(void);
+void __attribute__((ms_abi)) TmGetTransactionId(void);
+void __attribute__((ms_abi)) TmInitSystem(void);
+void __attribute__((ms_abi)) TmInitSystemPhase2(void);
+void __attribute__((ms_abi)) TmInitializeTransactionManager(void);
+void __attribute__((ms_abi)) TmIsKTMCommitCoordinator(void);
+void __attribute__((ms_abi)) TmIsTransactionActive(void);
+void __attribute__((ms_abi)) TmPrePrepareComplete(void);
+void __attribute__((ms_abi)) TmPrePrepareEnlistment(void);
+void __attribute__((ms_abi)) TmPrepareComplete(void);
+void __attribute__((ms_abi)) TmPrepareEnlistment(void);
+void __attribute__((ms_abi)) TmPropagationComplete(void);
+void __attribute__((ms_abi)) TmPropagationFailed(void);
+void __attribute__((ms_abi)) TmReadOnlyEnlistment(void);
+void __attribute__((ms_abi)) TmRecoverEnlistment(void);
+void __attribute__((ms_abi)) TmRecoverResourceManager(void);
+void __attribute__((ms_abi)) TmRecoverTransactionManager(void);
+void __attribute__((ms_abi)) TmReferenceEnlistmentKey(void);
+void __attribute__((ms_abi)) TmRenameTransactionManager(void);
+void __attribute__((ms_abi)) TmRequestOutcomeEnlistment(void);
+void __attribute__((ms_abi)) TmRollbackComplete(void);
+void __attribute__((ms_abi)) TmRollbackEnlistment(void);
+void __attribute__((ms_abi)) TmRollbackTransaction(void);
+void __attribute__((ms_abi)) TmSetCurrentTransaction(void);
+void __attribute__((ms_abi)) TmSinglePhaseReject(void);
+void __attribute__((ms_abi)) TmThawTransactions(void);
+void __attribute__((ms_abi)) DbgBreakPoint(void);
+void __attribute__((ms_abi)) DbgBreakPointWithStatus(void);
+void __attribute__((ms_abi)) KdSetEventLoggingPresent(uint8_t arg1);
+uint64_t __attribute__((ms_abi)) KdGetDebugDevice(void);
+NTSTATUS __attribute__((ms_abi)) HvlQueryConnection(uint64_t* arg1);
+NTSTATUS __attribute__((ms_abi)) HvlQueryActiveHypervisorProcessorCount(uint32_t* arg1);
+uint64_t __attribute__((ms_abi)) KdReleaseDebuggerLock(uint64_t arg1);
+uint64_t __attribute__((ms_abi)) WmiTraceMessage(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint16_t arg4);
+uint64_t __attribute__((ms_abi)) KdAcquireDebuggerLock(uint8_t* arg1);
+uint32_t __attribute__((ms_abi)) WheaDeferredRecoveryService(void);
+uint64_t __attribute__((ms_abi)) EtwWriteTransfer(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+uint64_t __attribute__((ms_abi)) EtwWrite(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint32_t arg4);
+uint64_t __attribute__((ms_abi)) DbgPrintReturnControlC(uint64_t arg1, uint64_t arg2, uint32_t* arg3, uint64_t arg4);
+void __attribute__((ms_abi)) NtCommitComplete(void);
+void __attribute__((ms_abi)) NtCommitEnlistment(void);
+void __attribute__((ms_abi)) NtCommitTransaction(void);
+void __attribute__((ms_abi)) NtCreateEnlistment(void);
+void __attribute__((ms_abi)) NtCreateResourceManager(void);
+void __attribute__((ms_abi)) NtCreateTransaction(void);
+void __attribute__((ms_abi)) NtCreateTransactionManager(void);
+void __attribute__((ms_abi)) NtEnumerateTransactionObject(void);
+void __attribute__((ms_abi)) NtFreezeTransactions(void);
+void __attribute__((ms_abi)) NtGetNotificationResourceManager(void);
+void __attribute__((ms_abi)) NtOpenEnlistment(void);
+void __attribute__((ms_abi)) NtOpenResourceManager(void);
+void __attribute__((ms_abi)) NtOpenTransaction(void);
+void __attribute__((ms_abi)) NtOpenTransactionManager(void);
+void __attribute__((ms_abi)) NtPrePrepareComplete(void);
+void __attribute__((ms_abi)) NtPrePrepareEnlistment(void);
+void __attribute__((ms_abi)) NtPrepareComplete(void);
+void __attribute__((ms_abi)) NtPrepareEnlistment(void);
+void __attribute__((ms_abi)) NtPropagationComplete(void);
+void __attribute__((ms_abi)) NtPropagationFailed(void);
+void __attribute__((ms_abi)) NtQueryInformationEnlistment(void);
+void __attribute__((ms_abi)) NtQueryInformationResourceManager(void);
+void __attribute__((ms_abi)) NtQueryInformationTransaction(void);
+void __attribute__((ms_abi)) NtQueryInformationTransactionManager(void);
+void __attribute__((ms_abi)) NtReadOnlyEnlistment(void);
+void __attribute__((ms_abi)) NtRecoverEnlistment(void);
+void __attribute__((ms_abi)) NtRecoverResourceManager(void);
+void __attribute__((ms_abi)) NtRecoverTransactionManager(void);
+void __attribute__((ms_abi)) NtRollbackComplete(void);
+void __attribute__((ms_abi)) NtRollbackEnlistment(void);
+void __attribute__((ms_abi)) NtRollbackTransaction(void);
+void __attribute__((ms_abi)) NtSetInformationEnlistment(void);
+void __attribute__((ms_abi)) NtSetInformationResourceManager(void);
+void __attribute__((ms_abi)) NtSetInformationTransaction(void);
+void __attribute__((ms_abi)) NtThawTransactions(void);
+NTSTATUS __attribute__((ms_abi)) NtVdmControl(void);
+uint64_t __attribute__((ms_abi)) NtOpenProcessToken(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint64_t __attribute__((ms_abi)) NtOpenThreadToken(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
+int32_t __attribute__((ms_abi)) AlpcGetHeaderSize(PRTL_DYNAMIC_HASH_TABLE arg1);
+uint64_t __attribute__((ms_abi)) AlpcRegionDestroyProcedure(uint64_t* arg1, PLIST_ENTRY arg2);
+uint32_t __attribute__((ms_abi)) AlpcpFreeCompletionPacketLookaside(uint64_t arg1);
+int64_t __attribute__((ms_abi)) AlpcpGetMessageAttributeOffset(uint64_t* arg1, PKDPC arg2);
+int64_t __attribute__((ms_abi)) AlpcpGetMessageAttributeOffset32(uint64_t* arg1, struct _RECON_ALPCPGETMESSAGEATTRIBUTEOFFSET32_RDX* arg2);
+uint64_t __attribute__((ms_abi)) LpcRequestPort(uint64_t arg1, uint32_t* arg2);
+uint64_t __attribute__((ms_abi)) ZwClose(void);
+uint64_t __attribute__((ms_abi)) ZwOpenKey(void);
+uint64_t __attribute__((ms_abi)) ZwQueryValueKey(void);
+uint64_t __attribute__((ms_abi)) ZwCreateFile(void);
+uint64_t __attribute__((ms_abi)) ZwReadFile(void);
+uint64_t __attribute__((ms_abi)) ZwWriteFile(void);
+uint64_t __attribute__((ms_abi)) ZwAllocateVirtualMemory(void);
+uint64_t __attribute__((ms_abi)) ZwFreeVirtualMemory(void);
+uint64_t __attribute__((ms_abi)) ZwQuerySystemInformation(void);
+uint64_t __attribute__((ms_abi)) ZwWaitForSingleObject(void);
 
 /* External Kernel Callee Declarations */
+extern uint64_t __attribute__((ms_abi)) AlpcpDereferenceBlobEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) AlpcpSendMessage(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) AlpcpUnlockBlob(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) CcCopyWriteEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) CcFlushCachePriv(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) CcForEachPartition(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) CcMdlReadComplete2(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) CcNotifyWriteBehindInternal(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) CmpFindNameInList(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) EtwWriteEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) EtwpTraceMessageVa(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ExAcquirePushLockExclusiveEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ExAcquireResourceSharedLite(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ExAcquireSharedWaitForExclusive(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ExAllocateTimerInternal2(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ExFreePoolWithTag(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ExNotifyCallback(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ExQueueWorkItemFromIo(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ExRaiseHardError(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ExpTryQueueWorkItem(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) FsRtlAddLargeMcbEntry(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) FsRtlPrivateFastUnlockAll(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) IoPropagateIrpExtensionEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) IopQueryXxxInformation(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) IopQueueWorkItemProlog(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
 extern BOOLEAN __attribute__((ms_abi)) KdEnterDebugger(void* TrapFrame);
 extern void __attribute__((ms_abi)) KdExitDebugger(BOOLEAN Enable);
 extern BOOLEAN __attribute__((ms_abi)) KdpPrintString(struct _STRING* Output);
+extern uint64_t __attribute__((ms_abi)) KeBugCheckEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) KeCopyAffinityEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) KeExpandKernelStackAndCalloutInternal(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) KeLeaveCriticalRegion(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
 extern uint64_t __attribute__((ms_abi)) KeQueryActiveProcessorCountEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
 extern uint64_t __attribute__((ms_abi)) KeSetTargetProcessorDpcEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) KeSetTimer2(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) KeWaitForSingleObject(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) KiInsertQueueDpc(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) KiSetHeteroPolicyThread(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
 extern BOOLEAN __attribute__((ms_abi)) KiSetTimerEx(void* Timer, int64_t DueTime, ULONG Period, uint64_t Hand);
+extern uint64_t __attribute__((ms_abi)) LdrpSearchResourceSection_U(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) MiAddPhysicalMemoryChunks(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) MiAllocateContiguousMemory(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) MiAllocatePagesForMdl(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
 extern uint64_t __attribute__((ms_abi)) MiFreePagesFromMdl(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
 extern BOOLEAN __attribute__((ms_abi)) MiIsAddressValid(void* VirtualAddress);
+extern uint64_t __attribute__((ms_abi)) MiMapViewInSystemSpace(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) MiProbeAndLockPages(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) MiUnloadSystemImage(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) MmAcquireLoadLock(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) MmLoadSystemImageEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) MmReleaseLoadLock(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) NtOpenProcessTokenEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) NtOpenThreadTokenEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ObCreateObjectTypeEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ObDereferenceSecurityDescriptor(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ObMakeTemporaryObject(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
 extern int64_t __attribute__((ms_abi)) ObfDereferenceObjectWithTag(void* Object, ULONG Tag);
+extern uint64_t __attribute__((ms_abi)) ObfReferenceObject(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) ObfReferenceObjectWithTag(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
 extern BOOLEAN __attribute__((ms_abi)) ObpIsKernelHandle(void* Handle, BOOLEAN PreviousMode);
+extern uint64_t __attribute__((ms_abi)) ObpLookupDirectoryEntryEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) PoFxIssueComponentPerfStateChangeMultiple(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) PopAcquireRwLockExclusive(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) PopHandleConvergedPowerRequestUpdate(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) PopReleaseRwLock(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) PsBoostThreadIoEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) RtlCheckTokenMembershipEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) RtlFindNextForwardRunClearCapped(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) RtlFindNextForwardRunClearCappedEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
 extern NTSTATUS __attribute__((ms_abi)) RtlHashUnicodeString(const struct _UNICODE_STRING* String, BOOLEAN CaseInSensitive, ULONG HashAlgorithm, ULONG* HashValue);
+extern uint64_t __attribute__((ms_abi)) RtlpAddKnownAce(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) RtlpComputeCrcInternal(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) RtlpCreateHashTable(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) RtlpGetTokenNamedObjectPath(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) RtlpOpenImageFileOptionsKeyEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) RtlpSetSecurityObject(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) RtlpSystemBootStatusRequest(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) SeComputeAutoInheritByObjectTypeEx(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) SeReportSecurityEventWithSubCategory(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) SepAdjustAccessStateForConstraints(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) SepCreateAccessStateFromSubjectContext(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) SepInternalSetSecurityAttributesToken(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
 extern BOOLEAN __attribute__((ms_abi)) SepSidInToken(void* Token, void* PrincipalSelfSid, void* Sid, BOOLEAN DenyOnly, BOOLEAN Restricted, BOOLEAN SingleSid);
+extern uint64_t __attribute__((ms_abi)) _vsprintf_l(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) memset(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) vDbgPrintExWithPrefixInternal(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) vsprintf_s(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
+extern uint64_t __attribute__((ms_abi)) vswprintf_s(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3);
 
 #endif /* NT_RECONSTRUCTED_TYPES_H */

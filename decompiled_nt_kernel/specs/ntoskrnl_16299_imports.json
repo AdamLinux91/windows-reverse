@@ -1,0 +1,1423 @@
+{
+  "binary": "ntoskrnl.exe",
+  "version": "10.0.16299.15",
+  "total_modules": 18,
+  "modules": [
+    {
+      "dll": "ext-ms-win-ntos-werkernel-l1-1-0.dll",
+      "functions": [
+        {
+          "name": "WerLiveKernelInitSystem",
+          "hint": 3,
+          "ordinal": null,
+          "iat_rva": 4150984
+        }
+      ]
+    },
+    {
+      "dll": "ext-ms-win-ntos-tm-l1-1-0.dll",
+      "functions": [
+        {
+          "name": "TmPrepareEnlistment",
+          "hint": 59,
+          "ordinal": null,
+          "iat_rva": 4150336
+        },
+        {
+          "name": "TmPrepareComplete",
+          "hint": 58,
+          "ordinal": null,
+          "iat_rva": 4150344
+        },
+        {
+          "name": "TmPrePrepareEnlistment",
+          "hint": 57,
+          "ordinal": null,
+          "iat_rva": 4150352
+        },
+        {
+          "name": "TmPrePrepareComplete",
+          "hint": 56,
+          "ordinal": null,
+          "iat_rva": 4150360
+        },
+        {
+          "name": "TmIsTransactionActive",
+          "hint": 55,
+          "ordinal": null,
+          "iat_rva": 4150368
+        },
+        {
+          "name": "TmIsKTMCommitCoordinator",
+          "hint": 54,
+          "ordinal": null,
+          "iat_rva": 4150376
+        },
+        {
+          "name": "TmInitializeTransactionManager",
+          "hint": 53,
+          "ordinal": null,
+          "iat_rva": 4150384
+        },
+        {
+          "name": "TmGetTransactionId",
+          "hint": 50,
+          "ordinal": null,
+          "iat_rva": 4150392
+        },
+        {
+          "name": "TmFreezeTransactions",
+          "hint": 49,
+          "ordinal": null,
+          "iat_rva": 4150400
+        },
+        {
+          "name": "TmEndPropagationRequest",
+          "hint": 48,
+          "ordinal": null,
+          "iat_rva": 4150408
+        },
+        {
+          "name": "TmEnableCallbacks",
+          "hint": 47,
+          "ordinal": null,
+          "iat_rva": 4150416
+        },
+        {
+          "name": "TmDereferenceEnlistmentKey",
+          "hint": 46,
+          "ordinal": null,
+          "iat_rva": 4150424
+        },
+        {
+          "name": "TmCurrentTransaction",
+          "hint": 45,
+          "ordinal": null,
+          "iat_rva": 4150432
+        },
+        {
+          "name": "TmCreateEnlistment",
+          "hint": 44,
+          "ordinal": null,
+          "iat_rva": 4150440
+        },
+        {
+          "name": "TmCommitTransaction",
+          "hint": 43,
+          "ordinal": null,
+          "iat_rva": 4150448
+        },
+        {
+          "name": "TmCommitEnlistment",
+          "hint": 42,
+          "ordinal": null,
+          "iat_rva": 4150456
+        },
+        {
+          "name": "TmCommitComplete",
+          "hint": 41,
+          "ordinal": null,
+          "iat_rva": 4150464
+        },
+        {
+          "name": "TmCancelPropagationRequest",
+          "hint": 40,
+          "ordinal": null,
+          "iat_rva": 4150472
+        },
+        {
+          "name": "NtThawTransactions",
+          "hint": 39,
+          "ordinal": null,
+          "iat_rva": 4150480
+        },
+        {
+          "name": "NtSetInformationTransaction",
+          "hint": 36,
+          "ordinal": null,
+          "iat_rva": 4150488
+        },
+        {
+          "name": "NtSetInformationResourceManager",
+          "hint": 35,
+          "ordinal": null,
+          "iat_rva": 4150496
+        },
+        {
+          "name": "NtSetInformationEnlistment",
+          "hint": 34,
+          "ordinal": null,
+          "iat_rva": 4150504
+        },
+        {
+          "name": "TmPropagationComplete",
+          "hint": 60,
+          "ordinal": null,
+          "iat_rva": 4150512
+        },
+        {
+          "name": "NtRollbackEnlistment",
+          "hint": 31,
+          "ordinal": null,
+          "iat_rva": 4150520
+        },
+        {
+          "name": "NtRollbackComplete",
+          "hint": 30,
+          "ordinal": null,
+          "iat_rva": 4150528
+        },
+        {
+          "name": "NtRecoverTransactionManager",
+          "hint": 27,
+          "ordinal": null,
+          "iat_rva": 4150536
+        },
+        {
+          "name": "NtRecoverResourceManager",
+          "hint": 26,
+          "ordinal": null,
+          "iat_rva": 4150544
+        },
+        {
+          "name": "NtRecoverEnlistment",
+          "hint": 25,
+          "ordinal": null,
+          "iat_rva": 4150552
+        },
+        {
+          "name": "TmInitSystemPhase2",
+          "hint": 52,
+          "ordinal": null,
+          "iat_rva": 4150560
+        },
+        {
+          "name": "TmInitSystem",
+          "hint": 51,
+          "ordinal": null,
+          "iat_rva": 4150568
+        },
+        {
+          "name": "NtCommitComplete",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4150576
+        },
+        {
+          "name": "NtCommitEnlistment",
+          "hint": 1,
+          "ordinal": null,
+          "iat_rva": 4150584
+        },
+        {
+          "name": "NtCommitTransaction",
+          "hint": 2,
+          "ordinal": null,
+          "iat_rva": 4150592
+        },
+        {
+          "name": "NtCreateEnlistment",
+          "hint": 3,
+          "ordinal": null,
+          "iat_rva": 4150600
+        },
+        {
+          "name": "TmPropagationFailed",
+          "hint": 61,
+          "ordinal": null,
+          "iat_rva": 4150608
+        },
+        {
+          "name": "TmReadOnlyEnlistment",
+          "hint": 62,
+          "ordinal": null,
+          "iat_rva": 4150616
+        },
+        {
+          "name": "TmRecoverEnlistment",
+          "hint": 63,
+          "ordinal": null,
+          "iat_rva": 4150624
+        },
+        {
+          "name": "TmRecoverResourceManager",
+          "hint": 64,
+          "ordinal": null,
+          "iat_rva": 4150632
+        },
+        {
+          "name": "TmRecoverTransactionManager",
+          "hint": 65,
+          "ordinal": null,
+          "iat_rva": 4150640
+        },
+        {
+          "name": "TmReferenceEnlistmentKey",
+          "hint": 66,
+          "ordinal": null,
+          "iat_rva": 4150648
+        },
+        {
+          "name": "TmRenameTransactionManager",
+          "hint": 67,
+          "ordinal": null,
+          "iat_rva": 4150656
+        },
+        {
+          "name": "TmRequestOutcomeEnlistment",
+          "hint": 68,
+          "ordinal": null,
+          "iat_rva": 4150664
+        },
+        {
+          "name": "TmRollbackComplete",
+          "hint": 69,
+          "ordinal": null,
+          "iat_rva": 4150672
+        },
+        {
+          "name": "TmRollbackEnlistment",
+          "hint": 70,
+          "ordinal": null,
+          "iat_rva": 4150680
+        },
+        {
+          "name": "TmRollbackTransaction",
+          "hint": 71,
+          "ordinal": null,
+          "iat_rva": 4150688
+        },
+        {
+          "name": "TmSetCurrentTransaction",
+          "hint": 72,
+          "ordinal": null,
+          "iat_rva": 4150696
+        },
+        {
+          "name": "TmSinglePhaseReject",
+          "hint": 74,
+          "ordinal": null,
+          "iat_rva": 4150704
+        },
+        {
+          "name": "TmThawTransactions",
+          "hint": 75,
+          "ordinal": null,
+          "iat_rva": 4150712
+        },
+        {
+          "name": "NtRegisterProtocolAddressInformation",
+          "hint": 28,
+          "ordinal": null,
+          "iat_rva": 4150720
+        },
+        {
+          "name": "NtRenameTransactionManager",
+          "hint": 29,
+          "ordinal": null,
+          "iat_rva": 4150728
+        },
+        {
+          "name": "NtRollforwardTransactionManager",
+          "hint": 33,
+          "ordinal": null,
+          "iat_rva": 4150736
+        },
+        {
+          "name": "NtCreateResourceManager",
+          "hint": 4,
+          "ordinal": null,
+          "iat_rva": 4150744
+        },
+        {
+          "name": "NtCreateTransaction",
+          "hint": 5,
+          "ordinal": null,
+          "iat_rva": 4150752
+        },
+        {
+          "name": "NtCreateTransactionManager",
+          "hint": 6,
+          "ordinal": null,
+          "iat_rva": 4150760
+        },
+        {
+          "name": "NtEnumerateTransactionObject",
+          "hint": 7,
+          "ordinal": null,
+          "iat_rva": 4150768
+        },
+        {
+          "name": "NtFreezeTransactions",
+          "hint": 8,
+          "ordinal": null,
+          "iat_rva": 4150776
+        },
+        {
+          "name": "NtGetNotificationResourceManager",
+          "hint": 9,
+          "ordinal": null,
+          "iat_rva": 4150784
+        },
+        {
+          "name": "NtSetInformationTransactionManager",
+          "hint": 37,
+          "ordinal": null,
+          "iat_rva": 4150792
+        },
+        {
+          "name": "NtSinglePhaseReject",
+          "hint": 38,
+          "ordinal": null,
+          "iat_rva": 4150800
+        },
+        {
+          "name": "NtOpenEnlistment",
+          "hint": 10,
+          "ordinal": null,
+          "iat_rva": 4150808
+        },
+        {
+          "name": "NtOpenResourceManager",
+          "hint": 11,
+          "ordinal": null,
+          "iat_rva": 4150816
+        },
+        {
+          "name": "NtOpenTransaction",
+          "hint": 12,
+          "ordinal": null,
+          "iat_rva": 4150824
+        },
+        {
+          "name": "NtOpenTransactionManager",
+          "hint": 13,
+          "ordinal": null,
+          "iat_rva": 4150832
+        },
+        {
+          "name": "TmShutdownSystem",
+          "hint": 73,
+          "ordinal": null,
+          "iat_rva": 4150840
+        },
+        {
+          "name": "NtRollbackTransaction",
+          "hint": 32,
+          "ordinal": null,
+          "iat_rva": 4150848
+        },
+        {
+          "name": "NtReadOnlyEnlistment",
+          "hint": 24,
+          "ordinal": null,
+          "iat_rva": 4150856
+        },
+        {
+          "name": "NtQueryInformationTransactionManager",
+          "hint": 23,
+          "ordinal": null,
+          "iat_rva": 4150864
+        },
+        {
+          "name": "NtQueryInformationTransaction",
+          "hint": 22,
+          "ordinal": null,
+          "iat_rva": 4150872
+        },
+        {
+          "name": "NtQueryInformationResourceManager",
+          "hint": 21,
+          "ordinal": null,
+          "iat_rva": 4150880
+        },
+        {
+          "name": "NtQueryInformationEnlistment",
+          "hint": 20,
+          "ordinal": null,
+          "iat_rva": 4150888
+        },
+        {
+          "name": "NtPropagationFailed",
+          "hint": 19,
+          "ordinal": null,
+          "iat_rva": 4150896
+        },
+        {
+          "name": "NtPropagationComplete",
+          "hint": 18,
+          "ordinal": null,
+          "iat_rva": 4150904
+        },
+        {
+          "name": "NtPrepareEnlistment",
+          "hint": 17,
+          "ordinal": null,
+          "iat_rva": 4150912
+        },
+        {
+          "name": "NtPrepareComplete",
+          "hint": 16,
+          "ordinal": null,
+          "iat_rva": 4150920
+        },
+        {
+          "name": "NtPrePrepareEnlistment",
+          "hint": 15,
+          "ordinal": null,
+          "iat_rva": 4150928
+        },
+        {
+          "name": "NtPrePrepareComplete",
+          "hint": 14,
+          "ordinal": null,
+          "iat_rva": 4150936
+        }
+      ]
+    },
+    {
+      "dll": "HAL.dll",
+      "functions": [
+        {
+          "name": "HalGetBusDataByOffset",
+          "hint": 25,
+          "ordinal": null,
+          "iat_rva": 4149360
+        },
+        {
+          "name": "HalReturnToFirmware",
+          "hint": 57,
+          "ordinal": null,
+          "iat_rva": 4149368
+        },
+        {
+          "name": "HalGetProcessorIdByNtNumber",
+          "hint": 32,
+          "ordinal": null,
+          "iat_rva": 4149376
+        },
+        {
+          "name": "HalGetMessageRoutingInfo",
+          "hint": 31,
+          "ordinal": null,
+          "iat_rva": 4149384
+        },
+        {
+          "name": "HalGetVectorInput",
+          "hint": 33,
+          "ordinal": null,
+          "iat_rva": 4149392
+        },
+        {
+          "name": "HalTranslateBusAddress",
+          "hint": 72,
+          "ordinal": null,
+          "iat_rva": 4149400
+        },
+        {
+          "name": "HalQueryEnvironmentVariableInfoEx",
+          "hint": 45,
+          "ordinal": null,
+          "iat_rva": 4149408
+        },
+        {
+          "name": "HalStartNextProcessor",
+          "hint": 68,
+          "ordinal": null,
+          "iat_rva": 4149416
+        },
+        {
+          "name": "HalSetEnvironmentVariableEx",
+          "hint": 64,
+          "ordinal": null,
+          "iat_rva": 4149424
+        },
+        {
+          "name": "KeStallExecutionProcessor",
+          "hint": 84,
+          "ordinal": null,
+          "iat_rva": 4149432
+        },
+        {
+          "name": "HalPerformEndOfInterrupt",
+          "hint": 42,
+          "ordinal": null,
+          "iat_rva": 4149440
+        },
+        {
+          "name": "HalSetBusDataByOffset",
+          "hint": 61,
+          "ordinal": null,
+          "iat_rva": 4149448
+        },
+        {
+          "name": "HalEnumerateProcessors",
+          "hint": 19,
+          "ordinal": null,
+          "iat_rva": 4149456
+        },
+        {
+          "name": "KdHvComPortInUse",
+          "hint": 81,
+          "ordinal": null,
+          "iat_rva": 4149464
+        },
+        {
+          "name": "HalRegisterErrataCallbacks",
+          "hint": 50,
+          "ordinal": null,
+          "iat_rva": 4149472
+        },
+        {
+          "name": "HalAcpiGetTableEx",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4149480
+        },
+        {
+          "name": "HalInitSystem",
+          "hint": 36,
+          "ordinal": null,
+          "iat_rva": 4149488
+        },
+        {
+          "name": "HalRegisterDynamicProcessor",
+          "hint": 49,
+          "ordinal": null,
+          "iat_rva": 4149496
+        },
+        {
+          "name": "HalStartDynamicProcessor",
+          "hint": 67,
+          "ordinal": null,
+          "iat_rva": 4149504
+        },
+        {
+          "name": "HalIsHyperThreadingEnabled",
+          "hint": 40,
+          "ordinal": null,
+          "iat_rva": 4149512
+        },
+        {
+          "name": "HalCalibratePerformanceCounter",
+          "hint": 10,
+          "ordinal": null,
+          "iat_rva": 4149520
+        },
+        {
+          "name": "HalHandleNMI",
+          "hint": 35,
+          "ordinal": null,
+          "iat_rva": 4149528
+        },
+        {
+          "name": "HalDisableInterrupt",
+          "hint": 13,
+          "ordinal": null,
+          "iat_rva": 4149536
+        },
+        {
+          "name": "HalQueryMaximumProcessorCount",
+          "hint": 46,
+          "ordinal": null,
+          "iat_rva": 4149544
+        },
+        {
+          "name": "HalRequestClockInterrupt",
+          "hint": 52,
+          "ordinal": null,
+          "iat_rva": 4149552
+        },
+        {
+          "name": "HalRequestSoftwareInterrupt",
+          "hint": 56,
+          "ordinal": null,
+          "iat_rva": 4149560
+        },
+        {
+          "name": "HalEnableInterrupt",
+          "hint": 17,
+          "ordinal": null,
+          "iat_rva": 4149568
+        },
+        {
+          "name": "HalGetEnvironmentVariableEx",
+          "hint": 27,
+          "ordinal": null,
+          "iat_rva": 4149576
+        },
+        {
+          "name": "KeFlushWriteBuffer",
+          "hint": 82,
+          "ordinal": null,
+          "iat_rva": 4149584
+        },
+        {
+          "name": "HalInitializeBios",
+          "hint": 37,
+          "ordinal": null,
+          "iat_rva": 4149592
+        },
+        {
+          "name": "HalSetRealTimeClock",
+          "hint": 66,
+          "ordinal": null,
+          "iat_rva": 4149600
+        },
+        {
+          "name": "HalReportResourceUsage",
+          "hint": 51,
+          "ordinal": null,
+          "iat_rva": 4149608
+        },
+        {
+          "name": "HalAllProcessorsStarted",
+          "hint": 3,
+          "ordinal": null,
+          "iat_rva": 4149616
+        },
+        {
+          "name": "HalQueryRealTimeClock",
+          "hint": 47,
+          "ordinal": null,
+          "iat_rva": 4149624
+        },
+        {
+          "name": "KeQueryPerformanceCounter",
+          "hint": 83,
+          "ordinal": null,
+          "iat_rva": 4149632
+        },
+        {
+          "name": "HalStartProfileInterrupt",
+          "hint": 69,
+          "ordinal": null,
+          "iat_rva": 4149640
+        },
+        {
+          "name": "HalStopProfileInterrupt",
+          "hint": 70,
+          "ordinal": null,
+          "iat_rva": 4149648
+        },
+        {
+          "name": "HalInitializeProcessor",
+          "hint": 39,
+          "ordinal": null,
+          "iat_rva": 4149656
+        },
+        {
+          "name": "HalSendSoftwareInterrupt",
+          "hint": 59,
+          "ordinal": null,
+          "iat_rva": 4149664
+        },
+        {
+          "name": "HalSendNMI",
+          "hint": 58,
+          "ordinal": null,
+          "iat_rva": 4149672
+        },
+        {
+          "name": "HalHandleMcheck",
+          "hint": 34,
+          "ordinal": null,
+          "iat_rva": 4149680
+        },
+        {
+          "name": "HalRequestIpiSpecifyVector",
+          "hint": 55,
+          "ordinal": null,
+          "iat_rva": 4149688
+        },
+        {
+          "name": "HalGetInterruptTargetInformation",
+          "hint": 28,
+          "ordinal": null,
+          "iat_rva": 4149696
+        },
+        {
+          "name": "HalRequestIpi",
+          "hint": 54,
+          "ordinal": null,
+          "iat_rva": 4149704
+        },
+        {
+          "name": "HalProcessorIdle",
+          "hint": 43,
+          "ordinal": null,
+          "iat_rva": 4149712
+        },
+        {
+          "name": "HalGetMemoryCachingRequirements",
+          "hint": 30,
+          "ordinal": null,
+          "iat_rva": 4149720
+        },
+        {
+          "name": "HalAllocateCrashDumpRegisters",
+          "hint": 6,
+          "ordinal": null,
+          "iat_rva": 4149728
+        },
+        {
+          "name": "HalInitializeOnResume",
+          "hint": 38,
+          "ordinal": null,
+          "iat_rva": 4149736
+        },
+        {
+          "name": "HalRequestDeferredRecoveryServiceInterrupt",
+          "hint": 53,
+          "ordinal": null,
+          "iat_rva": 4149744
+        },
+        {
+          "name": "HalSetEnvironmentVariable",
+          "hint": 63,
+          "ordinal": null,
+          "iat_rva": 4149752
+        },
+        {
+          "name": "HalGetEnvironmentVariable",
+          "hint": 26,
+          "ordinal": null,
+          "iat_rva": 4149760
+        }
+      ]
+    },
+    {
+      "dll": "PSHED.dll",
+      "functions": [
+        {
+          "name": "PshedFreeMemory",
+          "hint": 8,
+          "ordinal": null,
+          "iat_rva": 4149776
+        },
+        {
+          "name": "PshedReadErrorRecord",
+          "hint": 17,
+          "ordinal": null,
+          "iat_rva": 4149784
+        },
+        {
+          "name": "PshedClearErrorRecord",
+          "hint": 4,
+          "ordinal": null,
+          "iat_rva": 4149792
+        },
+        {
+          "name": "PshedAllocateMemory",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4149800
+        },
+        {
+          "name": "PshedIsSystemWheaEnabled",
+          "hint": 15,
+          "ordinal": null,
+          "iat_rva": 4149808
+        },
+        {
+          "name": "PshedGetBootErrorPacket",
+          "hint": 10,
+          "ordinal": null,
+          "iat_rva": 4149816
+        },
+        {
+          "name": "PshedInitialize",
+          "hint": 13,
+          "ordinal": null,
+          "iat_rva": 4149824
+        },
+        {
+          "name": "PshedGetAllErrorSources",
+          "hint": 9,
+          "ordinal": null,
+          "iat_rva": 4149832
+        },
+        {
+          "name": "PshedAttemptErrorRecovery",
+          "hint": 2,
+          "ordinal": null,
+          "iat_rva": 4149840
+        },
+        {
+          "name": "PshedWriteErrorRecord",
+          "hint": 22,
+          "ordinal": null,
+          "iat_rva": 4149848
+        },
+        {
+          "name": "PshedBugCheckSystem",
+          "hint": 3,
+          "ordinal": null,
+          "iat_rva": 4149856
+        },
+        {
+          "name": "PshedFinalizeErrorRecord",
+          "hint": 7,
+          "ordinal": null,
+          "iat_rva": 4149864
+        },
+        {
+          "name": "PshedArePluginsPresent",
+          "hint": 1,
+          "ordinal": null,
+          "iat_rva": 4149872
+        },
+        {
+          "name": "PshedEnableErrorSource",
+          "hint": 6,
+          "ordinal": null,
+          "iat_rva": 4149880
+        },
+        {
+          "name": "PshedDisableErrorSource",
+          "hint": 5,
+          "ordinal": null,
+          "iat_rva": 4149888
+        },
+        {
+          "name": "PshedGetInjectionCapabilities",
+          "hint": 12,
+          "ordinal": null,
+          "iat_rva": 4149896
+        },
+        {
+          "name": "PshedInjectError",
+          "hint": 14,
+          "ordinal": null,
+          "iat_rva": 4149904
+        },
+        {
+          "name": "PshedSetErrorSourceInfo",
+          "hint": 20,
+          "ordinal": null,
+          "iat_rva": 4149912
+        }
+      ]
+    },
+    {
+      "dll": "BOOTVID.dll",
+      "functions": [
+        {
+          "name": "VidSolidColorFill",
+          "hint": 11,
+          "ordinal": null,
+          "iat_rva": 4149248
+        },
+        {
+          "name": "VidScreenToBufferBlt",
+          "hint": 8,
+          "ordinal": null,
+          "iat_rva": 4149256
+        },
+        {
+          "name": "VidBitBlt",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4149264
+        },
+        {
+          "name": "VidResetDisplay",
+          "hint": 7,
+          "ordinal": null,
+          "iat_rva": 4149272
+        },
+        {
+          "name": "VidBitBltEx",
+          "hint": 1,
+          "ordinal": null,
+          "iat_rva": 4149280
+        },
+        {
+          "name": "VidDisplayString",
+          "hint": 4,
+          "ordinal": null,
+          "iat_rva": 4149288
+        },
+        {
+          "name": "VidInitialize",
+          "hint": 6,
+          "ordinal": null,
+          "iat_rva": 4149296
+        },
+        {
+          "name": "VidSetScrollRegion",
+          "hint": 9,
+          "ordinal": null,
+          "iat_rva": 4149304
+        },
+        {
+          "name": "VidSetTextColor",
+          "hint": 10,
+          "ordinal": null,
+          "iat_rva": 4149312
+        },
+        {
+          "name": "VidCleanUp",
+          "hint": 3,
+          "ordinal": null,
+          "iat_rva": 4149320
+        },
+        {
+          "name": "VidBufferToScreenBlt",
+          "hint": 2,
+          "ordinal": null,
+          "iat_rva": 4149328
+        }
+      ]
+    },
+    {
+      "dll": "ext-ms-win-ntos-clipsp-l1-1-0.dll",
+      "functions": [
+        {
+          "name": "ClipSpInitialize",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4150136
+        },
+        {
+          "name": "ClipSpUninitialize",
+          "hint": 1,
+          "ordinal": null,
+          "iat_rva": 4150144
+        }
+      ]
+    },
+    {
+      "dll": "kdcom.dll",
+      "functions": [
+        {
+          "name": "KdReceivePacket",
+          "hint": 2,
+          "ordinal": null,
+          "iat_rva": 4151048
+        },
+        {
+          "name": "KdSetHiberRange",
+          "hint": 4,
+          "ordinal": null,
+          "iat_rva": 4151056
+        },
+        {
+          "name": "KdPower",
+          "hint": 1,
+          "ordinal": null,
+          "iat_rva": 4151064
+        },
+        {
+          "name": "KdInitialize",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4151072
+        },
+        {
+          "name": "KdSendPacket",
+          "hint": 3,
+          "ordinal": null,
+          "iat_rva": 4151080
+        }
+      ]
+    },
+    {
+      "dll": "ext-ms-win-ntos-kcminitcfg-l1-1-0.dll",
+      "functions": [
+        {
+          "name": "CmSetInitMachineConfig",
+          "hint": 1,
+          "ordinal": null,
+          "iat_rva": 4150160
+        },
+        {
+          "name": "CmCompleteInitMachineConfig",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4150168
+        }
+      ]
+    },
+    {
+      "dll": "ext-ms-win-ntos-ksr-l1-1-2.dll",
+      "functions": [
+        {
+          "name": "KsrCleanupPageDatabase",
+          "hint": 1,
+          "ordinal": null,
+          "iat_rva": 4150224
+        },
+        {
+          "name": "KsrFreePersistedMemory",
+          "hint": 4,
+          "ordinal": null,
+          "iat_rva": 4150232
+        },
+        {
+          "name": "KsrQueryMetadata",
+          "hint": 19,
+          "ordinal": null,
+          "iat_rva": 4150240
+        },
+        {
+          "name": "KsrEnumeratePersistedMemory",
+          "hint": 3,
+          "ordinal": null,
+          "iat_rva": 4150248
+        },
+        {
+          "name": "KsrClaimPersistedMemory",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4150256
+        },
+        {
+          "name": "KsrPersistMemoryWithMetadata",
+          "hint": 17,
+          "ordinal": null,
+          "iat_rva": 4150264
+        },
+        {
+          "name": "KsrMdlToMemoryRuns",
+          "hint": 10,
+          "ordinal": null,
+          "iat_rva": 4150272
+        },
+        {
+          "name": "KsrGetFirmwareInformation",
+          "hint": 6,
+          "ordinal": null,
+          "iat_rva": 4150280
+        },
+        {
+          "name": "KsrInitSystem",
+          "hint": 9,
+          "ordinal": null,
+          "iat_rva": 4150288
+        },
+        {
+          "name": "KsrInitPageDatabase",
+          "hint": 8,
+          "ordinal": null,
+          "iat_rva": 4150296
+        },
+        {
+          "name": "KsrFreePersistedMemoryBlock",
+          "hint": 5,
+          "ordinal": null,
+          "iat_rva": 4150304
+        }
+      ]
+    },
+    {
+      "dll": "ext-ms-win-ntos-ksecurity-l1-1-1.dll",
+      "functions": [
+        {
+          "name": "QueryUpdateFileEaAllowedExt",
+          "hint": 1,
+          "ordinal": null,
+          "iat_rva": 4150184
+        },
+        {
+          "name": "AppContainerPrivilegesEnabledExt",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4150192
+        }
+      ]
+    },
+    {
+      "dll": "ext-ms-win-ntos-werkernel-l1-1-1.dll",
+      "functions": [
+        {
+          "name": "WerLiveKernelOpenDumpFile",
+          "hint": 4,
+          "ordinal": null,
+          "iat_rva": 4151000
+        },
+        {
+          "name": "WerLiveKernelCancelReport",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4151008
+        },
+        {
+          "name": "WerLiveKernelCreateReport",
+          "hint": 2,
+          "ordinal": null,
+          "iat_rva": 4151016
+        },
+        {
+          "name": "WerLiveKernelSubmitReport",
+          "hint": 5,
+          "ordinal": null,
+          "iat_rva": 4151024
+        },
+        {
+          "name": "WerLiveKernelCloseHandle",
+          "hint": 1,
+          "ordinal": null,
+          "iat_rva": 4151032
+        }
+      ]
+    },
+    {
+      "dll": "ext-ms-win-ntos-ksigningpolicy-l1-1-0.dll",
+      "functions": [
+        {
+          "name": "SeQuerySigningPolicyExt",
+          "hint": 2,
+          "ordinal": null,
+          "iat_rva": 4150208
+        }
+      ]
+    },
+    {
+      "dll": "ext-ms-win-ntos-ucode-l1-1-0.dll",
+      "functions": [
+        {
+          "name": "ExpMicrocodeInitialization",
+          "hint": 2,
+          "ordinal": null,
+          "iat_rva": 4150952
+        },
+        {
+          "name": "ExpMicrocodeInformationUnload",
+          "hint": 1,
+          "ordinal": null,
+          "iat_rva": 4150960
+        },
+        {
+          "name": "ExpMicrocodeInformationLoad",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4150968
+        }
+      ]
+    },
+    {
+      "dll": "ext-ms-win-ntos-stateseparation-l1-1-0.dll",
+      "functions": [
+        {
+          "name": "ExpInitializeStateSeparationPhase1",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4150320
+        }
+      ]
+    },
+    {
+      "dll": "ext-ms-win-fs-clfs-l1-1-0.dll",
+      "functions": [
+        {
+          "name": "ClfsMgmtRegisterManagedClient",
+          "hint": 37,
+          "ordinal": null,
+          "iat_rva": 4149944
+        },
+        {
+          "name": "ClfsMgmtInstallPolicy",
+          "hint": 35,
+          "ordinal": null,
+          "iat_rva": 4149952
+        },
+        {
+          "name": "ClfsCreateLogFile",
+          "hint": 7,
+          "ordinal": null,
+          "iat_rva": 4149960
+        },
+        {
+          "name": "ClfsDeleteLogByPointer",
+          "hint": 10,
+          "ordinal": null,
+          "iat_rva": 4149968
+        },
+        {
+          "name": "ClfsMgmtDeregisterManagedClient",
+          "hint": 33,
+          "ordinal": null,
+          "iat_rva": 4149976
+        },
+        {
+          "name": "ClfsGetLogFileInformation",
+          "hint": 20,
+          "ordinal": null,
+          "iat_rva": 4149984
+        },
+        {
+          "name": "ClfsReadRestartArea",
+          "hint": 48,
+          "ordinal": null,
+          "iat_rva": 4149992
+        },
+        {
+          "name": "ClfsLsnEqual",
+          "hint": 27,
+          "ordinal": null,
+          "iat_rva": 4150000
+        },
+        {
+          "name": "ClfsReadLogRecord",
+          "hint": 45,
+          "ordinal": null,
+          "iat_rva": 4150008
+        },
+        {
+          "name": "ClfsReadNextLogRecord",
+          "hint": 46,
+          "ordinal": null,
+          "iat_rva": 4150016
+        },
+        {
+          "name": "ClfsTerminateReadLog",
+          "hint": 57,
+          "ordinal": null,
+          "iat_rva": 4150024
+        },
+        {
+          "name": "ClfsWriteRestartArea",
+          "hint": 58,
+          "ordinal": null,
+          "iat_rva": 4150032
+        },
+        {
+          "name": "ClfsCloseLogFileObject",
+          "hint": 6,
+          "ordinal": null,
+          "iat_rva": 4150040
+        },
+        {
+          "name": "ClfsDeleteMarshallingArea",
+          "hint": 12,
+          "ordinal": null,
+          "iat_rva": 4150048
+        },
+        {
+          "name": "ClfsReserveAndAppendLog",
+          "hint": 51,
+          "ordinal": null,
+          "iat_rva": 4150056
+        },
+        {
+          "name": "ClfsLsnInvalid",
+          "hint": 29,
+          "ordinal": null,
+          "iat_rva": 4150064
+        },
+        {
+          "name": "ClfsFlushToLsn",
+          "hint": 16,
+          "ordinal": null,
+          "iat_rva": 4150072
+        },
+        {
+          "name": "ClfsLsnContainer",
+          "hint": 24,
+          "ordinal": null,
+          "iat_rva": 4150080
+        },
+        {
+          "name": "ClfsLsnLess",
+          "hint": 30,
+          "ordinal": null,
+          "iat_rva": 4150088
+        },
+        {
+          "name": "ClfsCreateMarshallingArea",
+          "hint": 8,
+          "ordinal": null,
+          "iat_rva": 4150096
+        },
+        {
+          "name": "ClfsAddLogContainer",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4150104
+        },
+        {
+          "name": "ClfsRemoveLogContainer",
+          "hint": 49,
+          "ordinal": null,
+          "iat_rva": 4150112
+        },
+        {
+          "name": "ClfsLsnDifference",
+          "hint": 26,
+          "ordinal": null,
+          "iat_rva": 4150120
+        }
+      ]
+    },
+    {
+      "dll": "CI.dll",
+      "functions": [
+        {
+          "name": "CiInitialize",
+          "hint": 0,
+          "ordinal": null,
+          "iat_rva": 4149344
+        }
+      ]
+    },
+    {
+      "dll": "msrpc.sys",
+      "functions": [
+        {
+          "name": "MesEncodeIncrementalHandleCreate",
+          "hint": 15,
+          "ordinal": null,
+          "iat_rva": 4151096
+        },
+        {
+          "name": "MesIncrementalHandleReset",
+          "hint": 17,
+          "ordinal": null,
+          "iat_rva": 4151104
+        },
+        {
+          "name": "NdrMesTypeDecode3",
+          "hint": 45,
+          "ordinal": null,
+          "iat_rva": 4151112
+        },
+        {
+          "name": "NdrMesTypeEncode3",
+          "hint": 48,
+          "ordinal": null,
+          "iat_rva": 4151120
+        },
+        {
+          "name": "RpcExceptionFilter",
+          "hint": 64,
+          "ordinal": null,
+          "iat_rva": 4151128
+        },
+        {
+          "name": "MesDecodeBufferHandleCreate",
+          "hint": 11,
+          "ordinal": null,
+          "iat_rva": 4151136
+        },
+        {
+          "name": "MesHandleFree",
+          "hint": 16,
+          "ordinal": null,
+          "iat_rva": 4151144
+        }
+      ]
+    },
+    {
+      "dll": "cng.sys",
+      "functions": [
+        {
+          "name": "BCryptExportKey",
+          "hint": 16,
+          "ordinal": null,
+          "iat_rva": 4149928
+        }
+      ]
+    }
+  ]
+}

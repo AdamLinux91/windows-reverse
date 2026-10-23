@@ -213,7 +213,7 @@ class VerifiedCEmitter:
                     dep_name = m.group(2)
                     if dep_name not in by_name and dep_name in self.structs:
                         dep_st = self.structs[dep_name]
-                        if dep_st.size <= 256 or dep_name in ("_KTHREAD", "_OBJECT_HEADER"):
+                        if dep_st.size <= 2048 or dep_name in ("_KTHREAD", "_OBJECT_HEADER"):
                             by_name[dep_name] = dep_st
                             queue.append(dep_st)
 
@@ -317,7 +317,7 @@ class VerifiedCEmitter:
                     lane_ends[l_idx] = f_end
                     placed = True
                     break
-            if not placed and len(lane_tuples) < 4:
+            if not placed and len(lane_tuples) < 12:
                 lane_tuples.append([(fld, fname)])
                 lane_ends.append(f_end)
 
@@ -826,7 +826,10 @@ class VerifiedCEmitter:
                 ': : : "memory", "cc");'
             )
 
-        m_st = re.match(r"store\s+i(\d+)\s+([^,]+),\s*(?:ptr|i\d+\*)\s+([^\s,]+)", stmt)
+        m_st = re.match(
+            r"store\s+i(\d+)\s+([^,]+),\s*(?:ptr|i\d+\*)\s+(inttoptr\s*\([^)]+\)|[^\s,]+)",
+            stmt,
+        )
         if m_st:
             bits = int(m_st.group(1))
             val_c = self._resolve_c_tok(m_st.group(2), val_exprs)
@@ -938,7 +941,10 @@ class VerifiedCEmitter:
                 return None
 
         # Memory load: `load iN, ptr %p`
-        m_ld = re.match(r"load\s+i(\d+),\s*(?:ptr|i\d+\*)\s+([^\s,]+)", rhs)
+        m_ld = re.match(
+            r"load\s+i(\d+),\s*(?:ptr|i\d+\*)\s+(inttoptr\s*\([^)]+\)|[^\s,]+)",
+            rhs,
+        )
         if m_ld:
             bits = int(m_ld.group(1))
             ptr_tok = self._norm_tok(m_ld.group(2))
@@ -1266,11 +1272,85 @@ class VerifiedCEmitter:
                 )
                 if resolved is not None:
                     path_str, leaf_fld = resolved
-                    wrapped = f"({base_c})" if (" " in base_c or base_c.startswith("CONTAINING_RECORD")) else base_c
-                    return (f"{wrapped}->{path_str}", leaf_fld.c_type)
+                    if self._is_emittable_field_path(sname, path_str):
+                        wrapped = f"({base_c})" if (" " in base_c or base_c.startswith("CONTAINING_RECORD")) else base_c
+                        return (f"{wrapped}->{path_str}", leaf_fld.c_type)
+            off_part = f" + 0x{disp:x}" if disp >= 0 else f" - 0x{-disp:x}"
+            if disp == 0:
+                off_part = ""
+            return (
+                f"(*({fallback_ty}*)((uint8_t*)(uintptr_t)({base_c}){off_part}))",
+                fallback_ty,
+            )
 
         addr_c = self._resolve_c_tok(ptr_tok, val_exprs)
         return (f"(*({fallback_ty}*)(uintptr_t)({addr_c}))", fallback_ty)
+
+    @classmethod
+    def _emitted_field_map(cls, st: StructDef) -> dict[str, StructField]:
+        used_names: set[str] = set()
+        if st.is_union:
+            out: dict[str, StructField] = {}
+            for fld in st.fields:
+                if fld.bit_size is not None:
+                    continue
+                fname = cls._unique_field_name(fld.name, used_names)
+                out[fname] = fld
+            return out
+
+        non_bf = [
+            f
+            for f in sorted(st.fields, key=lambda x: (x.offset, -x.size, x.name))
+            if f.bit_size is None and f.offset < max(st.size, 1)
+        ]
+        renamed: list[tuple[StructField, str]] = []
+        for fld in non_bf:
+            fname = cls._unique_field_name(fld.name, used_names)
+            renamed.append((fld, fname))
+
+        lane_ends: list[int] = []
+        out = {}
+        for fld, fname in renamed:
+            f_end = fld.offset + max(fld.size, 1)
+            if st.size > 0 and f_end > st.size:
+                continue
+            placed = False
+            for l_idx, cur_end in enumerate(lane_ends):
+                if fld.offset >= cur_end:
+                    lane_ends[l_idx] = f_end
+                    out[fname] = fld
+                    placed = True
+                    break
+            if not placed and len(lane_ends) < 12:
+                lane_ends.append(f_end)
+                out[fname] = fld
+        return out
+
+    def _is_emittable_field_path(self, sname: str, path_str: str) -> bool:
+        parts = path_str.split(".")
+        cur_sname = sname
+        for idx, part in enumerate(parts):
+            st = self.structs.get(cur_sname)
+            if st is None:
+                return False
+            fmap = self._emitted_field_map(st)
+            fld = fmap.get(part)
+            if fld is None:
+                return False
+            if idx + 1 < len(parts):
+                if fld.is_pointer:
+                    return False
+                m = re.match(r"^(struct|union)\s+([A-Za-z0-9_]+)$", fld.c_type.strip())
+                if not m:
+                    return False
+                sub_name = m.group(2)
+                sub_st = self.structs.get(sub_name)
+                if sub_st is None or not (
+                    sub_st.size <= 2048 or sub_name in ("_KTHREAD", "_OBJECT_HEADER")
+                ):
+                    return False
+                cur_sname = sub_name
+        return True
 
     def _emit_terminator(
         self,
@@ -1342,6 +1422,9 @@ class VerifiedCEmitter:
                 out.append(f"        goto {self._c_label(def_lbl)};")
                 out.append("}")
                 return out
+
+        if term == "unreachable":
+            return ["return;"] if signature.is_void_return else ["return 0;"]
 
         return []
 
@@ -1470,6 +1553,10 @@ class VerifiedCEmitter:
             return "1U"
         if norm in ("false", "null", "undef", "poison", "zeroinitializer"):
             return "0ULL"
+        m_itp = re.match(r"inttoptr\s*\(\s*i\d+\s+(-?\d+)\s+to\s+(?:ptr|i\d+\*)\s*\)", norm)
+        if m_itp:
+            u64 = int(m_itp.group(1)) & 0xFFFFFFFFFFFFFFFF
+            return f"0x{u64:x}ULL"
         try:
             ival = int(norm, 0)
             if ival < 0:
