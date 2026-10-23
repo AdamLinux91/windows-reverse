@@ -22,7 +22,11 @@ from rich.table import Table
 from ntrev.frontend import load_binary_image
 from ntrev.pipeline import NtDecompilationPipeline
 from ntrev.symbols import load_pdb_database
-from ntrev.whole_kernel import WholeKernelCLifter
+from ntrev.whole_kernel import (
+    WholeKernelCLifter,
+    export_exact_kernel,
+    verify_exact_kernel,
+)
 
 console = Console()
 
@@ -125,6 +129,56 @@ def _cmd_decompile(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_exact_kernel(args: argparse.Namespace) -> int:
+    """Create or verify the only artifact that can make a byte-identity claim."""
+    if args.verify_image:
+        if not args.manifest:
+            console.print("[red]--manifest is required with --verify-image[/red]")
+            return 2
+        result = verify_exact_kernel(args.verify_image, args.manifest)
+        console.print(
+            f"Exact-image verification: {'[bold green]PASS[/bold green]' if result.passed else '[bold red]FAIL[/bold red]'}\n"
+            f"  image: {result.image_path}\n"
+            f"  checked sections/functions: {result.checked_sections}/{result.checked_functions}"
+        )
+        if result.errors:
+            for error in result.errors[:20]:
+                console.print(f"  [red]{error}[/red]")
+        return 0 if result.passed else 2
+
+    if not args.binary:
+        console.print("[red]exact-kernel requires an input PE unless --verify-image is used[/red]")
+        return 2
+    out_dir = Path(args.output_dir)
+    pdb_line = (
+        f"PDB: [bold]{Path(args.pdb).resolve()}[/bold]"
+        if args.pdb
+        else "PDB: [dim]not supplied[/dim]"
+    )
+    console.print(Panel(
+        f"Input: [bold]{Path(args.binary).resolve()}[/bold]\n{pdb_line}",
+        title="Byte-Preserving Exact Kernel Artifact",
+    ))
+    try:
+        artifact = export_exact_kernel(args.binary, out_dir, args.pdb)
+    except (OSError, ValueError) as exc:
+        console.print(f"[bold red]Exact artifact refused:[/bold red] {exc}")
+        return 2
+    console.print(
+        "[bold green]PASS:[/bold green] copied the original PE without rewriting any bytes.\n"
+        f"  artifact: {artifact.artifact_image}\n"
+        f"  manifest: {artifact.manifest_path}\n"
+        f"  SHA-256: {artifact.artifact_sha256}\n"
+        f"  procedures hashed: {artifact.function_count:,}\n"
+        f"  executable section bytes: {artifact.executable_raw_bytes:,}"
+    )
+    console.print(
+        "[yellow]Use this exact PE for behavior. The generated C/ASM tree is an analysis artifact "
+        "until a Windows differential/formal-equivalence gate proves a replacement.[/yellow]"
+    )
+    return 0
+
+
 def _cmd_whole_kernel(args: argparse.Namespace) -> int:
     """Run the bounded-memory two-pass whole-kernel lifter on every PDB/.pdata function."""
     out_dir = Path(args.output_dir)
@@ -137,6 +191,13 @@ def _cmd_whole_kernel(args: argparse.Namespace) -> int:
     lifter = WholeKernelCLifter()
     _, summary = lifter.run(args.binary, args.pdb, out_dir)
     compile_result = lifter.compile_tree(out_dir) if args.compile else None
+    exact_artifact = None
+    if args.exact_image:
+        try:
+            exact_artifact = export_exact_kernel(args.binary, out_dir / "exact", args.pdb)
+        except (OSError, ValueError) as exc:
+            console.print(f"[bold red]Exact-image export refused:[/bold red] {exc}")
+            return 2
     table = Table(title="Whole-Kernel Coverage")
     table.add_column("Metric", style="bold cyan")
     table.add_column("Value", style="green")
@@ -152,6 +213,11 @@ def _cmd_whole_kernel(args: argparse.Namespace) -> int:
         )
         if compile_result.failed_units or compile_result.unexpected_unresolved_symbols:
             return 2
+    if exact_artifact is not None:
+        console.print(
+            f"[bold green]Exact behavior artifact:[/bold green] {exact_artifact.artifact_image}\n"
+            f"[bold green]Exact artifact manifest:[/bold green] {exact_artifact.manifest_path}"
+        )
     console.print("[bold green]Whole-kernel C/ASM shards, reconstructed data sections, prototypes, and RVA manifest written.[/bold green]")
     return 0
 
@@ -252,7 +318,23 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p_whole.add_argument("--pdb", required=True, help="Path to the matching MSF 7.00 ntkrnlmp.pdb")
     p_whole.add_argument("-o", "--output-dir", default="decompiled_whole_kernel", help="Self-contained output tree")
     p_whole.add_argument("--compile", action="store_true", help="Compile every shard and link a relocatable whole-kernel object")
+    p_whole.add_argument(
+        "--exact-image",
+        action="store_true",
+        help="Also copy the input PE byte-for-byte to output/exact for actual kernel behavior",
+    )
     p_whole.set_defaults(func=_cmd_whole_kernel)
+
+    p_exact = sub.add_parser(
+        "exact-kernel",
+        help="Copy and hash a real AMD64 ntoskrnl.exe without rewriting bytes",
+    )
+    p_exact.add_argument("binary", nargs="?", help="Path to the real AMD64 PE32+ ntoskrnl.exe")
+    p_exact.add_argument("--pdb", help="Matching MSF 7.00 ntkrnlmp.pdb; RSDS identity is checked")
+    p_exact.add_argument("-o", "--output-dir", default="exact_ntoskrnl", help="Exact artifact output directory")
+    p_exact.add_argument("--verify-image", help="Verify an existing exact image against --manifest instead of copying")
+    p_exact.add_argument("--manifest", help="Manifest for --verify-image")
+    p_exact.set_defaults(func=_cmd_exact_kernel)
 
     p_pe = sub.add_parser("inspect-pe", help="Inspect PE32+ sections, .pdata unwinds, and RSDS PDB70")
     p_pe.add_argument("binary", help="Path to PE32+ binary")

@@ -26,6 +26,14 @@
 
 Before unifying the Windows NT Executive (`ntoskrnl.exe`) with a monolithic Linux-compatible hybrid kernel, we require **mathematically provable binary-to-source recovery** of NT system services, executive structures, and kernel primitives — without hand-wave approximations or broken decompiler heuristics.
 
+> **Execution truth:** a recompiled C tree that compiles and links is not automatically the
+> original kernel. Microsoft’s source/compiler/build environment are unavailable, and
+> privileged state, undocumented loader contracts, interrupts, and timing cannot be
+> inferred from a static C lift alone. When exact behavior is required, `ntrev
+> exact-kernel` makes a byte-preserving copy of the matching PE and hashes the complete
+> image, sections, and discovered procedures. The C/ASM tree is an analysis artifact
+> until a Windows differential or formal-equivalence gate proves a replacement.
+
 `ntrev` implements **Phase 1: Automated Decompilation & Binary-to-Source Semantic Equivalence**:
 
 ```text
@@ -164,7 +172,24 @@ ntrev demo -o output/demo
 Do not pass only an export list. Give `ntrev` the exact matching retail image and
 `ntkrnlmp.pdb`; the command discovers `.pdata` procedures and PDB public/procedure
 symbols, preserves non-C entry paths as raw assembly, emits all normal procedures in
-streaming subsystem shards, and runs the native compile/link gate:
+streaming subsystem shards, and runs the native compile/link gate. The generated C
+must not be treated as an exact Windows drop-in merely because it compiles.
+
+If the kernel must function **exactly** like the supplied Microsoft build today, make
+the byte-preserving artifact and use that PE for execution:
+
+```bash
+ntrev exact-kernel \\
+  /path/to/Windows/System32/ntoskrnl.exe \\
+  --pdb /path/to/symbols/ntkrnlmp.pdb \\
+  -o output/ntoskrnl_exact
+```
+
+This copies the original PE without rewriting it and records a complete-image SHA-256
+plus section/procedure hashes. `ntrev whole-kernel --exact-image` can produce that
+artifact alongside the C/ASM analysis tree. A recompiled C replacement requires a
+separate Windows differential or formal-equivalence gate; it is not covered by the
+compile/link result.
 
 ```bash
 ntrev whole-kernel \

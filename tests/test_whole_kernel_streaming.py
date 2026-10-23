@@ -7,7 +7,11 @@ from pathlib import Path
 
 from ntrev.frontend import load_binary_image
 from ntrev.symbols import load_pdb_database
-from ntrev.whole_kernel import WholeKernelCLifter
+from ntrev.whole_kernel import (
+    WholeKernelCLifter,
+    export_exact_kernel,
+    verify_exact_kernel,
+)
 
 
 def test_whole_kernel_two_pass_fixture_covers_all_functions_and_shards(
