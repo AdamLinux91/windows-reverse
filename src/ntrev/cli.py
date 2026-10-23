@@ -22,6 +22,7 @@ from rich.table import Table
 from ntrev.frontend import load_binary_image
 from ntrev.pipeline import NtDecompilationPipeline
 from ntrev.symbols import load_pdb_database
+from ntrev.whole_kernel import WholeKernelCLifter
 
 console = Console()
 
@@ -124,6 +125,37 @@ def _cmd_decompile(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_whole_kernel(args: argparse.Namespace) -> int:
+    """Run the bounded-memory two-pass whole-kernel lifter on every PDB/.pdata function."""
+    out_dir = Path(args.output_dir)
+    console.print(Panel(
+        f"Binary: [bold]{Path(args.binary).resolve()}[/bold]\n"
+        f"PDB: [bold]{Path(args.pdb).resolve()}[/bold]\n"
+        f"Output: [bold]{out_dir.resolve()}[/bold]",
+        title="Whole-Kernel Streaming Decompilation",
+    ))
+    lifter = WholeKernelCLifter()
+    _, summary = lifter.run(args.binary, args.pdb, out_dir)
+    compile_result = lifter.compile_tree(out_dir) if args.compile else None
+    table = Table(title="Whole-Kernel Coverage")
+    table.add_column("Metric", style="bold cyan")
+    table.add_column("Value", style="green")
+    for key, value in summary.__dict__.items():
+        if key != "shard_files":
+            table.add_row(key, f"{value:,}" if isinstance(value, int) else str(value))
+    table.add_row("shards", str(len(summary.shard_files)))
+    console.print(table)
+    if compile_result is not None:
+        console.print(
+            f"Native compile gate: {compile_result.compiled_units}/{compile_result.translation_units} units; "
+            f"unexpected unresolved symbols: {len(compile_result.unexpected_unresolved_symbols)}"
+        )
+        if compile_result.failed_units or compile_result.unexpected_unresolved_symbols:
+            return 2
+    console.print("[bold green]Whole-kernel C/ASM shards, reconstructed data sections, prototypes, and RVA manifest written.[/bold green]")
+    return 0
+
+
 def _cmd_demo(args: argparse.Namespace) -> int:
     # Build synthetic PE32+ ntoskrnl fixture + MSF 7.00 PDB on the fly & run full pipeline
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "examples"))
@@ -211,6 +243,16 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p_dec.add_argument("--no-smt", action="store_true", help="Skip Z3 SMT equivalence proofs")
     p_dec.add_argument("--show-c", action="store_true", help="Print reconstructed C source to stdout")
     p_dec.set_defaults(func=_cmd_decompile)
+
+    p_whole = sub.add_parser(
+        "whole-kernel",
+        help="Stream all exported and non-exported ntoskrnl.exe functions into verified C/ASM subsystem shards",
+    )
+    p_whole.add_argument("binary", help="Path to the real PE32+ ntoskrnl.exe")
+    p_whole.add_argument("--pdb", required=True, help="Path to the matching MSF 7.00 ntkrnlmp.pdb")
+    p_whole.add_argument("-o", "--output-dir", default="decompiled_whole_kernel", help="Self-contained output tree")
+    p_whole.add_argument("--compile", action="store_true", help="Compile every shard and link a relocatable whole-kernel object")
+    p_whole.set_defaults(func=_cmd_whole_kernel)
 
     p_pe = sub.add_parser("inspect-pe", help="Inspect PE32+ sections, .pdata unwinds, and RSDS PDB70")
     p_pe.add_argument("binary", help="Path to PE32+ binary")

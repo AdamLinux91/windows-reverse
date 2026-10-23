@@ -503,12 +503,35 @@ def _build_section_rva_info(binary: BinaryImage | None) -> tuple[list[int], set[
     return sec_rvas, exec_segs
 
 
-def _clean_pdb_symbol_name(raw_name: str) -> str:
-    """Clean minor fastcall/stdcall decorations while preserving valid C identifiers."""
+def _clean_pdb_symbol_name(raw_name: str, rva: int = 0) -> str:
+    """Clean fastcall/stdcall or MSVC C++ mangled names into valid C identifiers."""
     if raw_name.startswith("__imp_"):
         return raw_name
     if raw_name.startswith("@") and "@" in raw_name[1:]:
-        return raw_name[1:].split("@", 1)[0]
+        raw_name = raw_name[1:].split("@", 1)[0]
+    if raw_name.startswith("?"):
+        # Skip string literals (??_C@), vftables (??_7), scalar/vector deleting dtors, typeinfo
+        if raw_name.startswith(("??_C@", "??_7", "??_R", "??_E", "??_G", "?_OptionsStorage")):
+            return ""
+        parts = [p for p in raw_name.lstrip("?").split("@") if p and not p.startswith("$")]
+        clean_parts: list[str] = []
+        for p in parts[:2]:
+            s = "".join(ch if (ch.isalnum() or ch == "_") else "_" for ch in p).strip("_")
+            if s:
+                clean_parts.append(s)
+        if len(clean_parts) >= 2:
+            base = f"{clean_parts[1]}__{clean_parts[0]}"
+        elif clean_parts:
+            base = clean_parts[0]
+        else:
+            return ""
+        return f"{base}_{rva:x}" if rva else base
+    # Sanitize any non-identifier chars (e.g. `$`, `.`, `-` in `$filt$0` or PGO names)
+    if not raw_name.isidentifier():
+        sanitized = "".join(ch if (ch.isalnum() or ch == "_") else "_" for ch in raw_name)
+        if sanitized and sanitized[0].isdigit():
+            sanitized = "_" + sanitized
+        return f"{sanitized}_{rva:x}" if (rva and sanitized != raw_name) else sanitized
     return raw_name
 
 
@@ -519,7 +542,22 @@ def _parse_symbol_record_stream(
     tpi_records: dict[int, dict[str, Any]],
     full_sizes: dict[str, int],
 ) -> list[PDBSymbol]:
+    # Pre-scan whether S_PUB32 stream carries explicit CVPSF_FUNCTION (0x02) flags
+    stream_has_pub_func_flags = False
+    scan_pos = 0
+    while scan_pos + 4 <= len(sym_stream):
+        rl, rt = struct.unpack_from("<HH", sym_stream, scan_pos)
+        if rl < 2:
+            break
+        if rt == S_PUB32 and rl >= 12:
+            pf = struct.unpack_from("<I", sym_stream, scan_pos + 4)[0]
+            if pf & 0x02:
+                stream_has_pub_func_flags = True
+                break
+        scan_pos += 2 + rl
+
     symbols: list[PDBSymbol] = []
+    seen_func_names: dict[str, int] = {}
     pos = 0
     while pos + 4 <= len(sym_stream):
         rec_len, rec_ty = struct.unpack_from("<HH", sym_stream, pos)
@@ -533,12 +571,25 @@ def _parse_symbol_record_stream(
             raw_name, _ = _read_cstr(body, 10)
             if seg == 0 or seg >= len(sec_rvas) and len(sec_rvas) > 5:
                 continue
-            name = _clean_pdb_symbol_name(raw_name)
-            if not name or name.startswith(("?", "__imp_", "??_C@")):
+            if raw_name.startswith("__imp_"):
                 continue
             base_rva = sec_rvas[seg] if seg < len(sec_rvas) else 0x1000
             rva = base_rva + offset
-            is_func = bool(pub_flags & 0x02) or (seg in exec_segs)
+            is_func = (
+                bool(pub_flags & 0x02) and (seg in exec_segs or len(sec_rvas) <= 5)
+                if stream_has_pub_func_flags
+                else (bool(pub_flags & 0x02) or (seg in exec_segs))
+            )
+            if raw_name.startswith("?") and not is_func:
+                continue
+            name = _clean_pdb_symbol_name(raw_name, rva if raw_name.startswith("?") else 0)
+            if not name:
+                continue
+            if is_func:
+                prev_rva = seen_func_names.get(name)
+                if prev_rva is not None and prev_rva != rva:
+                    name = f"{name}_{rva:x}"
+                seen_func_names[name] = rva
             symbols.append(
                 PDBSymbol(
                     name=name,

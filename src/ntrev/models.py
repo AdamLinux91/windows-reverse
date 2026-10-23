@@ -7,7 +7,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 
-@dataclass
+@dataclass(slots=True)
 class InsnOperand:
     """Normalized x86-64 instruction operand."""
 
@@ -22,7 +22,7 @@ class InsnOperand:
     segment: str | None = None
 
 
-@dataclass
+@dataclass(slots=True)
 class DisasmInsn:
     """Single disassembled machine instruction with semantic operand metadata."""
 
@@ -47,6 +47,19 @@ class DisasmInsn:
 
 
 @dataclass
+class JumpTableInfo:
+    """Recovered MSVC x64 RVA jump table (`switch` dispatch) at an indirect `jmp reg`."""
+
+    jmp_address: int
+    index_reg: str
+    index_width: int  # 8, 16, 32, or 64 bits
+    targets: list[int] = field(default_factory=list)  # case 0..N-1 target VAs
+    default_target: int | None = None
+    setup_insn_addrs: list[int] = field(default_factory=list)  # table-load insns subsumed by switch
+    data_ranges: list[tuple[int, int]] = field(default_factory=list)  # inline table VA spans
+
+
+@dataclass
 class BasicBlock:
     """Control-Flow Graph basic block."""
 
@@ -57,6 +70,7 @@ class BasicBlock:
     fallthrough: int | None = None
     branch_target: int | None = None
     tailcall_target: int | None = None
+    cond_tailcall_target: int | None = None
     is_raw_asm_block: bool = False
     raw_asm_reason: str | None = None
 
@@ -94,6 +108,7 @@ class FunctionCFG:
     has_pdata_unwind: bool = False
     section_name: str = ".text"
     asm_classification: AsmBlockClassification = field(default_factory=AsmBlockClassification)
+    jump_tables: dict[int, JumpTableInfo] = field(default_factory=dict)
 
     def sorted_blocks(self) -> list[BasicBlock]:
         return [self.blocks[k] for k in sorted(self.blocks.keys())]
@@ -493,19 +508,20 @@ def classify_nt_subsystem(func_name: str) -> str:
         (("Zw", "Nt"), "zw_nt"),
         (("FsRtl", "FsRtlp"), "fsrtl"),
         (("Alpc", "Alpcp", "Lpc", "Lpcp"), "alpc"),
-        (("Cm", "Cmp"), "cm"),
+        (("Etw", "Etwp", "_Tlg", "Wmi", "Wmip", "Vf", "Vfp", "Vi", "Verifier", "Xdv",
+          "Hvl", "Hvlp", "Hvi", "Hvcall", "Vsl", "Vslp", "Whea", "Wheap", "Kd", "Kdp", "Kdb", "Dbg"), "etw_vf"),
+        (("Cm", "Cmp", "Hv", "Hvp", "Bi", "Bcd", "_Cm", "_Reg"), "cm"),
         (("Cc", "Ccp"), "cc"),
-        (("Po", "Pop"), "po"),
+        (("Po", "Pop", "Ppm", "Tt"), "po"),
         (("Tm", "Tmp"), "tm"),
-        (("Etw", "Etwp", "Wmi", "Wmip", "Vf", "Vfp", "Hvl", "Hvlp", "Whea", "Kd", "Kdp", "Dbg"), "etw_vf"),
-        (("Ke", "Ki", "Kz", "Kf", "Hal", "Inbv"), "ke"),
+        (("Ke", "Ki", "Kx", "Ky", "Kz", "Kf", "Hal", "Halp", "Inbv", "Bvga", "Bgk", "Arb"), "ke"),
         (("Ps", "Psp"), "ps"),
-        (("Mm", "Mi"), "mm"),
-        (("Ob", "Obp"), "ob"),
-        (("Io", "Iop", "Pi", "Pp", "Pnp"), "io"),
-        (("Ex", "Exp", "Exf"), "ex"),
-        (("Rtl", "Rtlp", "wcs", "str", "_wcs", "_str", "is", "to", "__chkstk"), "rtl"),
-        (("Se", "Sep"), "se"),
+        (("Mm", "Mi", "Sm", "Smp", "SMKM_", "ST_STORE", "B_TREE", "NP_CONTEXT"), "mm"),
+        (("Ob", "Obp", "Obf"), "ob"),
+        (("Io", "Iop", "Iof", "Pi", "Pip", "Pp", "Pnp", "_Pnp", "DevObj", "Mapper", "FsVga", "Hdls"), "io"),
+        (("Ex", "Exp", "Exf", "Perf", "Pf", "Pfp", "Em", "Emp", "RtlpHp", "Callback"), "ex"),
+        (("Se", "Sep", "Authz", "Srp", "Ci"), "se"),
+        (("Rtl", "Rtlp", "Ldr", "Nls", "Asl", "wcs", "str", "_wcs", "_str", "is", "to", "__chkstk"), "rtl"),
     ]
     for ptuple, subsys in prefixes:
         if func_name.startswith(ptuple):
