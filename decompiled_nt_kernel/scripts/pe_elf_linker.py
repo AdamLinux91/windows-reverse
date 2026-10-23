@@ -228,14 +228,19 @@ def link_elf_objects(
     external_rva_resolver: dict[str, int] | None = None,
     image_base: int = 0x140000000,
     section_align: int = 0x1000,
+    external_precedence: set[str] | None = None,
 ) -> LinkedKernelBlob:
     """
     Merge all `.text` and `.rodata`/`.data`/`.bss` sections across `obj_paths`,
     resolve global/weak/common symbols + `external_rva_resolver`, and apply all
-    x86-64 relocations relative to `code_rva` and `data_rva`.
+    x86-64 relocations relative to `code_rva` and `data_rva`. Names in
+    `external_precedence` intentionally bind to the supplied PE address even when a
+    generated object contains a fallback definition (used for the real image's IAT,
+    image base, and initialized kernel globals).
     """
     objs = [parse_elf64_object(p) for p in obj_paths]
     ext_map = external_rva_resolver or {}
+    preferred_external = external_precedence or set()
 
     code_buf = bytearray()
     data_buf = bytearray()
@@ -336,7 +341,9 @@ def link_elf_objects(
                 else:
                     raise ValueError(f"{obj.path}: unresolved local symbol in {tsec.name}")
             else:
-                if sym.name in sym_rva:
+                if sym.name in preferred_external and sym.name in ext_map:
+                    target_sym_rva = ext_map[sym.name]
+                elif sym.name in sym_rva:
                     target_sym_rva = sym_rva[sym.name]
                 elif sym.name in ext_map:
                     target_sym_rva = ext_map[sym.name]

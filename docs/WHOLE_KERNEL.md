@@ -49,6 +49,7 @@ build/ntoskrnl_whole/
 ├── src/<subsystem>/*.c                 # C-lift candidates or preserved raw ASM shards
 ├── src/globals/nt_data_sections.S       # reconstructed non-executable data and raw-ASM blobs
 ├── src/globals/nt_reconstructed_globals.c
+├── src/runtime/nt_int128_runtime.c      # freestanding GCC 128-bit helper implementations
 ├── specs/nt_whole_kernel_rvas.json      # every function, RVA, shard, arity, aliases, raw-ASM state
 ├── specs/whole_kernel_summary.json
 ├── obj/*.o                              # created by --compile
@@ -56,9 +57,11 @@ build/ntoskrnl_whole/
 ```
 
 `--compile` is a hard gate: every generated translation unit must compile, and the
-relocatable link must have no unexpected unresolved symbol. Only the normal GCC 128-bit
-integer helpers (`__divti3`, `__modti3`, `__udivti3`, `__umodti3`) and the GOT marker
-are allowed at this intermediate stage; unresolved raw-ASM/data symbols fail the gate.
+relocatable link must have no unexpected unresolved symbol. The generated tree includes
+freestanding implementations of the GCC 128-bit integer helpers
+(`__divti3`, `__modti3`, `__udivti3`, `__umodti3`); only the GOT marker is allowed to
+remain unresolved at this intermediate stage. Unresolved raw-ASM/data symbols fail the
+gate.
 
 ### The exact behavior path
 
@@ -87,6 +90,27 @@ whole-kernel procedure and loaded section; `ntrev exact-kernel --verify-image ..
 entitled to an exact behavior claim. The generated C/ASM tree is still valuable for
 inspection and future replacement work, but it is not a drop-in replacement until an
 external Windows differential or formal-equivalence gate passes.
+
+### The actual standalone recompiled path
+
+If the goal is a new kernel image made from the generated code rather than a graft, use
+`--standalone-output` with `--compile`:
+
+```bash
+ntrev whole-kernel /path/to/Windows/System32/ntoskrnl.exe \\
+  --pdb /path/to/symbols/ntkrnlmp.pdb \\
+  -o build/ntoskrnl_whole --compile \\
+  --standalone-output build/ntoskrnl_standalone.exe
+```
+
+The standalone linker does not accept a host fallback. It makes the generated
+`KiSystemStartup` the PE entry point, redirects generated exports, binds initialized
+kernel data and IAT references to the input image's loader contract, and overwrites the
+input executable-section bytes with INT3 guards. A missing generated function or an
+accidental jump to an old Microsoft code address therefore fails loudly rather than
+silently becoming grafting. This is the correct recompiled-image path, but its
+structural link is not a Windows boot proof; the next gate is booting it in a Windows VM
+and exercising real application workloads.
 
 The Python API is also available:
 
