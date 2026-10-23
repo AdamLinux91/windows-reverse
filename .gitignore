@@ -1,0 +1,21 @@
+# Virtual environments & caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build & distribution artifacts
+build/
+dist/
+*.egg-info/
+*.so
+*.o
+*.obj
+
+# Generated analysis outputs (unless in examples/fixtures)
+output/
+tmp/
