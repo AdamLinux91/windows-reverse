@@ -109,6 +109,7 @@ class Z3EquivalenceVerifier:
     def __init__(self, loop_unroll_bound: int = 12, timeout_ms: int = 10000) -> None:
         self.loop_unroll_bound = loop_unroll_bound
         self.timeout_ms = timeout_ms
+        z3.set_param("memory_max_size", 512)
 
     def verify_function(
         self,
@@ -283,6 +284,19 @@ class Z3EquivalenceVerifier:
             verified_stages.append(f"magic_{tag}_equivalence:{tag}_{rdiv.divisor}")
 
         elapsed = (time.perf_counter() - t0) * 1000.0
+        if "x86_64_to_llvm_ir_equivalence" not in verified_stages and not any(
+            s.startswith("loop_reroll_equivalence:") for s in verified_stages
+        ):
+            return EquivalenceProof(
+                function_name=cfg.name,
+                status="TIMEOUT_OR_UNKNOWN",
+                bit_width=64,
+                num_assertions=total_assertions,
+                solve_time_ms=round(elapsed, 3),
+                verified_stages=verified_stages,
+                notes="IR contains unreachable or unmodeled stack/control construct; skipped for drop-in safety.",
+            )
+
         return EquivalenceProof(
             function_name=cfg.name,
             status="VERIFIED_EQUIVALENT",
@@ -710,11 +724,21 @@ class Z3EquivalenceVerifier:
         c_widths = callee_param_widths or {}
 
         has_escaped_stack_lea = any(
-            ins.mnemonic == "lea"
-            and len(ins.operands) == 2
-            and ins.operands[1].kind == "mem"
-            and ins.operands[1].base in ("rsp", "esp", "rbp", "ebp")
-            and ins.operands[0].reg not in ("rsp", "esp", "rbp", "ebp")
+            (
+                ins.mnemonic == "lea"
+                and len(ins.operands) == 2
+                and ins.operands[1].kind == "mem"
+                and ins.operands[1].base in ("rsp", "esp", "rbp", "ebp")
+                and ins.operands[0].reg not in ("rsp", "esp", "rbp", "ebp")
+            )
+            or (
+                ins.mnemonic == "mov"
+                and len(ins.operands) == 2
+                and ins.operands[1].kind == "reg"
+                and ins.operands[1].reg in ("rsp", "esp", "rbp", "ebp")
+                and ins.operands[0].kind == "reg"
+                and ins.operands[0].reg not in ("rsp", "esp", "rbp", "ebp")
+            )
             for ins in cfg.all_instructions()
         )
         init_state = init_state.clone()
@@ -1661,6 +1685,9 @@ class Z3EquivalenceVerifier:
             return z3.BitVecVal(1, bits)
         if tok == "false":
             return z3.BitVecVal(0, bits)
+        m_itp = re.match(r"inttoptr\s*\(\s*i\d+\s+(-?\d+)\s+to\s+(?:ptr|i\d+\*)\s*\)", tok)
+        if m_itp:
+            return z3.BitVecVal(int(m_itp.group(1)) & ((1 << bits) - 1), bits)
         try:
             ival = int(tok, 0)
             return z3.BitVecVal(ival & ((1 << bits) - 1), bits)
@@ -1696,7 +1723,10 @@ class Z3EquivalenceVerifier:
         sym_name_to_va: dict[str, int],
     ) -> tuple[bool, z3.ArrayRef]:
         # Handle `store iN <val>, ptr <ptr>`
-        m_st = re.match(r"store\s+i(\d+)\s+([^,]+),\s*(?:ptr|i\d+\*)\s+([^\s,]+)", stmt)
+        m_st = re.match(
+            r"store\s+i(\d+)\s+([^,]+),\s*(?:ptr|i\d+\*)\s+(inttoptr\s*\([^)]+\)|[^\s,]+)",
+            stmt,
+        )
         if m_st:
             bits = int(m_st.group(1))
             val = self._resolve_ir_val(m_st.group(2), bits, env)
@@ -1767,7 +1797,10 @@ class Z3EquivalenceVerifier:
             return True, mem
 
         # load iN, ptr %p
-        m_ld = re.match(r"load\s+i(\d+),\s*(?:ptr|i\d+\*)\s+([^\s,]+)", rhs_clean)
+        m_ld = re.match(
+            r"load\s+i(\d+),\s*(?:ptr|i\d+\*)\s+(inttoptr\s*\([^)]+\)|[^\s,]+)",
+            rhs_clean,
+        )
         if m_ld:
             bits = int(m_ld.group(1))
             ptr = self._resolve_ir_val(m_ld.group(2), 64, env)
@@ -1783,9 +1816,9 @@ class Z3EquivalenceVerifier:
             if sname in sym_name_to_va:
                 env[lhs] = z3.BitVecVal(sym_name_to_va[sname], 64)
                 return True, mem
-            if sname.startswith("__nt_rodata_"):
+            if sname.startswith(("__nt_rodata_", "__nt_data_")):
                 try:
-                    env[lhs] = z3.BitVecVal(int(sname[len("__nt_rodata_") :], 16), 64)
+                    env[lhs] = z3.BitVecVal(int(sname.rsplit("_", 1)[-1], 16), 64)
                     return True, mem
                 except ValueError:
                     pass

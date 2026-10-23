@@ -77,12 +77,14 @@ class NtDecompilationPipeline:
         ghidra_json_path: str | Path | None = None,
         target_functions: list[str] | None = None,
         output_dir: str | Path | None = None,
+        preloaded_image: BinaryImage | None = None,
+        preloaded_pdb: PDBDatabase | None = None,
     ) -> DecompilationReport:
         """Execute all 4 stages on `binary_path` and optionally write deliverables to `output_dir`."""
-        image = load_binary_image(binary_path)
+        image = preloaded_image if preloaded_image is not None else load_binary_image(binary_path)
 
-        pdb_db: PDBDatabase | None = None
-        if pdb_path is not None:
+        pdb_db: PDBDatabase | None = preloaded_pdb
+        if pdb_db is None and pdb_path is not None:
             pdb_db = load_pdb_database(pdb_path, binary=image)
 
         if ghidra_json_path is not None:
@@ -274,6 +276,11 @@ class NtDecompilationPipeline:
             c_units.append(df.c_code)
             c_units.append("")
 
+        asm_weak_lines = self._collect_asm_weak_stubs(decompiled_funcs)
+        if asm_weak_lines:
+            c_units.extend(asm_weak_lines)
+            c_units.append("")
+
         source_code = "\n".join(c_units)
         combined_ir = "\n\n".join(ir_modules)
 
@@ -444,21 +451,32 @@ class NtDecompilationPipeline:
 
         # Group functions into canonical NT executive/kernel subsystems
         subsys_files = [
-            ("ke", "ke_kernel.c", "Kernel Core Dispatcher, IRQL, DPC & Synchronization (Ke/Ki/Kz)"),
-            ("ps", "ps_process.c", "Process & Thread Structure Executive (Ps)"),
-            ("mm", "mm_memory.c", "Virtual Memory Manager & MDL Subsystem (Mm)"),
-            ("ob", "ob_object.c", "Executive Object Manager & Cookie Type Table (Ob)"),
-            ("io", "io_manager.c", "I/O Manager, IRP Inspection & Plug-and-Play (Io/Pi)"),
-            ("ex", "ex_executive.c", "Executive Lock-Free SLists & Rundown Protection (Ex/Exp)"),
-            ("rtl", "rtl_library.c", "Kernel Run-Time Library, Bitmaps & Time Epoch Math (Rtl)"),
-            ("se", "se_kd_security.c", "Security Reference Monitor & Kernel Debugger (Se/Kd)"),
+            ("ke", "ke_kernel.c", "Kernel Core Dispatcher, IRQL, DPC, Bootstrap & Synchronization (Ke/Ki/Kz/Hal)"),
+            ("ps", "ps_process.c", "Process, Thread, Job & Silo Executive (Ps/Psp)"),
+            ("mm", "mm_memory.c", "Virtual Memory Manager, PFN & MDL Subsystem (Mm/Mi)"),
+            ("ob", "ob_object.c", "Executive Object Manager & Cookie Type Table (Ob/Obp)"),
+            ("io", "io_manager.c", "I/O Manager, IRP Stack, WorkItems & Plug-and-Play (Io/Iop/Pi/Pnp)"),
+            ("ex", "ex_executive.c", "Executive SLists, Rundown, PushLocks & Resources (Ex/Exp/Exf)"),
+            ("rtl", "rtl_library.c", "Kernel Run-Time Library, Trees, Bitmaps, Strings & Time (Rtl)"),
+            ("se", "se_kd_security.c", "Security Reference Monitor, Tokens, SIDs & ACLs (Se/Sep)"),
+            ("cm", "cm_registry.c", "Configuration Manager & Kernel Registry Transactions (Cm/Cmp)"),
+            ("cc", "cc_cache.c", "Common Cache Manager, BCBs & Dirty Page Tracking (Cc)"),
+            ("fsrtl", "fsrtl_filesystem.c", "File System Runtime Library, MCBs, Locks & Oplocks (FsRtl)"),
+            ("po", "po_power.c", "Power Manager, Device Power IRPs & Idle States (Po/Pop)"),
+            ("alpc", "alpc_ipc.c", "Asynchronous Local IPC Message Attributes & Headers (Alpc/Lpc)"),
+            ("tm", "tm_transactions.c", "Kernel Transaction Manager & Enlistments (Tm/Tmp)"),
+            ("etw_vf", "etw_vf_diag.c", "ETW Tracing, WMI, Driver Verifier, Hypervisor & KD (Etw/Vf/Hvl/Whea/Kd)"),
+            ("zw_nt", "zw_nt_syscalls.c", "Kernel System Service Dispatchers & Native API (Zw/Nt)"),
         ]
 
+        known_subsys = {k for k, _, _ in subsys_files}
         written_paths: dict[str, Path] = {"header": hdr_path}
         for sub_key, fname, desc in subsys_files:
-            if sub_key == "se":
+            if sub_key == "rtl":
                 group = [
-                    df for df in report.functions if df.subsystem in ("se", "kd_hal", "misc")
+                    df
+                    for df in report.functions
+                    if df.subsystem == "rtl" or df.subsystem not in known_subsys
                 ]
             else:
                 group = [df for df in report.functions if df.subsystem == sub_key]
@@ -482,12 +500,14 @@ class NtDecompilationPipeline:
             spath.write_text("\n".join(lines), encoding="utf-8")
             written_paths[f"src_{sub_key}"] = spath
 
-        # Weak-linkage reconstructed globals & `.rdata` lookup tables
+        # Weak-linkage reconstructed globals, `.rdata` lookup tables, ASM stubs & external callees
         glob_path = root / "src" / "runtime" / "nt_reconstructed_globals.c"
         glines = [
             "/*",
-            " * Reconstructed Retail ntoskrnl.exe Data Symbols & Read-Only Lookup Tables",
-            " * Extracted via RIP-relative symbol/section recovery (weak linkage).",
+            " * Reconstructed Retail ntoskrnl.exe Data Symbols, Read-Only Lookup Tables & Weak Callees",
+            " * Extracted via RIP-relative symbol/section recovery (weak linkage — overridden in Ring-0",
+            " * standalone builds by `nt_kernel_runtime.c` and bound directly to real kernel RVAs in",
+            " * `ntoskrnl_dropin.exe`).",
             " */",
             '#include "../../include/nt_reconstructed_types.h"',
             "",
@@ -496,6 +516,31 @@ class NtDecompilationPipeline:
             defn = VerifiedCEmitter.format_global_declaration(g, is_extern=False)
             glines.append(f"__attribute__((weak)) {defn}")
         glines.append("")
+
+        asm_weak_lines = self._collect_asm_weak_stubs(report.functions)
+        if asm_weak_lines:
+            glines.extend(asm_weak_lines)
+            glines.append("")
+
+        if ext_callees:
+            glines.append("/* Weak Fallback Stubs for External Internal Callees (Overridden by Strong Runtime) */")
+            for ec_name, n_args in sorted(ext_callees.items()):
+                csig = known_sigs.get(ec_name)
+                if csig is not None:
+                    proto = csig.format_prototype(include_abi=True)
+                    if csig.is_void_return:
+                        glines.append(f"__attribute__((weak)) {proto} {{}}")
+                    else:
+                        glines.append(
+                            f"__attribute__((weak)) {proto} {{ return ({csig.return_type})0; }}"
+                        )
+                else:
+                    p_str = ", ".join(f"uint64_t a{i}" for i in range(n_args)) or "void"
+                    glines.append(
+                        f"__attribute__((weak)) uint64_t __attribute__((ms_abi)) {ec_name}({p_str}) {{ return 0ULL; }}"
+                    )
+            glines.append("")
+
         glob_path.write_text("\n".join(glines), encoding="utf-8")
         written_paths["globals"] = glob_path
 
@@ -514,7 +559,11 @@ class NtDecompilationPipeline:
                 sub_key: sum(
                     1
                     for df in report.functions
-                    if (df.subsystem in ("se", "kd_hal", "misc") if sub_key == "se" else df.subsystem == sub_key)
+                    if (
+                        (df.subsystem == "rtl" or df.subsystem not in known_subsys)
+                        if sub_key == "rtl"
+                        else df.subsystem == sub_key
+                    )
                 )
                 for sub_key, _, _ in subsys_files
             },
@@ -546,6 +595,30 @@ class NtDecompilationPipeline:
         proof_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
         written_paths["proofs"] = proof_path
         return written_paths
+
+    @staticmethod
+    def _collect_asm_weak_stubs(decompiled_funcs: list[DecompiledFunction]) -> list[str]:
+        ext_fns: set[str] = set()
+        ext_syms: set[str] = set()
+        fn_pat = re.compile(r"extern void (__nt_asm_ext_[0-9a-fA-F]+)\(void\);")
+        sym_pat = re.compile(r"extern unsigned char (__nt_asm_sym_[0-9a-fA-F]+)\[\];")
+        for df in decompiled_funcs:
+            if not df.is_raw_asm:
+                continue
+            for m in fn_pat.finditer(df.c_code):
+                ext_fns.add(m.group(1))
+            for m in sym_pat.finditer(df.c_code):
+                ext_syms.add(m.group(1))
+        out: list[str] = []
+        if ext_fns or ext_syms:
+            out.append("/* Weak Linkage Stubs for Preserved Assembly External Targets */")
+            for fn in sorted(ext_fns):
+                out.append(
+                    f'__attribute__((weak, naked)) void {fn}(void) {{ __asm__ __volatile__ ("ret"); }}'
+                )
+            for sn in sorted(ext_syms):
+                out.append(f"__attribute__((weak)) unsigned char {sn}[64] = {{0}};")
+        return out
 
     @staticmethod
     def _merge_pdb_databases(

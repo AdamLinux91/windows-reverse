@@ -490,17 +490,25 @@ class DecompilationReport:
 def classify_nt_subsystem(func_name: str) -> str:
     """Classify an NT kernel symbol name into its canonical executive/kernel subsystem."""
     prefixes = [
-        (("Ke", "Ki", "Kz", "Kf", "Hal"), "ke"),
+        (("Zw", "Nt"), "zw_nt"),
+        (("FsRtl", "FsRtlp"), "fsrtl"),
+        (("Alpc", "Alpcp", "Lpc", "Lpcp"), "alpc"),
+        (("Cm", "Cmp"), "cm"),
+        (("Cc", "Ccp"), "cc"),
+        (("Po", "Pop"), "po"),
+        (("Tm", "Tmp"), "tm"),
+        (("Etw", "Etwp", "Wmi", "Wmip", "Vf", "Vfp", "Hvl", "Hvlp", "Whea", "Kd", "Kdp", "Dbg"), "etw_vf"),
+        (("Ke", "Ki", "Kz", "Kf", "Hal", "Inbv"), "ke"),
         (("Ps", "Psp"), "ps"),
         (("Mm", "Mi"), "mm"),
         (("Ob", "Obp"), "ob"),
-        (("Io", "Iop", "FsRtl", "Pi", "Pp", "Pnp"), "io"),
-        (("Ex", "Exp"), "ex"),
-        (("Rtl", "Rtlp"), "rtl"),
+        (("Io", "Iop", "Pi", "Pp", "Pnp"), "io"),
+        (("Ex", "Exp", "Exf"), "ex"),
+        (("Rtl", "Rtlp", "wcs", "str", "_wcs", "_str", "is", "to", "__chkstk"), "rtl"),
         (("Se", "Sep"), "se"),
-        (("Kd", "Kdp", "Whea", "Po", "Pop"), "kd_hal"),
     ]
     for ptuple, subsys in prefixes:
         if func_name.startswith(ptuple):
             return subsys
-    return "misc"
+    return "rtl"
+

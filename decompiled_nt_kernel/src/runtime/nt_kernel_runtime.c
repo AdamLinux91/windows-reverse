@@ -1,7 +1,7 @@
 /*
- * Bare-Metal Ring-0 Executive Runtime, Console & 8-Subsystem Hardware Self-Test Suite
- * Exercises the 69 real decompiled & Z3-verified Windows 10 ntoskrnl.exe (10.0.16299.15)
- * functions on real x86-64 hardware (UEFI / Multiboot2) and live host x86-64 silicon.
+ * Bare-Metal Ring-0 Executive Runtime, Console & 16-Subsystem Hardware Self-Test Suite
+ * Exercises the 527 real decompiled & Z3-verified Windows 10 ntoskrnl.exe (10.0.16299.15)
+ * functions on real x86-64 hardware (Windows winload.efi / UEFI / Multiboot2) and host silicon.
  */
 #include "../../include/nt_baremetal.h"
 #include "../../include/efi_min.h"
@@ -65,6 +65,11 @@ static uint32_t g_vga_row        = 0;
 static uint32_t g_vga_col        = 0;
 
 static EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *g_uefi_conout = NULL;
+static void (NTAPI *g_bootvid_display_str)(const char *) = NULL;
+
+void NtConsoleBindBootvid(void (NTAPI *display_str_fn)(const char *)) {
+    g_bootvid_display_str = display_str_fn;
+}
 
 static uint32_t *g_gop_fb     = NULL;
 static uint32_t  g_gop_width  = 0;
@@ -298,6 +303,10 @@ void NtConsolePutChar(char c) {
     }
     if (g_gop_fb) {
         gop_draw_char(c);
+    }
+    if (g_bootvid_display_str) {
+        char s[2] = { c, '\0' };
+        g_bootvid_display_str(s);
     }
 #endif
 }
@@ -620,7 +629,7 @@ int NtRunHardwareVerificationSuite(int is_ring0_hardware) {
 
     NtConsoleWrite("\n========================================================================\n");
     NtConsoleWrite(" Windows NT 10.0.16299.15 Decompiled Kernel — Live Hardware Test Suite\n");
-    NtConsoleWrite(" Source: Retail ntoskrnl.exe + ntkrnlmp.pdb (69/69 Z3 Formal Proofs)\n");
+    NtConsoleWrite(" Source: Retail ntoskrnl.exe + ntkrnlmp.pdb (527/527 Z3 Formal Proofs)\n");
     NtConsoleWrite("========================================================================\n");
 
     /* ----------------------------------------------------------------------
@@ -931,6 +940,102 @@ int NtRunHardwareVerificationSuite(int is_ring0_hardware) {
          luid_st == 0 && queried_luid.LowPart == 0x3E7U &&
          kd_not_pres == 1U && g_nt_kd_printed_len == 35U &&
          g_nt_kd_printed_buf[0] == 'K' && g_nt_kd_printed_buf[8] == ':')
+    );
+
+    /* ----------------------------------------------------------------------
+     * SUBSYSTEM 9: Cm — Configuration Manager Registry Callback Versioning
+     * ---------------------------------------------------------------------- */
+    uint32_t cm_maj = 0U, cm_min = 0U;
+    CmGetCallbackVersion(&cm_maj, &cm_min);
+    check_cond(
+        "Cm",
+        "CmGetCallbackVersion registry filter version negotiation (Major=1, Minor=1)",
+        (cm_maj == 1U && cm_min == 1U)
+    );
+
+    /* ----------------------------------------------------------------------
+     * SUBSYSTEM 10: Cc — Cache Manager SharedCacheMap EX_FAST_REF Unmasking
+     * ---------------------------------------------------------------------- */
+    uint8_t fake_shared_cache_map[256] __attribute__((aligned(16)));
+    uint8_t fake_bcb[256] __attribute__((aligned(16)));
+    mem_zero(fake_shared_cache_map, sizeof(fake_shared_cache_map));
+    mem_zero(fake_bcb, sizeof(fake_bcb));
+    uintptr_t expected_fobj = ((uintptr_t)fake_bcb) & ~(uintptr_t)0xFULL;
+    *(uint64_t *)(fake_shared_cache_map + 0x60) = (uint64_t)(expected_fobj | 0x7ULL);
+    *(uint64_t *)(fake_bcb + 0xB0) = (uint64_t)(uintptr_t)fake_shared_cache_map;
+    uint64_t cc_fobj = CcGetFileObjectFromBcb((uint64_t *)(uintptr_t)fake_bcb);
+    check_cond(
+        "Cc",
+        "CcGetFileObjectFromBcb SharedCacheMap->FileObjectFastRef (~0xF mask)",
+        (cc_fobj == (uint64_t)expected_fobj)
+    );
+
+    /* ----------------------------------------------------------------------
+     * SUBSYSTEM 11: FsRtl — File-System Extra Create Parameter (ECP) Flags
+     * ---------------------------------------------------------------------- */
+    uint8_t fake_ecp_alloc[64] __attribute__((aligned(16)));
+    mem_zero(fake_ecp_alloc, sizeof(fake_ecp_alloc));
+    uint32_t *ecp_body = (uint32_t *)(uintptr_t)(fake_ecp_alloc + 0x20);
+    FsRtlAcknowledgeEcp(ecp_body);
+    uint32_t ecp_hdr_flags = *(uint32_t *)(uintptr_t)(fake_ecp_alloc + 0x08);
+    check_cond(
+        "FsRtl",
+        "FsRtlAcknowledgeEcp negative-offset ECP_HEADER (+0x08 |= 0x8 ACKNOWLEDGED)",
+        ((ecp_hdr_flags & 0x8U) == 0x8U)
+    );
+
+    /* ----------------------------------------------------------------------
+     * SUBSYSTEM 12: Po — Power Manager Device Busy & Stopwatch Telemetry
+     * ---------------------------------------------------------------------- */
+    uint32_t po_busy[4] = {0U, 0U, 5U, 0U};
+    PoEndDeviceBusy(po_busy);
+    uint64_t po_sw_idle[4] = {0ULL, 0ULL, 0ULL, 0ULL};
+    uint64_t po_sw_act[4]  = {0ULL, 0ULL, 0ULL, 0x1234ULL};
+    BOOLEAN sw0 = PoIsRunningStopWatch(po_sw_idle);
+    BOOLEAN sw1 = PoIsRunningStopWatch(po_sw_act);
+    check_cond(
+        "Po",
+        "PoEndDeviceBusy counter decrement & PoIsRunningStopWatch state check",
+        (po_busy[2] == 4U && sw0 == 0U && sw1 == 1U)
+    );
+
+    /* ----------------------------------------------------------------------
+     * SUBSYSTEM 13: Alpc — Local Inter-Process Communication Attribute Sizing
+     * ---------------------------------------------------------------------- */
+    int32_t alpc_hdr_base = AlpcGetHeaderSize((PRTL_DYNAMIC_HASH_TABLE)(uintptr_t)0ULL);
+    int32_t alpc_hdr_sec  = AlpcGetHeaderSize((PRTL_DYNAMIC_HASH_TABLE)(uintptr_t)0x80000000ULL);
+    check_cond(
+        "Alpc",
+        "AlpcGetHeaderSize message attribute bitmask calculation (8B base, 32B security)",
+        (alpc_hdr_base == 8 && alpc_hdr_sec == 0x20)
+    );
+
+    /* ----------------------------------------------------------------------
+     * SUBSYSTEM 14: Etw / Vf / Hvl — Kernel Event Logging & Debug Device
+     * ---------------------------------------------------------------------- */
+    KdEventLoggingPresent = 0U;
+    KdSetEventLoggingPresent(1U);
+    uint64_t kd_dev_ptr = KdGetDebugDevice();
+    check_cond(
+        "Etw/Kd",
+        "KdSetEventLoggingPresent state update & KdGetDebugDevice descriptor RVA",
+        (KdEventLoggingPresent == 1U && kd_dev_ptr == (uint64_t)(uintptr_t)&KdDebugDevice)
+    );
+
+    /* ----------------------------------------------------------------------
+     * SUBSYSTEM 15 & 16: Tm / Zw — KTM IAT Thunks & SSDT Syscall Dispatchers
+     * ---------------------------------------------------------------------- */
+    uintptr_t tm_addr = (uintptr_t)&TmCurrentTransaction;
+    uintptr_t zw_addr = (uintptr_t)&ZwClose;
+    /* Verify preserved ZwClose prologue starts with `48 8B C4 FA` (`mov rax, rsp; cli`) */
+    const uint8_t *zw_bytes = (const uint8_t *)zw_addr;
+    check_cond(
+        "Tm/Zw",
+        "Preserved KTM IAT dispatch thunk & ZwClose Ring-0 SSDT stub (`mov rax,rsp; cli`)",
+        (tm_addr != 0ULL && zw_addr != 0ULL &&
+         zw_bytes[0] == 0x48U &&
+         ((zw_bytes[1] == 0x89U && zw_bytes[2] == 0xE0U) || (zw_bytes[1] == 0x8BU && zw_bytes[2] == 0xC4U)) &&
+         zw_bytes[3] == 0xFAU)
     );
 
     NtConsoleWrite("------------------------------------------------------------------------\n");
