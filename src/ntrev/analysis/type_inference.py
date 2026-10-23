@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from ntrev.frontend.asm_detector import CANONICAL_GPR64
 from ntrev.lifter.x86_to_llvm import SUBREG_MAP
 from ntrev.models import FunctionCFG, InferredFuncSignature, PDBDatabase
+from ntrev.symbols.nt_types import KNOWN_WDK_PROTOTYPES
 
 WIN64_ARGS = ["rcx", "rdx", "r8", "r9"]
 
@@ -71,8 +72,13 @@ class TypeInferenceEngine:
         constraints = self._collect_constraints(cfg)
         ret_type, is_void = self._infer_return_type(cfg, constraints)
 
+        wdk_proto = KNOWN_WDK_PROTOTYPES.get(cfg.name)
+
         if pdb_sym and pdb_sym.return_type:
             ret_type = pdb_sym.return_type
+            is_void = ret_type == "void"
+        elif wdk_proto is not None:
+            ret_type = wdk_proto[0]
             is_void = ret_type == "void"
 
         # Determine parameter count under Windows x64 RCX, RDX, R8, R9 convention
@@ -82,6 +88,8 @@ class TypeInferenceEngine:
                 highest_arg_idx = idx
         if pdb_sym and pdb_sym.param_types:
             highest_arg_idx = max(highest_arg_idx, len(pdb_sym.param_types) - 1)
+        elif wdk_proto is not None:
+            highest_arg_idx = len(wdk_proto[1]) - 1
 
         params: list[tuple[str, str]] = []
         reg_types: dict[str, str] = {}
@@ -93,6 +101,10 @@ class TypeInferenceEngine:
                 p_name_pdb, p_type_pdb = pdb_sym.param_types[idx]
                 pname = p_name_pdb
                 ptype = struct_types.get(reg, p_type_pdb)
+            elif wdk_proto is not None and idx < len(wdk_proto[1]):
+                p_name_wdk, p_type_wdk = wdk_proto[1][idx]
+                pname = p_name_wdk
+                ptype = struct_types.get(reg, p_type_wdk)
             elif reg in struct_types:
                 ptype = struct_types[reg]
             else:

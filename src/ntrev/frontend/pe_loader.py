@@ -4,7 +4,8 @@ Windows PE32+ (ntoskrnl.exe / .sys / .dll) and ELF64 loader.
 Extracts:
   - Executable & data sections (.text, PAGE, INIT, KVASCODE, .rdata, .data)
   - .pdata x64 SEH RUNTIME_FUNCTION + UNWIND_INFO exception unwind boundaries
-  - Export & Import tables
+    (including MSVC PGO UNW_FLAG_CHAININFO chained cold chunks)
+  - Export & Import tables (preserving /OPT:ICF multi-symbol export aliases)
   - IMAGE_DEBUG_DIRECTORY CodeView RSDS (PDB70 GUID, Age, PDB path, MS Symbol Server URL)
 """
 
@@ -26,6 +27,7 @@ from ntrev.models import (
 IMAGE_SCN_MEM_EXECUTE = 0x20000000
 IMAGE_SCN_MEM_WRITE = 0x80000000
 IMAGE_DEBUG_TYPE_CODEVIEW = 2
+UNW_FLAG_CHAININFO = 0x04
 
 
 def load_binary_image(path: str | Path) -> BinaryImage:
@@ -67,15 +69,18 @@ def _load_pe_image(file_path: Path, raw: bytes) -> BinaryImage:
         )
 
     exports: dict[int, str] = {}
+    export_by_name: dict[str, int] = {}
     if hasattr(pe, "DIRECTORY_ENTRY_EXPORT"):
         for sym in pe.DIRECTORY_ENTRY_EXPORT.symbols:
-            if sym.address is not None:
+            if sym.address is not None and not getattr(sym, "forwarder", None):
                 sym_name = (
                     sym.name.decode("ascii", errors="replace")
                     if sym.name
                     else f"Ordinal_{sym.ordinal}"
                 )
-                exports[int(sym.address)] = sym_name
+                rva_val = int(sym.address)
+                exports.setdefault(rva_val, sym_name)
+                export_by_name[sym_name] = rva_val
 
     imports: dict[int, str] = {}
     if hasattr(pe, "DIRECTORY_ENTRY_IMPORT"):
@@ -101,6 +106,7 @@ def _load_pe_image(file_path: Path, raw: bytes) -> BinaryImage:
         machine=machine_str,
         sections=sections,
         exports=exports,
+        export_by_name=export_by_name,
         imports=imports,
         pdata_functions=pdata_functions,
         rsds=rsds,
@@ -127,12 +133,26 @@ def _extract_pdata_functions(pe: pefile.PE) -> list[RuntimeFunctionEntry]:
             continue
         prolog_size = 0
         unwind_flags = 0
+        chained_parent_rva: int | None = None
         if unwind_rva:
             try:
-                hdr = pe.get_data(unwind_rva, 4)
-                if len(hdr) == 4:
-                    ver_flags, prolog_size = hdr[0], hdr[1]
-                    unwind_flags = (ver_flags >> 3) & 0x1F
+                # Bit 0 of unwind_rva indicates an indirectRUNTIME_FUNCTION pointer
+                if unwind_rva & 1:
+                    parent_rf = pe.get_data(unwind_rva & ~1, 12)
+                    if len(parent_rf) == 12:
+                        chained_parent_rva = struct.unpack_from("<I", parent_rf, 0)[0]
+                else:
+                    hdr = pe.get_data(unwind_rva, 4)
+                    if len(hdr) == 4:
+                        ver_flags, prolog_size, code_cnt = hdr[0], hdr[1], hdr[2]
+                        unwind_flags = (ver_flags >> 3) & 0x1F
+                        if unwind_flags & UNW_FLAG_CHAININFO:
+                            # Chained RUNTIME_FUNCTION sits immediately after aligned UNWIND_CODE array
+                            aligned_codes = code_cnt + (code_cnt & 1)
+                            chain_off = 4 + aligned_codes * 2
+                            chain_blob = pe.get_data(unwind_rva + chain_off, 12)
+                            if len(chain_blob) == 12:
+                                chained_parent_rva = struct.unpack_from("<I", chain_blob, 0)[0]
             except Exception:
                 pass
         entries.append(
@@ -142,6 +162,7 @@ def _extract_pdata_functions(pe: pefile.PE) -> list[RuntimeFunctionEntry]:
                 unwind_info_rva=unwind_rva,
                 prolog_size=prolog_size,
                 unwind_flags=unwind_flags,
+                chained_parent_rva=chained_parent_rva,
             )
         )
     return entries
@@ -202,6 +223,7 @@ def _load_elf64_image(file_path: Path, raw: bytes) -> BinaryImage:
     image_base = 0x140000000 if e_type == 1 else 0  # Relocatable .o gets synthetic base
     sections: list[PESectionInfo] = []
     exports: dict[int, str] = {}
+    export_by_name: dict[str, int] = {}
     sec_rva_map: dict[int, int] = {}
     next_rva = 0x1000
 
@@ -243,11 +265,12 @@ def _load_elf64_image(file_path: Path, raw: bytes) -> BinaryImage:
                 sym_name = read_cstr(strtab, st_name)
                 if not sym_name or st_shndx not in sec_rva_map:
                     continue
-                if sym_type in (2, 0) and not sym_name.startswith("."):  # STT_FUNC or assembly label
+                if sym_type in (2, 0) and not sym_name.startswith("."):
                     rva = sec_rva_map[st_shndx] + (int(st_value) if e_type == 1 else 0)
                     if e_type != 1:
                         rva = int(st_value - image_base)
-                    exports[rva] = sym_name
+                    exports.setdefault(rva, sym_name)
+                    export_by_name[sym_name] = rva
 
     return BinaryImage(
         path=str(file_path),
@@ -257,4 +280,5 @@ def _load_elf64_image(file_path: Path, raw: bytes) -> BinaryImage:
         machine="AMD64",
         sections=sections,
         exports=exports,
+        export_by_name=export_by_name,
     )

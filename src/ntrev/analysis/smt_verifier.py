@@ -6,11 +6,15 @@ Formally proves mathematical/logical equivalence across decompilation & de-optim
      - Bit-accurate 64-bit registers (`rax`..`r15`) & x86-64 sub-register write rules
      - Exact two's-complement & unsigned carry/overflow flags (`ZF`, `CF`, `SF`, `OF`)
      - Little-endian byte-addressable Z3 Array memory (`Array(BV64, BV8)`) + `gs:` KPCR space
+     - RIP-relative `.rdata` constant folding + PDB named kernel global VA congruence
+     - Z3 EUF (`z3.Function`) congruence across direct `call` and tailcall sites
+     - Exact x86-64 memory bit-string `bt`/`bts`/`btr`/`btc` and `lock` atomic operations
      - Windows x64 (`ms_abi`) callee-saved register preservation (`rbx`, `rbp`, `rdi`, `rsi`,
        `r12`..`r15`, and `rsp == rsp_in + 8` on return)
-  2. `x86-64 Machine CFG`  <===>  `Collapsed Rerolled Loops` (both 5-way multi-branch unrolled
-     dispatch CFGs and linear strided unrolled blocks)
-  3. `x86-64 Machine CFG`  <===>  `Recovered Magic-Multiplier Constant Divisions` (`UDiv`/`SDiv`)
+  2. `x86-64 Machine CFG`  <===>  `Collapsed Rerolled Loops` (5-way multi-branch unrolled
+     dispatch CFGs, 16x unrolled strided 4KB page-scan loops, and linear strided blocks)
+  3. `x86-64 Machine CFG`  <===>  `Recovered Magic-Multiplier Constant Divisions & Modulos`
+     (64-bit & 32-bit unsigned and signed reciprocals via Z3 `QF_LIA` + `QF_BV`)
 
 When `solver.check(orig != candidate) == z3.unsat`, equivalence holds for ALL 2^64 inputs.
 When `z3.sat`, extracts a concrete counterexample pinpointing exact input values that diverge.
@@ -24,8 +28,9 @@ from dataclasses import dataclass, field
 
 import z3
 
-from ntrev.lifter.x86_to_llvm import GPR64_LIST, SUBREG_MAP
+from ntrev.lifter.x86_to_llvm import GPR64_LIST, INITIAL_RSP_OFFSET, SUBREG_MAP
 from ntrev.models import (
+    BinaryImage,
     DisasmInsn,
     EquivalenceProof,
     FunctionCFG,
@@ -46,6 +51,11 @@ class SymbolicState:
     of: z3.BoolRef
     mem: z3.ArrayRef
     gs_mem: z3.ArrayRef
+    stack_mem: z3.ArrayRef = field(
+        default_factory=lambda: z3.Array("stack_in", z3.BitVecSort(64), z3.BitVecSort(8))
+    )
+    entry_rsp: z3.BitVecRef = field(default_factory=lambda: z3.BitVecVal(0, 64))
+    isolate_stack: bool = True
     returned: z3.BoolRef = field(default_factory=lambda: z3.BoolVal(False))
     ret_rax: z3.BitVecRef = field(default_factory=lambda: z3.BitVecVal(0, 64))
 
@@ -58,6 +68,9 @@ class SymbolicState:
             of=self.of,
             mem=self.mem,
             gs_mem=self.gs_mem,
+            stack_mem=self.stack_mem,
+            entry_rsp=self.entry_rsp,
+            isolate_stack=self.isolate_stack,
             returned=self.returned,
             ret_rax=self.ret_rax,
         )
@@ -82,6 +95,9 @@ class SymbolicState:
             of=ite(cond, s_true.of, s_false.of),
             mem=ite(cond, s_true.mem, s_false.mem),
             gs_mem=ite(cond, s_true.gs_mem, s_false.gs_mem),
+            stack_mem=ite(cond, s_true.stack_mem, s_false.stack_mem),
+            entry_rsp=s_true.entry_rsp,
+            isolate_stack=s_true.isolate_stack,
             returned=ite(cond, s_true.returned, s_false.returned),
             ret_rax=ite(cond, s_true.ret_rax, s_false.ret_rax),
         )
@@ -102,6 +118,11 @@ class Z3EquivalenceVerifier:
         recovered_divs: list[RecoveredDivMod] | None = None,
         return_bits: int = 64,
         param_names: list[str] | None = None,
+        image: BinaryImage | None = None,
+        symbol_lookup: dict[int, str] | None = None,
+        global_data_symbols: dict[int, str] | None = None,
+        callee_arg_counts: dict[str, int] | None = None,
+        callee_param_widths: dict[str, list[int]] | None = None,
     ) -> EquivalenceProof:
         """Run full Z3 equivalence verification across lifted IR and de-optimizations."""
         t0 = time.perf_counter()
@@ -117,7 +138,6 @@ class Z3EquivalenceVerifier:
             )
 
         if cfg.asm_classification.has_inline_asm_blocks:
-            # Verify pure C transformations if any; note inline asm side-effect preservation
             elapsed = (time.perf_counter() - t0) * 1000.0
             return EquivalenceProof(
                 function_name=cfg.name,
@@ -127,30 +147,79 @@ class Z3EquivalenceVerifier:
                 notes="Hybrid C + privileged inline __asm__ blocks verified via LLVM IR + sideeffect fencing.",
             )
 
-        inputs, init_state, preconditions = self._make_initial_symbolic_state()
-        x86_final = self.execute_x86_cfg(cfg, init_state.clone())
+        # Dynamically expand loop unroll bound when verifying a statically-bounded unrolled page loop
+        eff_bound = self.loop_unroll_bound
+        for rl in rerolled_loops or []:
+            if rl.kind == "unrolled_page_loop" and rl.max_unroll_factor > 0:
+                try:
+                    outer_trips = int(rl.trip_count_expr) // rl.max_unroll_factor
+                    if outer_trips <= 64:
+                        eff_bound = max(eff_bound, outer_trips + 2)
+                except ValueError:
+                    pass
+
+        g_syms = global_data_symbols or {}
+        sym_name_to_va = {name: va for va, name in g_syms.items()}
+        img_base = image.image_base if image is not None else None
+
+        inputs, init_state, preconditions = self._make_initial_symbolic_state(image_base=img_base)
+        x86_final = self.execute_x86_cfg(
+            cfg,
+            init_state.clone(),
+            image=image,
+            symbol_lookup=symbol_lookup,
+            global_data_symbols=g_syms,
+            callee_arg_counts=callee_arg_counts,
+            callee_param_widths=callee_param_widths,
+            unroll_bound=eff_bound,
+            preconditions=preconditions,
+        )
 
         verified_stages: list[str] = []
         total_assertions = 0
 
         # 1. Verify Windows x64 ABI callee-saved register preservation & stack balance
-        abi_ok, abi_cex, n_assert = self._check_callee_saved_abi(
+        abi_ok, _abi_cex, n_assert = self._check_callee_saved_abi(
             inputs, init_state, x86_final, preconditions
         )
         total_assertions += n_assert
         if abi_ok:
             verified_stages.append("win64_callee_saved_abi")
 
-        # 2. Verify x86-64 CFG <===> Lifted LLVM IR return value equivalence
-        ir_eval = self._evaluate_llvm_ir(llvm_ir, inputs, init_state.mem, init_state.gs_mem)
+        # 2. Verify x86-64 CFG <===> Lifted LLVM IR return value (or void store) equivalence
+        ir_eval = self._evaluate_llvm_ir(
+            llvm_ir,
+            inputs,
+            init_state.mem,
+            init_state.gs_mem,
+            sym_name_to_va=sym_name_to_va,
+            unroll_bound=eff_bound,
+            preconditions=preconditions,
+        )
         if ir_eval is not None:
             ir_ret, _ir_mem = ir_eval
-            eq_ok, cex, n_assert = self._prove_bv_equal(
-                lhs=self._truncate_bv(x86_final.ret_rax, return_bits),
-                rhs=self._truncate_bv(ir_ret, return_bits),
-                inputs=inputs,
-                preconditions=preconditions,
-            )
+            if return_bits > 0:
+                eq_ok, cex, n_assert = self._prove_bv_equal(
+                    lhs=self._truncate_bv(x86_final.ret_rax, return_bits),
+                    rhs=self._truncate_bv(ir_ret, return_bits),
+                    inputs=inputs,
+                    preconditions=preconditions,
+                )
+            else:
+                # `void` function: prove observable memory state equivalence at caller target pointer
+                probe_addr = z3.BitVec("void_mem_probe", 64)
+                probe_pre = list(preconditions) + [
+                    z3.Or(
+                        z3.ULT(probe_addr, inputs["rsp"] - z3.BitVecVal(0x2000, 64)),
+                        z3.UGT(probe_addr, inputs["rsp"] + z3.BitVecVal(0x1000, 64)),
+                    )
+                ]
+                eq_ok, cex, n_assert = self._prove_bv_equal(
+                    lhs=z3.Select(x86_final.mem, probe_addr),
+                    rhs=z3.Select(_ir_mem, probe_addr),
+                    inputs=inputs,
+                    preconditions=probe_pre,
+                )
             total_assertions += n_assert
             if not eq_ok:
                 elapsed = (time.perf_counter() - t0) * 1000.0
@@ -165,16 +234,17 @@ class Z3EquivalenceVerifier:
                 )
             verified_stages.append("x86_64_to_llvm_ir_equivalence")
 
-        # 3. Verify collapsed multi-branch / linear rerolled loops against x86-64 CFG
+        # 3. Verify collapsed multi-branch / page-unrolled / linear rerolled loops against x86-64 CFG
         for rloop in rerolled_loops or []:
             if rloop.replaces_entire_function:
                 loop_bv = self._symbolic_eval_rerolled_loop(
                     rloop, inputs, init_state.mem, param_names=param_names
                 )
                 if loop_bv is not None:
+                    chk_bits = return_bits if return_bits > 0 else 64
                     eq_ok, cex, n_assert = self._prove_bv_equal(
-                        lhs=self._truncate_bv(x86_final.ret_rax, return_bits),
-                        rhs=self._truncate_bv(loop_bv, return_bits),
+                        lhs=self._truncate_bv(x86_final.ret_rax, chk_bits),
+                        rhs=self._truncate_bv(loop_bv, chk_bits),
                         inputs=inputs,
                         preconditions=preconditions,
                     )
@@ -192,9 +262,11 @@ class Z3EquivalenceVerifier:
                         )
                     verified_stages.append(f"loop_reroll_equivalence:{rloop.kind}")
 
-        # 4. Verify recovered magic-multiplier constant divisions across all bit-vectors
+        # 4. Verify recovered magic-multiplier constant divisions / modulos across all bit-vectors
         for rdiv in recovered_divs or []:
-            div_ok, cex, n_assert = self.verify_magic_division(cfg, rdiv, return_bits=return_bits)
+            div_ok, cex, n_assert = self.verify_magic_division(
+                cfg, rdiv, return_bits=(return_bits if return_bits > 0 else 64)
+            )
             total_assertions += n_assert
             if not div_ok:
                 elapsed = (time.perf_counter() - t0) * 1000.0
@@ -207,7 +279,8 @@ class Z3EquivalenceVerifier:
                     counterexample=cex,
                     notes=f"Magic division by {rdiv.divisor} failed Z3 equivalence proof.",
                 )
-            verified_stages.append(f"magic_div_equivalence:div_{rdiv.divisor}")
+            tag = "mod" if rdiv.is_modulo else "div"
+            verified_stages.append(f"magic_{tag}_equivalence:{tag}_{rdiv.divisor}")
 
         elapsed = (time.perf_counter() - t0) * 1000.0
         return EquivalenceProof(
@@ -255,123 +328,205 @@ class Z3EquivalenceVerifier:
         return_bits: int = 64,
     ) -> tuple[bool, dict[str, str] | None, int]:
         """
-        Prove `x86_cfg(x) == x / divisor` across all 2^bits inputs `x`.
-
-        For unsigned simple reciprocals `(x * M) >> (bits + s)`, uses Z3's `QF_LIA`
-        Presburger linear integer decision procedure (`M` and `divisor` are concrete
-        constants, so `q * 2^(bits+s) <= x * M < (q+1) * 2^(bits+s)` is strictly linear!)
-        plus Z3 BitVec equivalence between `x86_cfg(x)` and `(x * M) >> (bits + s)`.
+        Prove recovered magic-multiplier reciprocal equivalence across all 2^bits inputs:
+          - For single-block leaf functions, proves both `x86_cfg(x) == magic_formula(x)`
+            and `magic_formula(x) == x / D` (or `x % D`).
+          - For subexpression reciprocals inside multi-block/multi-call kernel functions
+            (e.g. `KeSetCoalescableTimer` signed `/ 10000`, `PiUEventHashStringIntoBucket` `% 13`),
+            proves the recovered `(magic, shift, divisor)` reciprocal identity over all 2^bits inputs
+            in Z3 `QF_LIA` Presburger arithmetic (while `x86_64_to_llvm_ir_equivalence` proves the
+            surrounding CFG!).
         """
-        inputs, init_state, preconditions = self._make_initial_symbolic_state()
-        x86_out = self.execute_x86_cfg(cfg, init_state.clone())
-
-        div_in = inputs.get(rdiv.dividend_reg, inputs["rcx"])
         bits = rdiv.bit_width
+        m_int = int(rdiv.magic_constant)
+        d_int = int(rdiv.divisor)
+        if d_int <= 1:
+            return False, {"divisor": str(d_int)}, 1
 
-        if not rdiv.is_signed and rdiv.divisor > 1:
-            x_narrow = z3.Extract(bits - 1, 0, div_in) if bits < 64 else div_in
-            prod_wide = z3.ZeroExt(bits, x_narrow) * z3.BitVecVal(rdiv.magic_constant, 2 * bits)
-            m_int = int(rdiv.magic_constant)
-            d_int = int(rdiv.divisor)
+        has_calls = any(ins.mnemonic == "call" for ins in cfg.all_instructions())
+        is_whole_fn = len(cfg.blocks) == 1 and not has_calls
 
-            # Pattern 1: Direct reciprocal `(x * M) >> (bits + s)`
-            total_shift = bits + rdiv.shift_amount
-            magic_q = z3.Extract(bits - 1, 0, z3.LShR(prod_wide, total_shift))
-            magic_q64 = z3.ZeroExt(64 - bits, magic_q) if bits < 64 else magic_q
+        if is_whole_fn:
+            inputs, init_state, preconditions = self._make_initial_symbolic_state()
+            x86_out = self.execute_x86_cfg(cfg, init_state.clone())
+            div_in = inputs.get(rdiv.dividend_reg, inputs["rcx"])
 
-            if z3.is_false(
-                z3.simplify(
-                    self._truncate_bv(x86_out.ret_rax, min(return_bits, bits))
-                    != self._truncate_bv(magic_q64, min(return_bits, bits))
-                )
-            ):
-                lia = z3.SolverFor("QF_LIA")
-                lia.set("timeout", self.timeout_ms)
-                x_int = z3.Int("x_uint")
-                q_int = z3.Int("q_magic")
-                scale = 1 << total_shift
-                lia.add(x_int >= 0, x_int < (1 << bits))
-                lia.add(q_int * scale <= x_int * m_int, x_int * m_int < (q_int + 1) * scale)
-                lia.add(z3.Or(q_int * d_int > x_int, x_int - q_int * d_int >= d_int))
-                lia_res = lia.check()
-                if lia_res == z3.unsat:
-                    return True, None, len(preconditions) + len(lia.assertions())
-                if lia_res == z3.sat:
-                    bad_x = lia.model().eval(x_int, model_completion=True).as_long()
-                    return (
-                        False,
-                        {
-                            rdiv.dividend_reg: hex(bad_x),
-                            "x86_output": hex((bad_x * m_int) >> total_shift),
-                            "reconstructed_output": hex(bad_x // d_int),
-                        },
-                        len(preconditions) + len(lia.assertions()),
-                    )
+            if not rdiv.is_signed and not rdiv.is_modulo:
+                x_narrow = z3.Extract(bits - 1, 0, div_in) if bits < 64 else div_in
+                prod_wide = z3.ZeroExt(bits, x_narrow) * z3.BitVecVal(m_int, 2 * bits)
 
-            # Pattern 2: Hacker's Delight (bits+1)-bit overflow-add reciprocal
-            # `hi = (x * M) >> bits; q = (((x - hi) >> 1) + hi) >> (s - 1)`
-            if rdiv.shift_amount >= 1:
-                hi_bv = z3.Extract(2 * bits - 1, bits, prod_wide)
-                s2 = rdiv.shift_amount - 1
-                hd_q = z3.LShR(z3.LShR(x_narrow - hi_bv, 1) + hi_bv, s2)
-                hd_q64 = z3.ZeroExt(64 - bits, hd_q) if bits < 64 else hd_q
+                # Pattern 1: Direct reciprocal `(x * M) >> (bits + s)`
+                total_shift = bits + rdiv.shift_amount
+                magic_q = z3.Extract(bits - 1, 0, z3.LShR(prod_wide, total_shift))
+                magic_q64 = z3.ZeroExt(64 - bits, magic_q) if bits < 64 else magic_q
 
                 if z3.is_false(
                     z3.simplify(
                         self._truncate_bv(x86_out.ret_rax, min(return_bits, bits))
-                        != self._truncate_bv(hd_q64, min(return_bits, bits))
+                        != self._truncate_bv(magic_q64, min(return_bits, bits))
                     )
                 ):
-                    lia = z3.SolverFor("QF_LIA")
-                    lia.set("timeout", self.timeout_ms)
-                    x_int = z3.Int("x_uint")
-                    hi_int = z3.Int("hi_uint")
-                    t_int = z3.Int("t_uint")
-                    q_int = z3.Int("q_hd")
-                    b_scale = 1 << bits
-                    s2_scale = 1 << s2
-                    lia.add(x_int >= 0, x_int < b_scale)
-                    lia.add(hi_int * b_scale <= x_int * m_int, x_int * m_int < (hi_int + 1) * b_scale)
-                    lia.add(t_int * 2 <= (x_int - hi_int), (x_int - hi_int) < (t_int + 1) * 2)
-                    lia.add(q_int * s2_scale <= (t_int + hi_int), (t_int + hi_int) < (q_int + 1) * s2_scale)
-                    lia.add(z3.Or(q_int * d_int > x_int, x_int - q_int * d_int >= d_int))
-                    lia_res = lia.check()
-                    if lia_res == z3.unsat:
-                        return True, None, len(preconditions) + len(lia.assertions())
-                    if lia_res == z3.sat:
-                        bad_x = lia.model().eval(x_int, model_completion=True).as_long()
-                        bad_q = lia.model().eval(q_int, model_completion=True).as_long()
-                        return (
-                            False,
-                            {
-                                rdiv.dividend_reg: hex(bad_x),
-                                "x86_output": hex(bad_q),
-                                "reconstructed_output": hex(bad_x // d_int),
-                            },
-                            len(preconditions) + len(lia.assertions()),
-                        )
+                    return self._prove_unsigned_lia_simple(bits, m_int, rdiv.shift_amount, d_int)
 
-        # Fallback general BitVec UDiv / SDiv check (32-bit or 65-bit overflow-add / signed imul)
-        x_narrow = z3.Extract(bits - 1, 0, div_in) if bits < 64 else div_in
-        d_bv = z3.BitVecVal(rdiv.divisor, bits)
-        quot = (x_narrow / d_bv) if rdiv.is_signed else z3.UDiv(x_narrow, d_bv)
-        quot64 = (
-            z3.SignExt(64 - bits, quot)
-            if (bits < 64 and rdiv.is_signed)
-            else (z3.ZeroExt(64 - bits, quot) if bits < 64 else quot)
-        )
-        return self._prove_bv_equal(
-            lhs=self._truncate_bv(x86_out.ret_rax, min(return_bits, bits)),
-            rhs=self._truncate_bv(quot64, min(return_bits, bits)),
-            inputs=inputs,
-            preconditions=preconditions,
-        )
+                # Pattern 2: Hacker's Delight (bits+1)-bit overflow-add reciprocal
+                if rdiv.shift_amount >= 1:
+                    hi_bv = z3.Extract(2 * bits - 1, bits, prod_wide)
+                    s2 = rdiv.shift_amount - 1
+                    hd_q = z3.LShR(z3.LShR(x_narrow - hi_bv, 1) + hi_bv, s2)
+                    hd_q64 = z3.ZeroExt(64 - bits, hd_q) if bits < 64 else hd_q
+
+                    if z3.is_false(
+                        z3.simplify(
+                            self._truncate_bv(x86_out.ret_rax, min(return_bits, bits))
+                            != self._truncate_bv(hd_q64, min(return_bits, bits))
+                        )
+                    ):
+                        return self._prove_unsigned_lia_hd(bits, m_int, s2, d_int)
+
+            # Direct BitVec check for 32-bit signed/unsigned whole-function reciprocals
+            x_narrow = z3.Extract(bits - 1, 0, div_in) if bits < 64 else div_in
+            d_bv = z3.BitVecVal(d_int, bits)
+            if rdiv.is_modulo:
+                ans = z3.SRem(x_narrow, d_bv) if rdiv.is_signed else z3.URem(x_narrow, d_bv)
+            else:
+                ans = (x_narrow / d_bv) if rdiv.is_signed else z3.UDiv(x_narrow, d_bv)
+            ans64 = (
+                z3.SignExt(64 - bits, ans)
+                if (bits < 64 and rdiv.is_signed)
+                else (z3.ZeroExt(64 - bits, ans) if bits < 64 else ans)
+            )
+            return self._prove_bv_equal(
+                lhs=self._truncate_bv(x86_out.ret_rax, min(return_bits, bits)),
+                rhs=self._truncate_bv(ans64, min(return_bits, bits)),
+                inputs=inputs,
+                preconditions=preconditions,
+            )
+
+        # Subexpression reciprocal inside a multi-block or multi-call kernel function:
+        # Prove the exact Presburger arithmetic theorem across all 2^bits inputs!
+        if not rdiv.is_signed:
+            ok, cex, n_a = self._prove_unsigned_lia_simple(bits, m_int, rdiv.shift_amount, d_int)
+            if ok:
+                return True, None, n_a
+            if rdiv.shift_amount >= 1:
+                return self._prove_unsigned_lia_hd(bits, m_int, rdiv.shift_amount - 1, d_int)
+            return ok, cex, n_a
+        return self._prove_signed_lia_reciprocal(bits, m_int, rdiv.shift_amount, d_int)
+
+    def _prove_unsigned_lia_simple(
+        self, bits: int, m_int: int, shift_amount: int, d_int: int
+    ) -> tuple[bool, dict[str, str] | None, int]:
+        lia = z3.SolverFor("QF_LIA")
+        lia.set("timeout", self.timeout_ms)
+        x_int = z3.Int("x_uint")
+        q_int = z3.Int("q_magic")
+        total_shift = bits + shift_amount
+        scale = 1 << total_shift
+        lia.add(x_int >= 0, x_int < (1 << bits))
+        lia.add(q_int * scale <= x_int * m_int, x_int * m_int < (q_int + 1) * scale)
+        lia.add(z3.Or(q_int * d_int > x_int, x_int - q_int * d_int >= d_int))
+        res = lia.check()
+        if res == z3.unsat:
+            return True, None, len(lia.assertions())
+        if res == z3.sat:
+            bad_x = lia.model().eval(x_int, model_completion=True).as_long()
+            return (
+                False,
+                {
+                    "dividend": hex(bad_x),
+                    "x86_output": hex((bad_x * m_int) >> total_shift),
+                    "reconstructed_output": hex(bad_x // d_int),
+                },
+                len(lia.assertions()),
+            )
+        return False, {"solver_status": "unknown_timeout"}, len(lia.assertions())
+
+    def _prove_unsigned_lia_hd(
+        self, bits: int, m_int: int, s2: int, d_int: int
+    ) -> tuple[bool, dict[str, str] | None, int]:
+        lia = z3.SolverFor("QF_LIA")
+        lia.set("timeout", self.timeout_ms)
+        x_int = z3.Int("x_uint")
+        hi_int = z3.Int("hi_uint")
+        t_int = z3.Int("t_uint")
+        q_int = z3.Int("q_hd")
+        b_scale = 1 << bits
+        s2_scale = 1 << s2
+        lia.add(x_int >= 0, x_int < b_scale)
+        lia.add(hi_int * b_scale <= x_int * m_int, x_int * m_int < (hi_int + 1) * b_scale)
+        lia.add(t_int * 2 <= (x_int - hi_int), (x_int - hi_int) < (t_int + 1) * 2)
+        lia.add(q_int * s2_scale <= (t_int + hi_int), (t_int + hi_int) < (q_int + 1) * s2_scale)
+        lia.add(z3.Or(q_int * d_int > x_int, x_int - q_int * d_int >= d_int))
+        res = lia.check()
+        if res == z3.unsat:
+            return True, None, len(lia.assertions())
+        if res == z3.sat:
+            bad_x = lia.model().eval(x_int, model_completion=True).as_long()
+            bad_q = lia.model().eval(q_int, model_completion=True).as_long()
+            return (
+                False,
+                {
+                    "dividend": hex(bad_x),
+                    "x86_output": hex(bad_q),
+                    "reconstructed_output": hex(bad_x // d_int),
+                },
+                len(lia.assertions()),
+            )
+        return False, {"solver_status": "unknown_timeout"}, len(lia.assertions())
+
+    def _prove_signed_lia_reciprocal(
+        self, bits: int, m_raw: int, shift_amount: int, d_int: int
+    ) -> tuple[bool, dict[str, str] | None, int]:
+        """
+        Prove Hacker's Delight signed magic reciprocal across ALL signed integers
+        `x in [-2^(bits-1), 2^(bits-1) - 1]`:
+          `t = ashr(hi(x * M_eff), s); q = t + (1 if t < 0 else 0) == trunc_div(x, D)`
+        """
+        sign_bit = 1 << (bits - 1)
+        m_signed = m_raw - (1 << bits) if (m_raw & sign_bit) else m_raw
+        m_eff = m_signed + (1 << bits) if m_signed < 0 else m_signed
+        total_shift = bits + shift_amount
+        scale = 1 << total_shift
+
+        lia = z3.SolverFor("QF_LIA")
+        lia.set("timeout", self.timeout_ms)
+        x_int = z3.Int("x_sint")
+        t_int = z3.Int("t_ashr")
+        q_int = z3.Int("q_sdiv")
+        rem_int = z3.Int("rem_sdiv")
+
+        lia.add(x_int >= -(1 << (bits - 1)), x_int < (1 << (bits - 1)))
+        lia.add(t_int * scale <= x_int * m_eff, x_int * m_eff < (t_int + 1) * scale)
+        lia.add(q_int == z3.If(t_int < 0, t_int + 1, t_int))
+        lia.add(rem_int == x_int - q_int * d_int)
+        # Truncated-toward-zero division fails iff remainder falls outside valid range:
+        invalid_pos = z3.And(x_int >= 0, z3.Or(rem_int < 0, rem_int >= d_int))
+        invalid_neg = z3.And(x_int < 0, z3.Or(rem_int > 0, rem_int <= -d_int))
+        lia.add(z3.Or(invalid_pos, invalid_neg))
+
+        res = lia.check()
+        if res == z3.unsat:
+            return True, None, len(lia.assertions())
+        if res == z3.sat:
+            bad_x = lia.model().eval(x_int, model_completion=True).as_long()
+            bad_q = lia.model().eval(q_int, model_completion=True).as_long()
+            return (
+                False,
+                {
+                    "dividend": hex(bad_x),
+                    "x86_output": hex(bad_q),
+                    "reconstructed_output": hex(int(bad_x / d_int)),
+                },
+                len(lia.assertions()),
+            )
+        return False, {"solver_status": "unknown_timeout"}, len(lia.assertions())
 
     # ------------------------------------------------------------------
     # Symbolic State Construction & Solver Helpers
     # ------------------------------------------------------------------
     def _make_initial_symbolic_state(
         self,
+        image_base: int | None = None,
     ) -> tuple[dict[str, z3.BitVecRef], SymbolicState, list[z3.BoolRef]]:
         inputs: dict[str, z3.BitVecRef] = {}
         regs: dict[str, z3.BitVecRef] = {}
@@ -383,23 +538,33 @@ class Z3EquivalenceVerifier:
         mem = z3.Array("mem_in", z3.BitVecSort(64), z3.BitVecSort(8))
         gs_mem = z3.Array("gs_mem_in", z3.BitVecSort(64), z3.BitVecSort(8))
 
-        # Standard ABI stack-frame non-aliasing preconditions:
-        # Stack pointer lies in canonical kernel stack region & pointer args don't alias private frame
         rsp = inputs["rsp"]
         preconditions: list[z3.BoolRef] = [
             z3.UGT(rsp, z3.BitVecVal(0x100000, 64)),
             z3.ULT(rsp, z3.BitVecVal(0x00007FFFFFFFFFF0, 64)),
         ]
+        if image_base is not None:
+            preconditions.append(
+                z3.Or(
+                    z3.ULT(rsp, z3.BitVecVal(image_base - 0x10000, 64)),
+                    z3.UGT(rsp, z3.BitVecVal(image_base + 0x04000000, 64)),
+                )
+            )
         for arg_r in ("rcx", "rdx", "r8", "r9"):
             pv = inputs[arg_r]
-            # Either pointer is far below `[rsp - 0x2000]` or above `[rsp + 0x1000]`
             not_aliasing_stack = z3.Or(
                 z3.ULT(pv, rsp - z3.BitVecVal(0x2000, 64)),
                 z3.UGT(pv, rsp + z3.BitVecVal(0x1000, 64)),
             )
-            # Also prevent pointer wraparound at 2^64-1 when indexing small structs/arrays
             no_wrap = z3.ULT(pv, z3.BitVecVal(0xFFFFFFFFFFFF0000, 64))
             preconditions.extend([not_aliasing_stack, no_wrap])
+            if image_base is not None:
+                # Caller-supplied data/output pointers do not alias the kernel PE image sections
+                not_aliasing_image = z3.Or(
+                    z3.ULT(pv, z3.BitVecVal(image_base, 64)),
+                    z3.UGT(pv, z3.BitVecVal(image_base + 0x04000000, 64)),
+                )
+                preconditions.append(not_aliasing_image)
 
         state = SymbolicState(
             regs=regs,
@@ -409,6 +574,7 @@ class Z3EquivalenceVerifier:
             of=z3.BoolVal(False),
             mem=mem,
             gs_mem=gs_mem,
+            entry_rsp=rsp,
         )
         return inputs, state, preconditions
 
@@ -419,8 +585,7 @@ class Z3EquivalenceVerifier:
         inputs: dict[str, z3.BitVecRef],
         preconditions: list[z3.BoolRef],
     ) -> tuple[bool, dict[str, str] | None, int]:
-        # Fast algebraic normalization before SAT bit-blasting (collapses shared 128-bit mul subtrees)
-        diff_simplified = z3.simplify(lhs != rhs)
+        diff_simplified = z3.simplify(lhs != rhs, ite_extra_rules=True)
         if z3.is_false(diff_simplified):
             return True, None, len(preconditions) + 1
 
@@ -447,7 +612,6 @@ class Z3EquivalenceVerifier:
                 hex(rhs_v.as_long()) if hasattr(rhs_v, "as_long") else str(rhs_v)
             )
             return False, cex, num_assertions
-        # Unknown (solver timeout) -> do not claim unproven equivalence
         return False, {"solver_status": "unknown_timeout"}, num_assertions
 
     def _check_callee_saved_abi(
@@ -480,19 +644,87 @@ class Z3EquivalenceVerifier:
             return z3.Extract(bits - 1, 0, bv)
         return z3.ZeroExt(bits - bv.size(), bv)
 
+    @staticmethod
+    def _callee_uf_call(
+        callee_name: str,
+        args64: list[z3.BitVecRef],
+        widths: list[int] | None = None,
+    ) -> z3.BitVecRef:
+        masked: list[z3.BitVecRef] = []
+        for idx, av in enumerate(args64):
+            if widths is not None and idx < len(widths) and widths[idx] in (8, 16):
+                av = av & z3.BitVecVal((1 << widths[idx]) - 1, 64)
+            masked.append(av)
+        bv64 = z3.BitVecSort(64)
+        uf = z3.Function(f"uf_call_{callee_name}_{len(masked)}", *([bv64] * len(masked)), bv64)
+        return uf(*masked) if masked else z3.Const(f"uf_call0_{callee_name}", bv64)
+
+    @staticmethod
+    def _check_loop_cond_polarity(
+        cond: z3.BoolRef, preconditions: list[z3.BoolRef] | None
+    ) -> bool | None:
+        simp = z3.simplify(cond)
+        if z3.is_true(simp):
+            return True
+        if z3.is_false(simp):
+            return False
+        if not preconditions or "mem_in" in str(simp):
+            return None
+        s = z3.SolverFor("QF_BV")
+        s.set("timeout", 50)
+        for p in preconditions:
+            s.add(p)
+        s.push()
+        s.add(z3.Not(simp))
+        if s.check() == z3.unsat:
+            return True
+        s.pop()
+        s.add(simp)
+        if s.check() == z3.unsat:
+            return False
+        return None
+
     # ------------------------------------------------------------------
     # Symbolic Execution of x86-64 Machine CFGs
     # ------------------------------------------------------------------
-    def execute_x86_cfg(self, cfg: FunctionCFG, init_state: SymbolicState) -> SymbolicState:
-        """Symbolically execute `cfg` up to `self.loop_unroll_bound` per backedge."""
+    def execute_x86_cfg(
+        self,
+        cfg: FunctionCFG,
+        init_state: SymbolicState,
+        image: BinaryImage | None = None,
+        symbol_lookup: dict[int, str] | None = None,
+        global_data_symbols: dict[int, str] | None = None,
+        callee_arg_counts: dict[str, int] | None = None,
+        callee_param_widths: dict[str, list[int]] | None = None,
+        unroll_bound: int | None = None,
+        preconditions: list[z3.BoolRef] | None = None,
+    ) -> SymbolicState:
+        """Symbolically execute `cfg` up to `unroll_bound` per backedge."""
         if not cfg.blocks or cfg.entry_address not in cfg.blocks:
             return init_state
+
+        bound = unroll_bound if unroll_bound is not None else self.loop_unroll_bound
+        sym_lu = symbol_lookup or {}
+        g_syms = global_data_symbols or {}
+        c_counts = callee_arg_counts or {}
+        c_widths = callee_param_widths or {}
+
+        has_escaped_stack_lea = any(
+            ins.mnemonic == "lea"
+            and len(ins.operands) == 2
+            and ins.operands[1].kind == "mem"
+            and ins.operands[1].base in ("rsp", "esp", "rbp", "ebp")
+            and ins.operands[0].reg not in ("rsp", "esp", "rbp", "ebp")
+            for ins in cfg.all_instructions()
+        )
+        init_state = init_state.clone()
+        init_state.isolate_stack = not has_escaped_stack_lea
 
         def eval_from(
             b_addr: int, state: SymbolicState, visit_counts: dict[int, int]
         ) -> SymbolicState:
             count = visit_counts.get(b_addr, 0)
-            if count >= self.loop_unroll_bound or b_addr not in cfg.blocks:
+            if count >= bound or b_addr not in cfg.blocks:
                 return state
 
             next_visits = dict(visit_counts)
@@ -502,7 +734,9 @@ class Z3EquivalenceVerifier:
             cur = state.clone()
 
             for ins in blk.instructions:
-                m = ins.mnemonic
+                raw_m = ins.mnemonic
+                m = raw_m[5:].strip() if raw_m.startswith("lock ") else raw_m
+
                 if m in ("ret", "retq", "retn"):
                     cur.regs["rsp"] = cur.regs["rsp"] + z3.BitVecVal(8, 64)
                     cur.ret_rax = cur.regs["rax"]
@@ -512,6 +746,27 @@ class Z3EquivalenceVerifier:
                 if m == "jmp":
                     if blk.branch_target is not None:
                         return eval_from(blk.branch_target, cur, next_visits)
+                    if blk.tailcall_target is not None:
+                        cname = sym_lu.get(blk.tailcall_target, f"sub_{blk.tailcall_target:x}")
+                        w_list = c_widths.get(cname)
+                        n_args = len(w_list) if w_list is not None else c_counts.get(cname, 4)
+                        n_args = max(0, min(n_args, 8))
+                        args64 = [cur.regs[r] for r in ("rcx", "rdx", "r8", "r9")[: min(n_args, 4)]]
+                        for idx in range(4, n_args):
+                            w = w_list[idx] if (w_list is not None and idx < len(w_list)) else 64
+                            if w not in (8, 16, 32, 64):
+                                w = 64
+                            sv = self._read_op(
+                                cur,
+                                ins,
+                                InsnOperand(kind="mem", size=w // 8, base="rsp", disp=0x28 + 8 * (idx - 4)),
+                                image,
+                                g_syms,
+                                w,
+                            )
+                            args64.append(self._match_bv(sv, 64, signed=False))
+                        cur.regs["rax"] = self._callee_uf_call(cname, args64, w_list)
+                        cur.regs["rsp"] = cur.regs["rsp"] + z3.BitVecVal(8, 64)
                     cur.ret_rax = cur.regs["rax"]
                     cur.returned = z3.BoolVal(True)
                     return cur
@@ -533,6 +788,12 @@ class Z3EquivalenceVerifier:
 
                 if m.startswith("j") and len(m) <= 4 and ins.operands and ins.operands[0].kind == "imm":
                     cond = self._eval_cc(cur, m[1:])
+                    if blk.branch_target in next_visits or blk.fallthrough in next_visits:
+                        pol = self._check_loop_cond_polarity(cond, preconditions)
+                        if pol is True and blk.branch_target is not None:
+                            return eval_from(blk.branch_target, cur, next_visits)
+                        if pol is False and blk.fallthrough is not None:
+                            return eval_from(blk.fallthrough, cur, next_visits)
                     st_t = (
                         eval_from(blk.branch_target, cur.clone(), next_visits)
                         if blk.branch_target is not None
@@ -545,7 +806,7 @@ class Z3EquivalenceVerifier:
                     )
                     return SymbolicState.merge(cond, st_t, st_f)
 
-                self._step_x86_insn(cur, ins)
+                self._step_x86_insn(cur, ins, image, sym_lu, g_syms, c_counts, c_widths)
 
             if blk.fallthrough is not None:
                 return eval_from(blk.fallthrough, cur, next_visits)
@@ -620,8 +881,17 @@ class Z3EquivalenceVerifier:
             ea = ea + z3.BitVecVal(op.disp & 0xFFFFFFFFFFFFFFFF, 64)
         return ea
 
+    def _stack_slot_addr(self, st: SymbolicState, ea: z3.BitVecRef) -> z3.BitVecRef:
+        return z3.simplify((ea - st.entry_rsp) + z3.BitVecVal(0x10000, 64))
+
     def _read_op(
-        self, st: SymbolicState, ins: DisasmInsn, op: InsnOperand, default_bits: int = 64
+        self,
+        st: SymbolicState,
+        ins: DisasmInsn,
+        op: InsnOperand,
+        image: BinaryImage | None,
+        global_data_symbols: dict[int, str],
+        default_bits: int = 64,
     ) -> z3.BitVecRef:
         bits = (op.size * 8) if op.size else default_bits
         if op.kind == "reg" and op.reg:
@@ -629,9 +899,17 @@ class Z3EquivalenceVerifier:
         if op.kind == "imm":
             return z3.BitVecVal(op.imm & ((1 << bits) - 1), bits)
         if op.kind == "mem":
+            if op.base == "rip" and op.index is None and image is not None and op.segment is None:
+                target_va = (ins.end_address + op.disp) & 0xFFFFFFFFFFFFFFFF
+                ro_val = image.read_readonly_scalar(target_va, bits // 8)
+                if ro_val is not None:
+                    return z3.BitVecVal(ro_val, bits)
             ea = self._compute_ea(st, ins, op)
-            arr = st.gs_mem if op.segment == "gs" else st.mem
-            return self._read_mem(arr, ea, bits // 8)
+            if op.segment == "gs":
+                return self._read_mem(st.gs_mem, ea, bits // 8)
+            if st.isolate_stack and op.base in ("rsp", "esp") and op.segment is None:
+                return self._read_mem(st.stack_mem, self._stack_slot_addr(st, ea), bits // 8)
+            return self._read_mem(st.mem, ea, bits // 8)
         return z3.BitVecVal(0, bits)
 
     def _write_op(
@@ -644,6 +922,10 @@ class Z3EquivalenceVerifier:
             byte_sz = op.size or (val.size() // 8)
             if op.segment == "gs":
                 st.gs_mem = self._write_mem(st.gs_mem, ea, val, byte_sz)
+            elif st.isolate_stack and op.base in ("rsp", "esp") and op.segment is None:
+                st.stack_mem = self._write_mem(
+                    st.stack_mem, self._stack_slot_addr(st, ea), val, byte_sz
+                )
             else:
                 st.mem = self._write_mem(st.mem, ea, val, byte_sz)
 
@@ -716,28 +998,77 @@ class Z3EquivalenceVerifier:
             return z3.Not(st.of)
         return st.zf
 
-    def _step_x86_insn(self, st: SymbolicState, ins: DisasmInsn) -> None:
-        m = ins.mnemonic
+    def _step_x86_insn(
+        self,
+        st: SymbolicState,
+        ins: DisasmInsn,
+        image: BinaryImage | None,
+        symbol_lookup: dict[int, str],
+        global_data_symbols: dict[int, str],
+        callee_arg_counts: dict[str, int],
+        callee_param_widths: dict[str, list[int]],
+    ) -> None:
+        raw_m = ins.mnemonic
+        m = raw_m[5:].strip() if raw_m.startswith("lock ") else raw_m
         ops = ins.operands
-        if m in ("nop", "endbr64"):
+        if m in ("nop", "endbr64", "lfence", "mfence", "sfence", "pause", "prefetchw", "prefetcht0", "cld"):
+            return
+
+        def rop(op: InsnOperand, dbits: int = 64) -> z3.BitVecRef:
+            return self._read_op(st, ins, op, image, global_data_symbols, dbits)
+
+        if m == "call":
+            if ops and ops[0].kind == "imm":
+                cname = symbol_lookup.get(ops[0].imm, f"sub_{ops[0].imm:x}")
+                w_list = callee_param_widths.get(cname)
+                n_args = len(w_list) if w_list is not None else callee_arg_counts.get(cname, 4)
+                n_args = max(0, min(n_args, 8))
+                args64 = [st.regs[r] for r in ("rcx", "rdx", "r8", "r9")[: min(n_args, 4)]]
+                for idx in range(4, n_args):
+                    w = w_list[idx] if (w_list is not None and idx < len(w_list)) else 64
+                    if w not in (8, 16, 32, 64):
+                        w = 64
+                    sv = rop(
+                        InsnOperand(kind="mem", size=w // 8, base="rsp", disp=0x20 + 8 * (idx - 4)),
+                        w,
+                    )
+                    args64.append(self._match_bv(sv, 64, signed=False))
+                st.regs["rax"] = self._callee_uf_call(cname, args64, w_list)
+            else:
+                tgt = self._match_bv(rop(ops[0], 64), 64) if ops else z3.BitVecVal(0, 64)
+                args64 = [tgt] + [st.regs[r] for r in ("rcx", "rdx", "r8", "r9")]
+                st.regs["rax"] = self._callee_uf_call("__indirect_call", args64)
             return
 
         if m == "push" and len(ops) == 1:
-            v = self._match_bv(self._read_op(st, ins, ops[0], 64), 64, signed=(ops[0].kind == "imm"))
+            v = self._match_bv(rop(ops[0], 64), 64, signed=(ops[0].kind == "imm"))
             new_rsp = st.regs["rsp"] - z3.BitVecVal(8, 64)
             st.regs["rsp"] = new_rsp
-            st.mem = self._write_mem(st.mem, new_rsp, v, 8)
+            if st.isolate_stack:
+                st.stack_mem = self._write_mem(
+                    st.stack_mem, self._stack_slot_addr(st, new_rsp), v, 8
+                )
+            else:
+                st.mem = self._write_mem(st.mem, new_rsp, v, 8)
             return
 
         if m == "pop" and len(ops) == 1:
-            v = self._read_mem(st.mem, st.regs["rsp"], 8)
+            if st.isolate_stack:
+                v = self._read_mem(st.stack_mem, self._stack_slot_addr(st, st.regs["rsp"]), 8)
+            else:
+                v = self._read_mem(st.mem, st.regs["rsp"], 8)
             st.regs["rsp"] = st.regs["rsp"] + z3.BitVecVal(8, 64)
             self._write_op(st, ins, ops[0], v)
             return
 
         if m == "leave":
             st.regs["rsp"] = st.regs["rbp"]
-            saved = self._read_mem(st.mem, st.regs["rsp"], 8)
+            if st.isolate_stack:
+                saved = self._read_mem(
+                    st.stack_mem, self._stack_slot_addr(st, st.regs["rsp"]), 8
+                )
+            else:
+                saved = self._read_mem(st.mem, st.regs["rsp"], 8)
             st.regs["rsp"] = st.regs["rsp"] + z3.BitVecVal(8, 64)
             st.regs["rbp"] = saved
             return
@@ -755,19 +1086,19 @@ class Z3EquivalenceVerifier:
 
         if m in ("mov", "movabs") and len(ops) == 2:
             bits = (ops[0].size * 8) if ops[0].size else 64
-            v = self._match_bv(self._read_op(st, ins, ops[1], bits), bits, signed=(ops[1].kind == "imm"))
+            v = self._match_bv(rop(ops[1], bits), bits, signed=(ops[1].kind == "imm"))
             self._write_op(st, ins, ops[0], v)
             return
 
         if m == "movzx" and len(ops) == 2:
             bits = (ops[0].size * 8) if ops[0].size else 64
-            v = self._match_bv(self._read_op(st, ins, ops[1]), bits, signed=False)
+            v = self._match_bv(rop(ops[1]), bits, signed=False)
             self._write_op(st, ins, ops[0], v)
             return
 
         if m in ("movsx", "movsxd") and len(ops) == 2:
             bits = (ops[0].size * 8) if ops[0].size else 64
-            v = self._match_bv(self._read_op(st, ins, ops[1]), bits, signed=True)
+            v = self._match_bv(rop(ops[1]), bits, signed=True)
             self._write_op(st, ins, ops[0], v)
             return
 
@@ -779,17 +1110,39 @@ class Z3EquivalenceVerifier:
 
         if m == "xchg" and len(ops) == 2:
             bits = (ops[0].size * 8) if ops[0].size else 64
-            v0 = self._match_bv(self._read_op(st, ins, ops[0], bits), bits)
-            v1 = self._match_bv(self._read_op(st, ins, ops[1], bits), bits)
+            v0 = self._match_bv(rop(ops[0], bits), bits)
+            v1 = self._match_bv(rop(ops[1], bits), bits)
             self._write_op(st, ins, ops[0], v1)
             self._write_op(st, ins, ops[1], v0)
+            return
+
+        if m == "xadd" and len(ops) == 2:
+            bits = (ops[0].size * 8) if ops[0].size else 64
+            v0 = self._match_bv(rop(ops[0], bits), bits)
+            v1 = self._match_bv(rop(ops[1], bits), bits)
+            res = v0 + v1
+            self._set_arith_flags(st, v0, v1, res, is_sub=False)
+            self._write_op(st, ins, ops[1], v0)
+            self._write_op(st, ins, ops[0], res)
+            return
+
+        if m == "cmpxchg" and len(ops) == 2:
+            bits = (ops[0].size * 8) if ops[0].size else 64
+            acc_reg = {8: "al", 16: "ax", 32: "eax", 64: "rax"}[bits]
+            acc_v = self._read_reg(st, acc_reg)
+            dst_v = self._match_bv(rop(ops[0], bits), bits)
+            src_v = self._match_bv(rop(ops[1], bits), bits)
+            self._set_arith_flags(st, acc_v, dst_v, acc_v - dst_v, is_sub=True)
+            eq = acc_v == dst_v
+            self._write_op(st, ins, ops[0], z3.If(eq, src_v, dst_v))
+            self._write_reg(st, acc_reg, z3.If(eq, acc_v, dst_v))
             return
 
         if m.startswith("cmov") and len(ops) == 2:
             bits = (ops[0].size * 8) if ops[0].size else 64
             cond = self._eval_cc(st, m[4:])
-            cur = self._match_bv(self._read_op(st, ins, ops[0], bits), bits)
-            alt = self._match_bv(self._read_op(st, ins, ops[1], bits), bits)
+            cur = self._match_bv(rop(ops[0], bits), bits)
+            alt = self._match_bv(rop(ops[1], bits), bits)
             self._write_op(st, ins, ops[0], z3.If(cond, alt, cur))
             return
 
@@ -800,25 +1153,21 @@ class Z3EquivalenceVerifier:
 
         if m == "cmp" and len(ops) == 2:
             bits = (ops[0].size * 8) if ops[0].size else 64
-            lhs = self._match_bv(self._read_op(st, ins, ops[0], bits), bits)
-            rhs = self._match_bv(
-                self._read_op(st, ins, ops[1], bits), bits, signed=(ops[1].kind == "imm")
-            )
+            lhs = self._match_bv(rop(ops[0], bits), bits)
+            rhs = self._match_bv(rop(ops[1], bits), bits, signed=(ops[1].kind == "imm"))
             self._set_arith_flags(st, lhs, rhs, lhs - rhs, is_sub=True)
             return
 
         if m == "test" and len(ops) == 2:
             bits = (ops[0].size * 8) if ops[0].size else 64
-            lhs = self._match_bv(self._read_op(st, ins, ops[0], bits), bits)
-            rhs = self._match_bv(
-                self._read_op(st, ins, ops[1], bits), bits, signed=(ops[1].kind == "imm")
-            )
+            lhs = self._match_bv(rop(ops[0], bits), bits)
+            rhs = self._match_bv(rop(ops[1], bits), bits, signed=(ops[1].kind == "imm"))
             self._set_logic_flags(st, lhs & rhs)
             return
 
-        if m in ("inc", "dec", "neg", "not") and len(ops) == 1:
+        if m in ("inc", "dec", "neg", "not", "bswap") and len(ops) == 1:
             bits = (ops[0].size * 8) if ops[0].size else 64
-            v = self._match_bv(self._read_op(st, ins, ops[0], bits), bits)
+            v = self._match_bv(rop(ops[0], bits), bits)
             one = z3.BitVecVal(1, bits)
             zero = z3.BitVecVal(0, bits)
             if m == "inc":
@@ -830,8 +1179,11 @@ class Z3EquivalenceVerifier:
             elif m == "neg":
                 res = -v
                 self._set_arith_flags(st, zero, v, res, is_sub=True)
-            else:
+            elif m == "not":
                 res = ~v
+            else:
+                byte_chunks = [z3.Extract(8 * (i + 1) - 1, 8 * i, v) for i in range(bits // 8)]
+                res = z3.Concat(*byte_chunks)
             self._write_op(st, ins, ops[0], res)
             return
 
@@ -840,7 +1192,7 @@ class Z3EquivalenceVerifier:
             acc_reg = {8: "al", 16: "ax", 32: "eax", 64: "rax"}[bits]
             hi_reg = {8: "ah", 16: "dx", 32: "edx", 64: "rdx"}[bits]
             lhs = self._read_reg(st, acc_reg)
-            rhs = self._match_bv(self._read_op(st, ins, ops[0], bits), bits)
+            rhs = self._match_bv(rop(ops[0], bits), bits)
             if m == "mul":
                 prod = z3.ZeroExt(bits, lhs) * z3.ZeroExt(bits, rhs)
             else:
@@ -854,7 +1206,7 @@ class Z3EquivalenceVerifier:
             lo_reg = {8: "al", 16: "ax", 32: "eax", 64: "rax"}[bits]
             hi_reg = {8: "ah", 16: "dx", 32: "edx", 64: "rdx"}[bits]
             dividend = z3.Concat(self._read_reg(st, hi_reg), self._read_reg(st, lo_reg))
-            div_op = self._match_bv(self._read_op(st, ins, ops[0], bits), bits)
+            div_op = self._match_bv(rop(ops[0], bits), bits)
             if m == "div":
                 d_wide = z3.ZeroExt(bits, div_op)
                 safe_d = z3.If(d_wide == z3.BitVecVal(0, 2 * bits), z3.BitVecVal(1, 2 * bits), d_wide)
@@ -873,12 +1225,15 @@ class Z3EquivalenceVerifier:
             bits = (ops[0].size * 8) if ops[0].size else 64
             s1 = ops[0] if len(ops) == 2 else ops[1]
             s2 = ops[1] if len(ops) == 2 else ops[2]
-            lhs = self._match_bv(self._read_op(st, ins, s1, bits), bits)
-            rhs = self._match_bv(self._read_op(st, ins, s2, bits), bits, signed=(s2.kind == "imm"))
+            lhs = self._match_bv(rop(s1, bits), bits)
+            rhs = self._match_bv(rop(s2, bits), bits, signed=(s2.kind == "imm"))
             self._write_op(st, ins, ops[0], lhs * rhs)
             return
 
-        if m in ("add", "sub", "adc", "sbb", "and", "or", "xor", "shl", "sal", "shr", "sar") and len(ops) == 2:
+        if (
+            m in ("add", "sub", "adc", "sbb", "and", "or", "xor", "shl", "sal", "shr", "sar", "rol", "ror")
+            and len(ops) == 2
+        ):
             bits = (ops[0].size * 8) if ops[0].size else 64
             if m == "xor" and ops[0].kind == "reg" and ops[1].kind == "reg" and ops[0].reg == ops[1].reg:
                 zero = z3.BitVecVal(0, bits)
@@ -886,10 +1241,8 @@ class Z3EquivalenceVerifier:
                 self._set_logic_flags(st, zero)
                 return
 
-            lhs = self._match_bv(self._read_op(st, ins, ops[0], bits), bits)
-            rhs = self._match_bv(
-                self._read_op(st, ins, ops[1], bits), bits, signed=(ops[1].kind == "imm")
-            )
+            lhs = self._match_bv(rop(ops[0], bits), bits)
+            rhs = self._match_bv(rop(ops[1], bits), bits, signed=(ops[1].kind == "imm"))
             if m == "add":
                 res = lhs + rhs
                 self._set_arith_flags(st, lhs, rhs, res, is_sub=False)
@@ -919,10 +1272,47 @@ class Z3EquivalenceVerifier:
                     res = lhs << amt
                 elif m == "shr":
                     res = z3.LShR(lhs, amt)
-                else:  # sar
+                elif m == "sar":
                     res = lhs >> amt
+                elif m == "rol":
+                    res = z3.RotateLeft(lhs, amt)
+                else:
+                    res = z3.RotateRight(lhs, amt)
                 self._set_logic_flags(st, res)
             self._write_op(st, ins, ops[0], res)
+            return
+
+        if m in ("bt", "bts", "btr", "btc") and len(ops) == 2:
+            bits = (ops[0].size * 8) if ops[0].size else 64
+            if bits not in (16, 32, 64):
+                bits = 32
+            rhs_raw = rop(ops[1], bits)
+
+            if ops[0].kind == "mem" and ops[1].kind == "reg":
+                rhs_s64 = self._match_bv(rhs_raw, 64, signed=True)
+                lg2 = {16: 4, 32: 5, 64: 6}[bits]
+                byte_off = (rhs_s64 >> z3.BitVecVal(lg2, 64)) * z3.BitVecVal(bits // 8, 64)
+                eff_ea = self._compute_ea(st, ins, ops[0]) + byte_off
+                arr = st.gs_mem if ops[0].segment == "gs" else st.mem
+                lhs = self._read_mem(arr, eff_ea, bits // 8)
+                bit_idx = self._match_bv(rhs_s64, bits) & z3.BitVecVal(bits - 1, bits)
+                st.cf = z3.Extract(0, 0, z3.LShR(lhs, bit_idx)) == z3.BitVecVal(1, 1)
+                if m in ("bts", "btr", "btc"):
+                    mask = z3.BitVecVal(1, bits) << bit_idx
+                    new_w = (lhs | mask) if m == "bts" else ((lhs & ~mask) if m == "btr" else (lhs ^ mask))
+                    if ops[0].segment == "gs":
+                        st.gs_mem = self._write_mem(st.gs_mem, eff_ea, new_w, bits // 8)
+                    else:
+                        st.mem = self._write_mem(st.mem, eff_ea, new_w, bits // 8)
+                return
+
+            lhs = self._match_bv(rop(ops[0], bits), bits)
+            bit_idx = self._match_bv(rhs_raw, bits) & z3.BitVecVal(bits - 1, bits)
+            st.cf = z3.Extract(0, 0, z3.LShR(lhs, bit_idx)) == z3.BitVecVal(1, 1)
+            if m in ("bts", "btr", "btc"):
+                mask = z3.BitVecVal(1, bits) << bit_idx
+                new_w = (lhs | mask) if m == "bts" else ((lhs & ~mask) if m == "btr" else (lhs ^ mask))
+                self._write_op(st, ins, ops[0], new_w)
 
     # ------------------------------------------------------------------
     # Symbolic Evaluator for Collapsed Rerolled Loops
@@ -934,14 +1324,13 @@ class Z3EquivalenceVerifier:
         mem: z3.ArrayRef,
         param_names: list[str] | None = None,
     ) -> z3.BitVecRef | None:
-        # Map parameter/register names back to symbolic input BitVecs
         reg_lookup = dict(inputs)
         win_regs = ["rcx", "rdx", "r8", "r9"]
         for idx, wreg in enumerate(win_regs):
             reg_lookup[f"arg{idx + 1}"] = inputs[wreg]
             if param_names and idx < len(param_names):
                 reg_lookup[param_names[idx]] = inputs[wreg]
-        # Resolve base pointer register
+
         base_bv: z3.BitVecRef | None = None
         for rname, bv in reg_lookup.items():
             if rloop.base_expr == rname:
@@ -950,7 +1339,6 @@ class Z3EquivalenceVerifier:
         if base_bv is None:
             base_bv = inputs["rcx"]
 
-        # Resolve initial byte displacement if present in body (`+ 0x...`)
         disp_m = re.search(r"\+\s*0x([0-9a-fA-F]+)", rloop.body_c_code)
         d0 = int(disp_m.group(1), 16) if disp_m else 0
 
@@ -966,15 +1354,24 @@ class Z3EquivalenceVerifier:
                 acc = self._apply_reduction_op(rloop.op_kind, acc, elem64)
             return acc
 
+        if rloop.kind == "unrolled_page_loop":
+            try:
+                total_elems = int(rloop.trip_count_expr)
+            except ValueError:
+                return None
+            for i in range(total_elems):
+                ea = base_bv + z3.BitVecVal(d0 + i * elem_bytes, 64)
+                elem = self._read_mem(mem, ea, elem_bytes)
+                elem64 = z3.ZeroExt(64 - elem.size(), elem) if elem.size() < 64 else elem
+                acc = self._apply_reduction_op(rloop.op_kind, acc, elem64)
+            return acc
+
         if rloop.kind == "multi_branch_dispatch":
-            # Identify count input register from trip_count_expr
             count_bv = inputs["rdx"]
             for rname, bv in reg_lookup.items():
                 if re.search(rf"\b{re.escape(rname)}\b", rloop.trip_count_expr):
                     count_bv = bv
                     break
-            # Compiler 32-bit `edx` comparisons zero-extend 32-bit count if 32-bit `cmp` was used;
-            # check both 64-bit and 32-bit depending on bound expression
             count_u64 = (
                 z3.ZeroExt(32, z3.Extract(31, 0, count_bv))
                 if "(uint32_t)" in rloop.trip_count_expr
@@ -993,9 +1390,6 @@ class Z3EquivalenceVerifier:
                     z3.BitVecVal(k_max, 64),
                 )
 
-            # Evaluate exact k-iteration loop prefixes S_0..S_{k_max}; since `0 <= bound <= k_max`
-            # exhausts all 2^64 inputs, `loop(bound) == S_{bound}` is an exact semantic encoding
-            # that avoids exponential Array/Adder mux blowup during bit-blasting.
             prefix_vals: list[z3.BitVecRef] = [z3.BitVecVal(0, 64)]
             running = z3.BitVecVal(0, 64)
             for i in range(k_max):
@@ -1029,14 +1423,20 @@ class Z3EquivalenceVerifier:
         inputs: dict[str, z3.BitVecRef],
         mem_in: z3.ArrayRef,
         gs_mem_in: z3.ArrayRef,
+        sym_name_to_va: dict[str, int] | None = None,
+        unroll_bound: int | None = None,
+        preconditions: list[z3.BoolRef] | None = None,
     ) -> tuple[z3.BitVecRef, z3.ArrayRef] | None:
         """
         Parse and symbolically execute SSA LLVM IR (`define ... i64 @fn(...) { ... }`),
-        returning `(ret_bv64, final_mem)` or `None` if an unsupported external call is present.
+        returning `(ret_bv64, final_mem)` or `None` if an unsupported instruction is present.
         """
         blocks, arg_names = self._parse_ssa_llvm_function(llvm_ir)
         if not blocks:
             return None
+
+        bound = unroll_bound if unroll_bound is not None else self.loop_unroll_bound
+        sym_va = sym_name_to_va or {}
 
         base_env: dict[str, z3.BitVecRef | z3.BoolRef] = {}
         arg_regs = ["rcx", "rdx", "r8", "r9"]
@@ -1054,7 +1454,7 @@ class Z3EquivalenceVerifier:
             visits: dict[str, int],
         ) -> tuple[z3.BitVecRef, z3.ArrayRef] | None:
             vc = visits.get(label, 0)
-            if vc >= self.loop_unroll_bound or label not in blocks:
+            if vc >= bound or label not in blocks:
                 return (z3.BitVecVal(0, 64), mem)
 
             next_visits = dict(visits)
@@ -1062,7 +1462,6 @@ class Z3EquivalenceVerifier:
             cur_env = dict(env)
             cur_mem = mem
 
-            # Evaluate all PHI nodes simultaneously using `env` (pre-block values)
             stmts = blocks[label]
             phi_updates: dict[str, z3.BitVecRef | z3.BoolRef] = {}
             idx = 0
@@ -1076,7 +1475,6 @@ class Z3EquivalenceVerifier:
             cur_env.update(phi_updates)
 
             for stmt in stmts[idx:]:
-                # Terminators: ret, br, switch
                 if stmt.startswith("ret "):
                     m_ret = re.match(r"ret\s+i(\d+)\s+(.+)$", stmt)
                     if m_ret:
@@ -1102,6 +1500,12 @@ class Z3EquivalenceVerifier:
                         return None
                     t_lbl = m_cbr.group(2).strip('"')
                     f_lbl = m_cbr.group(3).strip('"')
+                    if t_lbl in next_visits or f_lbl in next_visits:
+                        pol = self._check_loop_cond_polarity(cond_v, preconditions)
+                        if pol is True:
+                            return exec_ir_block(t_lbl, label, cur_env, cur_mem, next_visits)
+                        if pol is False:
+                            return exec_ir_block(f_lbl, label, cur_env, cur_mem, next_visits)
                     r_t = exec_ir_block(t_lbl, label, cur_env, cur_mem, next_visits)
                     r_f = exec_ir_block(f_lbl, label, cur_env, cur_mem, next_visits)
                     if r_t is None or r_f is None:
@@ -1112,12 +1516,13 @@ class Z3EquivalenceVerifier:
                     )
 
                 if stmt.startswith("switch "):
-                    sw_res = self._eval_ir_switch(
+                    return self._eval_ir_switch(
                         stmt, label, cur_env, cur_mem, next_visits, exec_ir_block
                     )
-                    return sw_res
 
-                step_ok, cur_mem = self._step_ir_stmt(stmt, cur_env, cur_mem, gs_mem_in)
+                step_ok, cur_mem = self._step_ir_stmt(
+                    stmt, cur_env, cur_mem, gs_mem_in, inputs, sym_va
+                )
                 if not step_ok:
                     return None
 
@@ -1158,7 +1563,6 @@ class Z3EquivalenceVerifier:
             if line == "{":
                 continue
 
-            # Join multi-line `switch ... [ ... ]` instructions
             if line.startswith("switch ") and "]" not in line:
                 parts = [line]
                 while idx < len(full_lines):
@@ -1288,6 +1692,8 @@ class Z3EquivalenceVerifier:
         env: dict[str, z3.BitVecRef | z3.BoolRef],
         mem: z3.ArrayRef,
         gs_mem: z3.ArrayRef,
+        inputs: dict[str, z3.BitVecRef],
+        sym_name_to_va: dict[str, int],
     ) -> tuple[bool, z3.ArrayRef]:
         # Handle `store iN <val>, ptr <ptr>`
         m_st = re.match(r"store\s+i(\d+)\s+([^,]+),\s*(?:ptr|i\d+\*)\s+([^\s,]+)", stmt)
@@ -1306,8 +1712,16 @@ class Z3EquivalenceVerifier:
         lhs = "%" + lhs_raw.strip().lstrip("%").strip('"')
         rhs = rhs.strip()
 
-        # Strip fast-math / poison flags (`nuw`, `nsw`, `exact`, `disjoint`, `nneg`, `inbounds`)
-        rhs_clean = re.sub(r"\b(nuw|nsw|exact|disjoint|nneg|inbounds|tail|notail)\b\s*", "", rhs).strip()
+        rhs_clean = re.sub(
+            r"\b(nuw|nsw|exact|disjoint|nneg|inbounds|samesign|tail|notail)\b\s*",
+            "",
+            rhs,
+        ).strip()
+
+        # Stack frame alloca (`%stack_frame = alloca [4096 x i8]`) -> `in_rsp - INITIAL_RSP_OFFSET`
+        if rhs_clean.startswith("alloca ") and lhs == "%stack_frame":
+            env[lhs] = inputs["rsp"] - z3.BitVecVal(INITIAL_RSP_OFFSET, 64)
+            return True, mem
 
         # inttoptr / ptrtoint / bitcast
         m_itp = re.match(r"inttoptr\s+i(\d+)\s+([^\s]+)\s+to\s+", rhs_clean)
@@ -1324,6 +1738,19 @@ class Z3EquivalenceVerifier:
             if v is None:
                 return False, mem
             env[lhs] = v
+            return True, mem
+
+        # getelementptr [4096 x i8], ptr %stack_frame, i64 0, i64 %idx
+        m_gep_arr = re.match(
+            r"getelementptr\s+\[\d+\s*x\s*i8\],\s*ptr\s+([^,]+),\s*i\d+\s+0,\s*i(\d+)\s+(.+)$",
+            rhs_clean,
+        )
+        if m_gep_arr:
+            base = self._resolve_ir_val(m_gep_arr.group(1), 64, env)
+            idx_v = self._resolve_ir_val(m_gep_arr.group(3), int(m_gep_arr.group(2)), env)
+            if base is None or idx_v is None:
+                return False, mem
+            env[lhs] = base + self._match_bv(idx_v, 64, signed=True)
             return True, mem
 
         # getelementptr iN, ptr %base, i64 %idx
@@ -1349,6 +1776,21 @@ class Z3EquivalenceVerifier:
             env[lhs] = self._read_mem(mem, ptr, bits // 8)
             return True, mem
 
+        # Global symbol address helper `call i64 @__nt_sym_addr_<Name>()`
+        m_sym = re.match(r"call\s+i64\s+@__nt_sym_addr_([A-Za-z0-9_$.]+)\(\s*\)", rhs_clean)
+        if m_sym:
+            sname = m_sym.group(1)
+            if sname in sym_name_to_va:
+                env[lhs] = z3.BitVecVal(sym_name_to_va[sname], 64)
+                return True, mem
+            if sname.startswith("__nt_rodata_"):
+                try:
+                    env[lhs] = z3.BitVecVal(int(sname[len("__nt_rodata_") :], 16), 64)
+                    return True, mem
+                except ValueError:
+                    pass
+            return False, mem
+
         # KPCR gs: helper call `call i64 @__nt_read_gs_i64(i64 392)`
         m_gs = re.match(r"call\s+i(\d+)\s+@__nt_read_gs_i\d+\(\s*i64\s+([^)]+)\)", rhs_clean)
         if m_gs:
@@ -1359,16 +1801,30 @@ class Z3EquivalenceVerifier:
             env[lhs] = self._read_mem(gs_mem, disp, bits // 8)
             return True, mem
 
-        # LLVM intrinsics: `@llvm.umax.iN`, `@llvm.umin.iN`, `@llvm.smax.iN`, `@llvm.smin.iN`, `@llvm.fshl.iN`, `@llvm.bswap.iN`
-        m_intrin = re.match(
-            r"call\s+i(\d+)\s+@llvm\.(umax|umin|smax|smin)\.[a-z0-9.]+\(\s*i\d+\s+([^,]+),\s*i\d+\s+([^)]+)\)",
+        # LLVM `@llvm.abs.iN(iN %x, i1 %is_int_min_poison)`
+        m_abs = re.match(
+            r"(?:tail\s+)?call\s+i(\d+)\s+@llvm\.abs\.[a-z0-9.]+\(\s*i\d+\s+([^,]+),\s*i1\s+[^)]+\)",
             rhs_clean,
         )
-        if m_intrin:
-            bits = int(m_intrin.group(1))
-            iname = m_intrin.group(2)
-            a = self._resolve_ir_val(m_intrin.group(3), bits, env)
-            b = self._resolve_ir_val(m_intrin.group(4), bits, env)
+        if m_abs:
+            bits = int(m_abs.group(1))
+            a = self._resolve_ir_val(m_abs.group(2), bits, env)
+            if a is None:
+                return False, mem
+            zero = z3.BitVecVal(0, bits)
+            env[lhs] = z3.If(a < zero, zero - a, a)
+            return True, mem
+
+        # LLVM 2-arg intrinsics: `umax`, `umin`, `smax`, `smin`, `uadd.sat`, `usub.sat`
+        m_intrin2 = re.match(
+            r"call\s+i(\d+)\s+@llvm\.(umax|umin|smax|smin|uadd\.sat|usub\.sat)\.[a-z0-9.]+\(\s*i\d+\s+([^,]+),\s*i\d+\s+([^)]+)\)",
+            rhs_clean,
+        )
+        if m_intrin2:
+            bits = int(m_intrin2.group(1))
+            iname = m_intrin2.group(2)
+            a = self._resolve_ir_val(m_intrin2.group(3), bits, env)
+            b = self._resolve_ir_val(m_intrin2.group(4), bits, env)
             if a is None or b is None:
                 return False, mem
             if iname == "umax":
@@ -1377,8 +1833,65 @@ class Z3EquivalenceVerifier:
                 env[lhs] = z3.If(z3.ULT(a, b), a, b)
             elif iname == "smax":
                 env[lhs] = z3.If(a > b, a, b)
-            else:
+            elif iname == "smin":
                 env[lhs] = z3.If(a < b, a, b)
+            elif iname == "uadd.sat":
+                sum_w = z3.ZeroExt(1, a) + z3.ZeroExt(1, b)
+                ov = z3.Extract(bits, bits, sum_w) == z3.BitVecVal(1, 1)
+                env[lhs] = z3.If(ov, z3.BitVecVal((1 << bits) - 1, bits), a + b)
+            else:  # usub.sat
+                env[lhs] = z3.If(z3.ULT(a, b), z3.BitVecVal(0, bits), a - b)
+            return True, mem
+
+        # LLVM funnel shifts `fshl` / `fshr`
+        m_fsh = re.match(
+            r"call\s+i(\d+)\s+@llvm\.(fshl|fshr)\.[a-z0-9.]+\(\s*i\d+\s+([^,]+),\s*i\d+\s+([^,]+),\s*i\d+\s+([^)]+)\)",
+            rhs_clean,
+        )
+        if m_fsh:
+            bits = int(m_fsh.group(1))
+            fk = m_fsh.group(2)
+            a = self._resolve_ir_val(m_fsh.group(3), bits, env)
+            b = self._resolve_ir_val(m_fsh.group(4), bits, env)
+            c = self._resolve_ir_val(m_fsh.group(5), bits, env)
+            if a is None or b is None or c is None:
+                return False, mem
+            amt = z3.ZeroExt(bits, z3.URem(c, z3.BitVecVal(bits, bits)))
+            wide = z3.Concat(a, b)
+            if fk == "fshl":
+                env[lhs] = z3.Extract(2 * bits - 1, bits, wide << amt)
+            else:
+                env[lhs] = z3.Extract(bits - 1, 0, z3.LShR(wide, amt))
+            return True, mem
+
+        # LLVM `bswap`
+        m_bsw = re.match(r"call\s+i(\d+)\s+@llvm\.bswap\.[a-z0-9.]+\(\s*i\d+\s+([^)]+)\)", rhs_clean)
+        if m_bsw:
+            bits = int(m_bsw.group(1))
+            a = self._resolve_ir_val(m_bsw.group(2), bits, env)
+            if a is None:
+                return False, mem
+            chunks = [z3.Extract(8 * (i + 1) - 1, 8 * i, a) for i in range(bits // 8)]
+            env[lhs] = z3.Concat(*chunks)
+            return True, mem
+
+        # Direct external kernel call `call i64 @Callee(i64 ..., ...)` -> EUF congruence!
+        m_ext_call = re.match(r"call\s+i64\s+@([A-Za-z0-9_$.]+)\(([^)]*)\)", rhs_clean)
+        if m_ext_call and not m_ext_call.group(1).startswith("llvm."):
+            cname = m_ext_call.group(1)
+            raw_args = m_ext_call.group(2).strip()
+            args64: list[z3.BitVecRef] = []
+            if raw_args:
+                for apart in raw_args.split(","):
+                    m_ap = re.match(r"i(\d+)\s+(.+)$", apart.strip())
+                    if not m_ap:
+                        return False, mem
+                    abits = int(m_ap.group(1))
+                    av = self._resolve_ir_val(m_ap.group(2).strip(), abits, env)
+                    if av is None:
+                        return False, mem
+                    args64.append(self._match_bv(av, 64))
+            env[lhs] = self._callee_uf_call(cname, args64)
             return True, mem
 
         # Casts: zext, sext, trunc
@@ -1403,11 +1916,20 @@ class Z3EquivalenceVerifier:
             if dst_b == 1:
                 env[lhs] = z3.Extract(0, 0, sv) == z3.BitVecVal(1, 1)
             elif ckind == "zext":
-                env[lhs] = z3.ZeroExt(dst_b - src_b, sv)
+                ext_n = dst_b - src_b
+                if sv.decl().kind() == z3.Z3_OP_ITE:
+                    ic, it, ifl = sv.children()
+                    env[lhs] = z3.If(ic, z3.ZeroExt(ext_n, it), z3.ZeroExt(ext_n, ifl))
+                else:
+                    env[lhs] = z3.ZeroExt(ext_n, sv)
             elif ckind == "sext":
                 env[lhs] = z3.SignExt(dst_b - src_b, sv)
             else:
-                env[lhs] = z3.Extract(dst_b - 1, 0, sv)
+                if sv.decl().kind() == z3.Z3_OP_ITE:
+                    ic, it, ifl = sv.children()
+                    env[lhs] = z3.If(ic, z3.Extract(dst_b - 1, 0, it), z3.Extract(dst_b - 1, 0, ifl))
+                else:
+                    env[lhs] = z3.Extract(dst_b - 1, 0, sv)
             return True, mem
 
         # icmp <pred> iN %a, %b
@@ -1466,7 +1988,7 @@ class Z3EquivalenceVerifier:
             env[lhs] = z3.If(cond, tv, fv)
             return True, mem
 
-        # Binary integer/boolean ops: add, sub, mul, udiv, sdiv, urem, srem, and, or, xor, shl, lshr, ashr
+        # Binary integer/boolean ops
         m_bin = re.match(
             r"(add|sub|mul|udiv|sdiv|urem|srem|and|or|xor|shl|lshr|ashr)\s+i(\d+)\s+([^,]+),\s*(.+)$",
             rhs_clean,
@@ -1493,6 +2015,23 @@ class Z3EquivalenceVerifier:
             if a is None or b is None:
                 return False, mem
             safe_b = z3.If(b == z3.BitVecVal(0, bits), z3.BitVecVal(1, bits), b)
+            if op == "mul" and bits >= 64:
+                if b.decl().kind() == z3.Z3_OP_ITE and a.decl().kind() != z3.Z3_OP_ITE:
+                    ic, it, ifl = b.children()
+                    env[lhs] = z3.If(ic, a * it, a * ifl)
+                    return True, mem
+                if a.decl().kind() == z3.Z3_OP_ITE and b.decl().kind() != z3.Z3_OP_ITE:
+                    ic, it, ifl = a.children()
+                    env[lhs] = z3.If(ic, it * b, ifl * b)
+                    return True, mem
+            if op == "lshr" and bits >= 64 and a.decl().kind() == z3.Z3_OP_ITE and b.decl().kind() != z3.Z3_OP_ITE:
+                ic, it, ifl = a.children()
+                env[lhs] = z3.If(ic, z3.LShR(it, b), z3.LShR(ifl, b))
+                return True, mem
+            if op == "sub" and bits >= 64 and b.decl().kind() == z3.Z3_OP_ITE and a.decl().kind() != z3.Z3_OP_ITE:
+                ic, it, ifl = b.children()
+                env[lhs] = z3.If(ic, a - it, a - ifl)
+                return True, mem
             op_map = {
                 "add": a + b,
                 "sub": a - b,

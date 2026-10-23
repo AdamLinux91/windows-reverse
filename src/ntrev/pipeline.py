@@ -20,6 +20,7 @@ Pipeline Architecture:
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from ntrev.analysis import (
@@ -39,10 +40,14 @@ from ntrev.models import (
     DecompilationReport,
     DecompiledFunction,
     EquivalenceProof,
+    InferredFuncSignature,
+    KernelGlobalRef,
     PDBDatabase,
     StructDef,
+    classify_nt_subsystem,
 )
 from ntrev.symbols import StructuralMapper, load_pdb_database
+from ntrev.symbols.nt_types import KNOWN_WDK_PROTOTYPES, get_builtin_nt_structs
 
 
 class NtDecompilationPipeline:
@@ -91,55 +96,87 @@ class NtDecompilationPipeline:
             target_functions=target_functions,
         )
 
-        # Build global VA -> symbol name lookup for direct CALL instructions
+        # Build global VA -> symbol name lookup for direct CALL & RIP-relative data symbols
         va_symbols: dict[int, str] = {}
         for rva, ename in image.exports.items():
             va_symbols[image.image_base + rva] = ename
         for va, iname in image.imports.items():
             va_symbols[va] = iname.split("!")[-1]
+        global_data_symbols: dict[int, str] = {}
         if pdb_db is not None:
             for rva, sym in pdb_db.symbols_by_rva.items():
-                va_symbols[image.image_base + rva] = sym.name
+                if sym.is_function:
+                    va_symbols[image.image_base + rva] = sym.name
+            for rva, dsym in pdb_db.data_symbols_by_rva.items():
+                global_data_symbols[image.image_base + rva] = dsym.name
 
         mapper = StructuralMapper(pdb=pdb_db)
         all_synthesized_structs: list[StructDef] = []
-        decompiled_funcs: list[DecompiledFunction] = []
-        ir_modules: list[str] = []
+
+        # Pass 1: Classify ASM, map PDB/NT structures, and infer function signatures across batch
+        pre_stage: list[tuple] = []
+        known_signatures: dict[str, InferredFuncSignature] = {}
+        callee_param_widths: dict[str, list[int]] = {}
+
+        for fname, (ret_ty, params) in KNOWN_WDK_PROTOTYPES.items():
+            callee_param_widths[fname] = [self._c_type_bit_width(pty) or 64 for _, pty in params]
 
         for cfg in cfgs:
-            # Stage 1B: Detect non-C kernel assembly routines & inline privileged blocks
             asm_cls = self.asm_detector.classify_function(cfg)
-
-            # Stage 2: Map PDB & built-in NT structures + reconstruct unknown structs
             field_refs, new_structs, inferred_param_structs = mapper.map_function_structures(cfg)
             all_synthesized_structs.extend(new_structs)
-
-            # Stage 3A: Constraint-based Type Inference
             signature = self.type_engine.infer_signature(
                 cfg=cfg,
                 pdb=pdb_db,
                 inferred_param_structs=inferred_param_structs,
             )
+            # Re-run struct mapping with inferred parameter names so field expressions match C params
+            p_name_map = {
+                reg: signature.params[i][0]
+                for i, reg in enumerate(("rcx", "rdx", "r8", "r9"))
+                if i < len(signature.params)
+            }
+            if p_name_map:
+                field_refs, _, _ = mapper.map_function_structures(cfg, param_names=p_name_map)
 
-            # Stage 1C: Lift C functions to LLVM 22 IR & optimize via LLVM NewPM PassBuilder
+            known_signatures[cfg.name] = signature
+            callee_param_widths[cfg.name] = [
+                self._c_type_bit_width(pty) or 64 for _, pty in signature.params
+            ]
+            pre_stage.append((cfg, asm_cls, field_refs, signature))
+
+        # Pass 2: Lift to LLVM 22 IR, De-Optimize, and Formally Prove Equivalence in Z3
+        decompiled_funcs: list[DecompiledFunction] = []
+        ir_modules: list[str] = []
+        all_globals_by_name: dict[str, KernelGlobalRef] = {}
+        c_callable_asm_names: set[str] = set()
+
+        for cfg, asm_cls, field_refs, signature in pre_stage:
             if asm_cls.is_raw_asm:
                 raw_ir = f"; Preserved raw NT kernel assembly routine: {cfg.name}\n"
                 opt_ir = raw_ir
+                fn_globals: list[KernelGlobalRef] = []
+                if asm_cls.is_c_callable_naked:
+                    c_callable_asm_names.add(cfg.name)
             else:
                 lifted = self.lifter.lift_function(
                     cfg=cfg,
                     param_count=len(signature.params),
                     symbol_lookup=va_symbols,
+                    global_data_symbols=global_data_symbols,
+                    callee_param_widths=callee_param_widths,
+                    image=image,
                     opt_level=2,
                 )
                 raw_ir = lifted.raw_ir
                 opt_ir = lifted.optimized_ir
+                fn_globals = lifted.referenced_globals
+                for g in fn_globals:
+                    all_globals_by_name.setdefault(g.name, g)
                 ir_modules.append(opt_ir)
 
-            # Stage 3B: Compiler De-Optimization (multi-branch & linear loop reroll + magic div)
             rerolled_loops, recovered_divs = self.deoptimizer.analyze_function(cfg, signature)
 
-            # Stage 3C: Z3 Theorem Prover Semantic Equivalence Verification
             ret_bits = self._c_type_bit_width(signature.return_type)
             if self.verify_smt:
                 proof = self.verifier.verify_function(
@@ -149,6 +186,10 @@ class NtDecompilationPipeline:
                     recovered_divs=recovered_divs,
                     return_bits=ret_bits,
                     param_names=[pn for pn, _ in signature.params],
+                    image=image,
+                    symbol_lookup=va_symbols,
+                    global_data_symbols=global_data_symbols,
+                    callee_param_widths=callee_param_widths,
                 )
             else:
                 proof = EquivalenceProof(function_name=cfg.name, status="VERIFICATION_DISABLED")
@@ -163,22 +204,34 @@ class NtDecompilationPipeline:
                     has_inline_asm=asm_cls.has_inline_asm_blocks,
                     raw_llvm_ir=raw_ir,
                     optimized_llvm_ir=opt_ir,
-                    c_code="",  # Populated in Stage 4 once all structs are finalized
+                    c_code="",
+                    subsystem=classify_nt_subsystem(cfg.name),
                     field_accesses=field_refs,
                     rerolled_loops=rerolled_loops,
                     recovered_divs=recovered_divs,
+                    referenced_globals=fn_globals,
                     proof=proof,
                 )
             )
 
         # Stage 4: Custom Verified LLVM IR + Structural Map -> Exact C/C++ Emitter
-        ordered_structs = self._topological_structs(list(mapper.structs.values()))
-        emitter = VerifiedCEmitter(structs=mapper.structs)
+        selected_structs = self._select_structs_for_header(
+            mapper.structs, decompiled_funcs, all_synthesized_structs
+        )
+        ordered_structs = self._topological_structs(selected_structs)
+        emitter = VerifiedCEmitter(structs=mapper.structs, known_signatures=known_signatures)
+        globals_list = list(all_globals_by_name.values())
 
         header_code = emitter.emit_header(
             structs=ordered_structs,
             signatures=[(df.signature, df.is_raw_asm) for df in decompiled_funcs],
+            globals_list=globals_list,
+            c_callable_asm_names=c_callable_asm_names,
         )
+
+        # Collect any external callees invoked in IR that are not defined in this compilation unit
+        defined_names = {df.name for df in decompiled_funcs}
+        ext_callees = self._collect_external_ir_callees(decompiled_funcs, defined_names)
 
         c_units: list[str] = [
             "/*",
@@ -188,6 +241,24 @@ class NtDecompilationPipeline:
             '#include "reconstructed_types.h"',
             "",
         ]
+
+        if globals_list:
+            c_units.append("/* Kernel Global Definitions (Weak Linkage — Overridable by Boot Runtime) */")
+            for g in globals_list:
+                defn = emitter.format_global_declaration(g, is_extern=False)
+                c_units.append(f"__attribute__((weak)) {defn}")
+            c_units.append("")
+
+        if ext_callees:
+            c_units.append("/* External Kernel Callee Declarations */")
+            for ec_name, n_args in sorted(ext_callees.items()):
+                csig = emitter.known_signatures.get(ec_name)
+                if csig is not None:
+                    c_units.append(f"extern {csig.format_prototype(include_abi=True)};")
+                else:
+                    p_str = ", ".join(f"uint64_t a{i}" for i in range(n_args)) or "void"
+                    c_units.append(f"extern uint64_t __attribute__((ms_abi)) {ec_name}({p_str});")
+            c_units.append("")
 
         cfg_by_name = {c.name: c for c in cfgs}
         for df in decompiled_funcs:
@@ -212,6 +283,7 @@ class NtDecompilationPipeline:
             image_base=image.image_base,
             functions=decompiled_funcs,
             reconstructed_structs=ordered_structs,
+            referenced_globals=globals_list,
             header_code=header_code,
             source_code=source_code,
             combined_llvm_ir=combined_ir,
@@ -221,6 +293,54 @@ class NtDecompilationPipeline:
             self.write_deliverables(report, output_dir)
 
         return report
+
+    @staticmethod
+    def _select_structs_for_header(
+        all_structs: dict[str, StructDef],
+        decompiled_funcs: list[DecompiledFunction],
+        synthesized_structs: list[StructDef],
+    ) -> list[StructDef]:
+        if len(all_structs) <= 64:
+            return list(all_structs.values())
+
+        wanted: set[str] = set(get_builtin_nt_structs().keys())
+        for st in synthesized_structs:
+            wanted.add(st.name)
+        pat = re.compile(r"\b(?:struct|union)\s+([A-Za-z_][A-Za-z0-9_]*)")
+        for df in decompiled_funcs:
+            for m in pat.finditer(df.signature.return_type):
+                wanted.add(m.group(1))
+            for _, pty in df.signature.params:
+                for m in pat.finditer(pty):
+                    wanted.add(m.group(1))
+            for fa in df.field_accesses:
+                wanted.add(fa.struct_name)
+
+        return [all_structs[n] for n in sorted(wanted) if n in all_structs]
+
+    @staticmethod
+    def _collect_external_ir_callees(
+        decompiled_funcs: list[DecompiledFunction],
+        defined_names: set[str],
+    ) -> dict[str, int]:
+        ext: dict[str, int] = {}
+        pat = re.compile(r"call\s+i\d+\s+@([A-Za-z0-9_.$]+)\(([^)]*)\)")
+        for df in decompiled_funcs:
+            if df.is_raw_asm:
+                continue
+            for m in pat.finditer(df.optimized_llvm_ir):
+                cname = m.group(1)
+                if (
+                    cname in defined_names
+                    or cname.startswith("llvm.")
+                    or cname.startswith("__nt_read_gs_")
+                    or cname.startswith("__nt_sym_addr_")
+                ):
+                    continue
+                args_s = m.group(2).strip()
+                n_args = len([x for x in args_s.split(",") if x.strip()]) if args_s else 0
+                ext[cname] = n_args
+        return ext
 
     @staticmethod
     def write_deliverables(report: DecompilationReport, output_dir: str | Path) -> dict[str, Path]:
@@ -242,9 +362,20 @@ class NtDecompilationPipeline:
             "image_base": hex(report.image_base),
             "total_functions": len(report.functions),
             "verified_functions": report.verified_count,
+            "referenced_globals": [
+                {
+                    "name": g.name,
+                    "va": hex(g.va),
+                    "c_type": g.c_type,
+                    "is_const": g.is_const,
+                    "initial_value": hex(g.initial_value) if g.initial_value is not None else None,
+                }
+                for g in report.referenced_globals
+            ],
             "functions": [
                 {
                     "name": fn.name,
+                    "subsystem": fn.subsystem,
                     "address": hex(fn.address),
                     "size": fn.size,
                     "prototype": fn.signature.format_prototype(include_abi=False),
@@ -265,6 +396,157 @@ class NtDecompilationPipeline:
             "proofs": proof_path,
         }
 
+    def export_subsystem_tree(
+        self,
+        report: DecompilationReport,
+        output_dir: str | Path,
+        binary_label: str | None = None,
+        pdb_label: str | None = None,
+    ) -> dict[str, Path]:
+        """
+        Export decompiled NT kernel artifacts as a modular, per-subsystem C kernel tree
+        (`include/`, `src/{ke,ps,mm,ob,io,ex,rtl,se,runtime}/`, `ir/`, `proofs/`).
+        """
+        root = Path(output_dir)
+        inc_dir = root / "include"
+        ir_dir = root / "ir"
+        proof_dir = root / "proofs"
+        for d in (inc_dir, ir_dir, proof_dir, root / "src" / "runtime"):
+            d.mkdir(parents=True, exist_ok=True)
+
+        # Build external callee declarations for the shared kernel header
+        defined_names = {df.name for df in report.functions}
+        ext_callees = self._collect_external_ir_callees(report.functions, defined_names)
+        known_sigs: dict[str, InferredFuncSignature] = {}
+        for kname, (ret_ty, kparams) in KNOWN_WDK_PROTOTYPES.items():
+            known_sigs[kname] = InferredFuncSignature(
+                name=kname, return_type=ret_ty, params=list(kparams)
+            )
+        ext_lines: list[str] = []
+        if ext_callees:
+            ext_lines.append("/* External Kernel Callee Declarations */")
+            for ec_name, n_args in sorted(ext_callees.items()):
+                csig = known_sigs.get(ec_name)
+                if csig is not None:
+                    ext_lines.append(f"extern {csig.format_prototype(include_abi=True)};")
+                else:
+                    p_str = ", ".join(f"uint64_t a{i}" for i in range(n_args)) or "void"
+                    ext_lines.append(f"extern uint64_t __attribute__((ms_abi)) {ec_name}({p_str});")
+            ext_lines.append("")
+
+        hdr_text = report.header_code.replace("NTREV_RECONSTRUCTED_TYPES_H", "NT_RECONSTRUCTED_TYPES_H")
+        if ext_lines:
+            end_guard = "#endif /* NT_RECONSTRUCTED_TYPES_H */"
+            hdr_text = hdr_text.replace(end_guard, "\n".join(ext_lines) + "\n" + end_guard)
+
+        hdr_path = inc_dir / "nt_reconstructed_types.h"
+        hdr_path.write_text(hdr_text, encoding="utf-8")
+
+        # Group functions into canonical NT executive/kernel subsystems
+        subsys_files = [
+            ("ke", "ke_kernel.c", "Kernel Core Dispatcher, IRQL, DPC & Synchronization (Ke/Ki/Kz)"),
+            ("ps", "ps_process.c", "Process & Thread Structure Executive (Ps)"),
+            ("mm", "mm_memory.c", "Virtual Memory Manager & MDL Subsystem (Mm)"),
+            ("ob", "ob_object.c", "Executive Object Manager & Cookie Type Table (Ob)"),
+            ("io", "io_manager.c", "I/O Manager, IRP Inspection & Plug-and-Play (Io/Pi)"),
+            ("ex", "ex_executive.c", "Executive Lock-Free SLists & Rundown Protection (Ex/Exp)"),
+            ("rtl", "rtl_library.c", "Kernel Run-Time Library, Bitmaps & Time Epoch Math (Rtl)"),
+            ("se", "se_kd_security.c", "Security Reference Monitor & Kernel Debugger (Se/Kd)"),
+        ]
+
+        written_paths: dict[str, Path] = {"header": hdr_path}
+        for sub_key, fname, desc in subsys_files:
+            if sub_key == "se":
+                group = [
+                    df for df in report.functions if df.subsystem in ("se", "kd_hal", "misc")
+                ]
+            else:
+                group = [df for df in report.functions if df.subsystem == sub_key]
+            if not group:
+                continue
+            sdir = root / "src" / sub_key
+            sdir.mkdir(parents=True, exist_ok=True)
+            spath = sdir / fname
+            lines = [
+                "/*",
+                f" * Reconstructed Windows NT Kernel Subsystem: {desc}",
+                f" * Source Binary : {binary_label or Path(report.binary_path).name}",
+                f" * Functions     : {len(group)} Z3-verified / assembly-preserved routines",
+                " */",
+                '#include "../../include/nt_reconstructed_types.h"',
+                "",
+            ]
+            for df in group:
+                lines.append(df.c_code)
+                lines.append("")
+            spath.write_text("\n".join(lines), encoding="utf-8")
+            written_paths[f"src_{sub_key}"] = spath
+
+        # Weak-linkage reconstructed globals & `.rdata` lookup tables
+        glob_path = root / "src" / "runtime" / "nt_reconstructed_globals.c"
+        glines = [
+            "/*",
+            " * Reconstructed Retail ntoskrnl.exe Data Symbols & Read-Only Lookup Tables",
+            " * Extracted via RIP-relative symbol/section recovery (weak linkage).",
+            " */",
+            '#include "../../include/nt_reconstructed_types.h"',
+            "",
+        ]
+        for g in report.referenced_globals:
+            defn = VerifiedCEmitter.format_global_declaration(g, is_extern=False)
+            glines.append(f"__attribute__((weak)) {defn}")
+        glines.append("")
+        glob_path.write_text("\n".join(glines), encoding="utf-8")
+        written_paths["globals"] = glob_path
+
+        ir_path = ir_dir / "verified_lifted.ll"
+        ir_path.write_text(report.combined_llvm_ir, encoding="utf-8")
+        written_paths["llvm_ir"] = ir_path
+
+        proof_path = proof_dir / "z3_equivalence_proofs.json"
+        manifest = {
+            "binary": binary_label or Path(report.binary_path).name,
+            "pdb": pdb_label or (Path(report.pdb_path).name if report.pdb_path else None),
+            "image_base": hex(report.image_base),
+            "total_functions": len(report.functions),
+            "verified_functions": report.verified_count,
+            "subsystems": {
+                sub_key: sum(
+                    1
+                    for df in report.functions
+                    if (df.subsystem in ("se", "kd_hal", "misc") if sub_key == "se" else df.subsystem == sub_key)
+                )
+                for sub_key, _, _ in subsys_files
+            },
+            "referenced_globals": [
+                {
+                    "name": g.name,
+                    "va": hex(g.va),
+                    "c_type": g.c_type,
+                    "is_const": g.is_const,
+                    "has_initial_bytes": bool(g.initial_bytes),
+                }
+                for g in report.referenced_globals
+            ],
+            "functions": [
+                {
+                    "name": fn.name,
+                    "subsystem": fn.subsystem,
+                    "address": hex(fn.address),
+                    "size": fn.size,
+                    "prototype": fn.signature.format_prototype(include_abi=False),
+                    "is_raw_asm": fn.is_raw_asm,
+                    "rerolled_loops": [rl.description for rl in fn.rerolled_loops],
+                    "recovered_divisions": [rd.c_expr for rd in fn.recovered_divs],
+                    "proof": fn.proof.to_dict(),
+                }
+                for fn in report.functions
+            ],
+        }
+        proof_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+        written_paths["proofs"] = proof_path
+        return written_paths
+
     @staticmethod
     def _merge_pdb_databases(
         primary: PDBDatabase | None, secondary: PDBDatabase
@@ -280,16 +562,16 @@ class NtDecompilationPipeline:
 
     @staticmethod
     def _topological_structs(structs: list[StructDef]) -> list[StructDef]:
-        """Order structs so embedded non-pointer value structs (`LIST_ENTRY`, `DISPATCHER_HEADER`) come first."""
         by_name = {s.name: s for s in structs}
         typedef_to_name = {s.typedef_name: s.name for s in structs if s.typedef_name}
         visited: set[str] = set()
+        visiting: set[str] = set()
         ordered: list[StructDef] = []
 
         def visit(sname: str) -> None:
-            if sname in visited or sname not in by_name:
+            if sname in visited or sname not in by_name or sname in visiting:
                 return
-            visited.add(sname)
+            visiting.add(sname)
             st = by_name[sname]
             for fld in st.fields:
                 if not fld.is_pointer and not fld.c_type.endswith("*"):
@@ -297,6 +579,8 @@ class NtDecompilationPipeline:
                     dep_name = typedef_to_name.get(dep, dep)
                     if dep_name in by_name and dep_name != sname:
                         visit(dep_name)
+            visiting.remove(sname)
+            visited.add(sname)
             ordered.append(st)
 
         for s in structs:
@@ -307,8 +591,8 @@ class NtDecompilationPipeline:
     def _c_type_bit_width(c_type: str) -> int:
         clean = c_type.strip()
         if clean == "void":
-            return 64
-        if clean.endswith("*"):
+            return 0
+        if "*" in clean or clean in ("PVOID", "HANDLE", "ULONG_PTR", "size_t"):
             return 64
         if clean in ("uint8_t", "int8_t", "char", "BOOLEAN", "KIRQL", "bool"):
             return 8

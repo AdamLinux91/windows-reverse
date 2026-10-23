@@ -1,0 +1,1747 @@
+{
+  "binary": "ntoskrnl.exe (10.0.16299.15 x64, RSDS 83DB4240-4EFD-4AB6-AFB6-FA864B700CB3)",
+  "pdb": "ntkrnlmp.pdb (GUID 83DB4240-4EFD-4AB6-AFB6-FA864B700CB3)",
+  "image_base": "0x140000000",
+  "total_functions": 69,
+  "verified_functions": 69,
+  "subsystems": {
+    "ke": 18,
+    "ps": 16,
+    "mm": 4,
+    "ob": 5,
+    "io": 6,
+    "ex": 5,
+    "rtl": 11,
+    "se": 4
+  },
+  "referenced_globals": [
+    {
+      "name": "KiInitialProcess",
+      "va": "0x140412b40",
+      "c_type": "uint8_t",
+      "is_const": false,
+      "has_initial_bytes": false
+    },
+    {
+      "name": "KeForceGroupAwareness",
+      "va": "0x1403f9124",
+      "c_type": "uint8_t",
+      "is_const": false,
+      "has_initial_bytes": false
+    },
+    {
+      "name": "KiActiveGroups",
+      "va": "0x1403f8014",
+      "c_type": "uint16_t",
+      "is_const": false,
+      "has_initial_bytes": false
+    },
+    {
+      "name": "ObHeaderCookie",
+      "va": "0x1403f9340",
+      "c_type": "uint8_t",
+      "is_const": false,
+      "has_initial_bytes": false
+    },
+    {
+      "name": "ObTypeIndexTable",
+      "va": "0x1403f9920",
+      "c_type": "uint8_t",
+      "is_const": false,
+      "has_initial_bytes": false
+    },
+    {
+      "name": "ObpInfoMaskToOffset",
+      "va": "0x140361a00",
+      "c_type": "uint8_t",
+      "is_const": false,
+      "has_initial_bytes": false
+    },
+    {
+      "name": "SeAliasAdminsSid",
+      "va": "0x1407eaad8",
+      "c_type": "uint64_t",
+      "is_const": false,
+      "has_initial_bytes": false
+    },
+    {
+      "name": "KdPitchDebugger",
+      "va": "0x14034e5c9",
+      "c_type": "uint8_t",
+      "is_const": false,
+      "has_initial_bytes": false
+    },
+    {
+      "name": "__nt_rodata_1401715d0",
+      "va": "0x1401715d0",
+      "c_type": "uint8_t",
+      "is_const": true,
+      "has_initial_bytes": true
+    },
+    {
+      "name": "KdDebuggerNotPresent",
+      "va": "0x14036960a",
+      "c_type": "uint8_t",
+      "is_const": false,
+      "has_initial_bytes": false
+    }
+  ],
+  "functions": [
+    {
+      "name": "KeGetCurrentIrql",
+      "subsystem": "ke",
+      "address": "0x1400e9b50",
+      "size": 5,
+      "prototype": "KIRQL KeGetCurrentIrql(void)",
+      "is_raw_asm": true,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeGetCurrentIrql",
+        "status": "PRESERVED_RAW_ASM",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 0,
+        "solve_time_ms": 0.001,
+        "verified_stages": [
+          "asm_identity_preserved"
+        ],
+        "counterexample": null,
+        "notes": "Non-C NT kernel assembly preserved verbatim as inline __asm__ volatile."
+      }
+    },
+    {
+      "name": "KzRaiseIrql",
+      "subsystem": "ke",
+      "address": "0x1400e9b30",
+      "size": 12,
+      "prototype": "KIRQL KzRaiseIrql(KIRQL NewIrql)",
+      "is_raw_asm": true,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KzRaiseIrql",
+        "status": "PRESERVED_RAW_ASM",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 0,
+        "solve_time_ms": 0.0,
+        "verified_stages": [
+          "asm_identity_preserved"
+        ],
+        "counterexample": null,
+        "notes": "Non-C NT kernel assembly preserved verbatim as inline __asm__ volatile."
+      }
+    },
+    {
+      "name": "KzLowerIrql",
+      "subsystem": "ke",
+      "address": "0x1400ed1e0",
+      "size": 8,
+      "prototype": "void KzLowerIrql(KIRQL NewIrql)",
+      "is_raw_asm": true,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KzLowerIrql",
+        "status": "PRESERVED_RAW_ASM",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 0,
+        "solve_time_ms": 0.0,
+        "verified_stages": [
+          "asm_identity_preserved"
+        ],
+        "counterexample": null,
+        "notes": "Non-C NT kernel assembly preserved verbatim as inline __asm__ volatile."
+      }
+    },
+    {
+      "name": "KeRaiseIrqlToDpcLevel",
+      "subsystem": "ke",
+      "address": "0x1400e9b10",
+      "size": 14,
+      "prototype": "KIRQL KeRaiseIrqlToDpcLevel(void)",
+      "is_raw_asm": true,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeRaiseIrqlToDpcLevel",
+        "status": "PRESERVED_RAW_ASM",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 0,
+        "solve_time_ms": 0.0,
+        "verified_stages": [
+          "asm_identity_preserved"
+        ],
+        "counterexample": null,
+        "notes": "Non-C NT kernel assembly preserved verbatim as inline __asm__ volatile."
+      }
+    },
+    {
+      "name": "KiFlushCurrentTbWorker",
+      "subsystem": "ke",
+      "address": "0x1400769f0",
+      "size": 29,
+      "prototype": "uint64_t KiFlushCurrentTbWorker(void)",
+      "is_raw_asm": true,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KiFlushCurrentTbWorker",
+        "status": "PRESERVED_RAW_ASM",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 0,
+        "solve_time_ms": 0.0,
+        "verified_stages": [
+          "asm_identity_preserved"
+        ],
+        "counterexample": null,
+        "notes": "Non-C NT kernel assembly preserved verbatim as inline __asm__ volatile."
+      }
+    },
+    {
+      "name": "KiSystemCall64",
+      "subsystem": "ke",
+      "address": "0x14016e980",
+      "size": 1734,
+      "prototype": "NTSTATUS KiSystemCall64(struct _RECON_KISYSTEMCALL64_RCX* arg1, uint64_t* arg2, uint64_t arg3, uint64_t arg4)",
+      "is_raw_asm": true,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KiSystemCall64",
+        "status": "PRESERVED_RAW_ASM",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 0,
+        "solve_time_ms": 0.0,
+        "verified_stages": [
+          "asm_identity_preserved"
+        ],
+        "counterexample": null,
+        "notes": "Non-C NT kernel assembly preserved verbatim as inline __asm__ volatile."
+      }
+    },
+    {
+      "name": "KeGetCurrentThread",
+      "subsystem": "ke",
+      "address": "0x14015f4e0",
+      "size": 10,
+      "prototype": "struct _KTHREAD* KeGetCurrentThread(void)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeGetCurrentThread",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 11.911,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "KeGetCurrentProcessorNumberEx",
+      "subsystem": "ke",
+      "address": "0x14001f570",
+      "size": 44,
+      "prototype": "ULONG KeGetCurrentProcessorNumberEx(struct _PROCESSOR_NUMBER* ProcNumber)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeGetCurrentProcessorNumberEx",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 8.137,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "KeQueryPriorityThread",
+      "subsystem": "ke",
+      "address": "0x1400339f0",
+      "size": 30,
+      "prototype": "int32_t KeQueryPriorityThread(struct _KTHREAD* Thread)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeQueryPriorityThread",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 4.835,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "KeInitializeDpc",
+      "subsystem": "ke",
+      "address": "0x1400e02a0",
+      "size": 25,
+      "prototype": "void KeInitializeDpc(struct _KDPC* Dpc, void* DeferredRoutine, void* DeferredContext)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeInitializeDpc",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 8.211,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "KeSetImportanceDpc",
+      "subsystem": "ke",
+      "address": "0x14010f680",
+      "size": 4,
+      "prototype": "void KeSetImportanceDpc(struct _KDPC* Dpc, uint32_t Importance)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeSetImportanceDpc",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 3.721,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "KeSetTargetProcessorDpc",
+      "subsystem": "ke",
+      "address": "0x140200ba0",
+      "size": 104,
+      "prototype": "void KeSetTargetProcessorDpc(struct _KDPC* Dpc, int8_t Number)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeSetTargetProcessorDpc",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 4634.705,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "KeCheckForZeroPage",
+      "subsystem": "ke",
+      "address": "0x140166a80",
+      "size": 92,
+      "prototype": "uint64_t KeCheckForZeroPage(uint64_t* PageBase)",
+      "is_raw_asm": false,
+      "rerolled_loops": [
+        "Collapsed 16x-unrolled strided loop (4096B = 512 x 8B, op=or) into single counted for-loop"
+      ],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeCheckForZeroPage",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 49,
+        "solve_time_ms": 2602.793,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence",
+          "loop_reroll_equivalence:unrolled_page_loop"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "KeSetCoalescableTimer",
+      "subsystem": "ke",
+      "address": "0x140037840",
+      "size": 202,
+      "prototype": "BOOLEAN KeSetCoalescableTimer(void* Timer, int64_t DueTime, ULONG Period, ULONG TolerableDelay)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [
+        "((int64_t)TolerableDelay / (int64_t)10000)"
+      ],
+      "proof": {
+        "function_name": "KeSetCoalescableTimer",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 40,
+        "solve_time_ms": 5376.157,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence",
+          "magic_div_equivalence:div_10000"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "KeReadStateEvent",
+      "subsystem": "ke",
+      "address": "0x1400f5b60",
+      "size": 4,
+      "prototype": "LONG KeReadStateEvent(struct _DISPATCHER_HEADER* Event)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeReadStateEvent",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.978,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "KeReadStateMutex",
+      "subsystem": "ke",
+      "address": "0x1400f5b60",
+      "size": 4,
+      "prototype": "LONG KeReadStateMutex(struct _DISPATCHER_HEADER* Mutex)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeReadStateMutex",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.269,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "KeReadStateSemaphore",
+      "subsystem": "ke",
+      "address": "0x1400f5b60",
+      "size": 4,
+      "prototype": "LONG KeReadStateSemaphore(struct _DISPATCHER_HEADER* Semaphore)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeReadStateSemaphore",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.697,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "KeReadStateTimer",
+      "subsystem": "ke",
+      "address": "0x1401fbac0",
+      "size": 4,
+      "prototype": "BOOLEAN KeReadStateTimer(struct _DISPATCHER_HEADER* Timer)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KeReadStateTimer",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.299,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsGetCurrentProcess",
+      "subsystem": "ps",
+      "address": "0x1400e9990",
+      "size": 17,
+      "prototype": "struct _EPROCESS* PsGetCurrentProcess(void)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsGetCurrentProcess",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 5.425,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsGetCurrentThread",
+      "subsystem": "ps",
+      "address": "0x14015f4e0",
+      "size": 10,
+      "prototype": "struct _ETHREAD* PsGetCurrentThread(void)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsGetCurrentThread",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.836,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsGetProcessId",
+      "subsystem": "ps",
+      "address": "0x1400bdce0",
+      "size": 8,
+      "prototype": "void* PsGetProcessId(struct _EPROCESS* Process)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsGetProcessId",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 4.242,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsGetProcessInheritedFromUniqueProcessId",
+      "subsystem": "ps",
+      "address": "0x14007d2f0",
+      "size": 8,
+      "prototype": "void* PsGetProcessInheritedFromUniqueProcessId(struct _EPROCESS* Process)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsGetProcessInheritedFromUniqueProcessId",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.903,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsGetProcessImageFileName",
+      "subsystem": "ps",
+      "address": "0x140109830",
+      "size": 8,
+      "prototype": "uint8_t* PsGetProcessImageFileName(struct _EPROCESS* Process)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsGetProcessImageFileName",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.993,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsGetProcessExitStatus",
+      "subsystem": "ps",
+      "address": "0x14070c880",
+      "size": 7,
+      "prototype": "NTSTATUS PsGetProcessExitStatus(struct _EPROCESS* Process)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsGetProcessExitStatus",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.646,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsGetProcessPeb",
+      "subsystem": "ps",
+      "address": "0x1401085e0",
+      "size": 8,
+      "prototype": "void* PsGetProcessPeb(struct _EPROCESS* Process)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsGetProcessPeb",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 4.213,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsGetProcessSectionBaseAddress",
+      "subsystem": "ps",
+      "address": "0x14004c7d0",
+      "size": 8,
+      "prototype": "void* PsGetProcessSectionBaseAddress(struct _EPROCESS* Process)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsGetProcessSectionBaseAddress",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.929,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsIsSystemProcess",
+      "subsystem": "ps",
+      "address": "0x1400b7d00",
+      "size": 12,
+      "prototype": "BOOLEAN PsIsSystemProcess(struct _EPROCESS* Process)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsIsSystemProcess",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 4.171,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsIsProtectedProcess",
+      "subsystem": "ps",
+      "address": "0x14004c7e0",
+      "size": 16,
+      "prototype": "BOOLEAN PsIsProtectedProcess(struct _EPROCESS* Process)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsIsProtectedProcess",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.717,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsIsProtectedProcessLight",
+      "subsystem": "ps",
+      "address": "0x140028eb0",
+      "size": 18,
+      "prototype": "BOOLEAN PsIsProtectedProcessLight(struct _EPROCESS* Process)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsIsProtectedProcessLight",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.741,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsGetThreadId",
+      "subsystem": "ps",
+      "address": "0x1401063d0",
+      "size": 8,
+      "prototype": "void* PsGetThreadId(struct _ETHREAD* Thread)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsGetThreadId",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.823,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsGetThreadProcess",
+      "subsystem": "ps",
+      "address": "0x140050520",
+      "size": 8,
+      "prototype": "struct _EPROCESS* PsGetThreadProcess(struct _KTHREAD* Thread)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsGetThreadProcess",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.882,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsGetThreadProcessId",
+      "subsystem": "ps",
+      "address": "0x14010af10",
+      "size": 8,
+      "prototype": "void* PsGetThreadProcessId(struct _ETHREAD* Thread)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsGetThreadProcessId",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 4.167,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsGetThreadTeb",
+      "subsystem": "ps",
+      "address": "0x1400f72a0",
+      "size": 8,
+      "prototype": "void* PsGetThreadTeb(struct _KTHREAD* Thread)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsGetThreadTeb",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.813,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PsIsSystemThread",
+      "subsystem": "ps",
+      "address": "0x1401091e0",
+      "size": 9,
+      "prototype": "BOOLEAN PsIsSystemThread(struct _KTHREAD* Thread)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "PsIsSystemThread",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 4.16,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "MmSizeOfMdl",
+      "subsystem": "mm",
+      "address": "0x1400fcd80",
+      "size": 29,
+      "prototype": "size_t MmSizeOfMdl(void* Base, size_t Length)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "MmSizeOfMdl",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 9.924,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "MmGetMaximumFileSectionSize",
+      "subsystem": "mm",
+      "address": "0x1405de6b0",
+      "size": 11,
+      "prototype": "uint64_t MmGetMaximumFileSectionSize(void)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "MmGetMaximumFileSectionSize",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 2.949,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "MmIsAddressValid",
+      "subsystem": "mm",
+      "address": "0x140212850",
+      "size": 14,
+      "prototype": "BOOLEAN MmIsAddressValid(void* VirtualAddress)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "MmIsAddressValid",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.324,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "MmFreePagesFromMdl",
+      "subsystem": "mm",
+      "address": "0x14002ec20",
+      "size": 16,
+      "prototype": "void MmFreePagesFromMdl(struct _MDL* MemoryDescriptorList)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "MmFreePagesFromMdl",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 3.931,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "ObGetObjectType",
+      "subsystem": "ob",
+      "address": "0x14056d640",
+      "size": 40,
+      "prototype": "struct _OBJECT_TYPE* ObGetObjectType(void* Object)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "ObGetObjectType",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 22.316,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "ObGetFilterVersion",
+      "subsystem": "ob",
+      "address": "0x1406e73d0",
+      "size": 6,
+      "prototype": "uint16_t ObGetFilterVersion(void)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "ObGetFilterVersion",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 2.778,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "ObQueryNameInfo",
+      "subsystem": "ob",
+      "address": "0x140566180",
+      "size": 39,
+      "prototype": "void* ObQueryNameInfo(void* Object)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "ObQueryNameInfo",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 4.947,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "ObDereferenceObject",
+      "subsystem": "ob",
+      "address": "0x140047050",
+      "size": 19,
+      "prototype": "int64_t ObDereferenceObject(void* Object)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "ObDereferenceObject",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.44,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "ObIsKernelHandle",
+      "subsystem": "ob",
+      "address": "0x140230bb0",
+      "size": 16,
+      "prototype": "BOOLEAN ObIsKernelHandle(void* Handle)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "ObIsKernelHandle",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.291,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "IoGetAttachedDevice",
+      "subsystem": "io",
+      "address": "0x140055bd0",
+      "size": 25,
+      "prototype": "struct _DEVICE_OBJECT* IoGetAttachedDevice(struct _DEVICE_OBJECT* DeviceObject)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "IoGetAttachedDevice",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 11054.078,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "IoGetIoPriorityHint",
+      "subsystem": "io",
+      "address": "0x14005a000",
+      "size": 47,
+      "prototype": "uint32_t IoGetIoPriorityHint(struct _IRP* Irp)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "IoGetIoPriorityHint",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 16.071,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "IoGetCurrentProcess",
+      "subsystem": "io",
+      "address": "0x1400e9990",
+      "size": 17,
+      "prototype": "struct _EPROCESS* IoGetCurrentProcess(void)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "IoGetCurrentProcess",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 4.169,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "IoThreadToProcess",
+      "subsystem": "io",
+      "address": "0x140050520",
+      "size": 8,
+      "prototype": "struct _EPROCESS* IoThreadToProcess(struct _ETHREAD* Thread)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "IoThreadToProcess",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.472,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "IoIs32bitProcess",
+      "subsystem": "io",
+      "address": "0x140022e20",
+      "size": 167,
+      "prototype": "BOOLEAN IoIs32bitProcess(struct _IRP* Irp)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "IoIs32bitProcess",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 45.081,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "PiUEventHashStringIntoBucket",
+      "subsystem": "io",
+      "address": "0x14002468c",
+      "size": 72,
+      "prototype": "ULONG PiUEventHashStringIntoBucket(const uint16_t* SourceString)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [
+        "((uint32_t)r8 % (uint32_t)13)"
+      ],
+      "proof": {
+        "function_name": "PiUEventHashStringIntoBucket",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 38,
+        "solve_time_ms": 9.022,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence",
+          "magic_mod_equivalence:mod_13"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "ExpInterlockedPushEntrySList",
+      "subsystem": "ex",
+      "address": "0x140169410",
+      "size": 49,
+      "prototype": "struct _SINGLE_LIST_ENTRY* ExpInterlockedPushEntrySList(union _SLIST_HEADER* ListHead, struct _SINGLE_LIST_ENTRY* ListEntry)",
+      "is_raw_asm": true,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "ExpInterlockedPushEntrySList",
+        "status": "PRESERVED_RAW_ASM",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 0,
+        "solve_time_ms": 0.001,
+        "verified_stages": [
+          "asm_identity_preserved"
+        ],
+        "counterexample": null,
+        "notes": "Non-C NT kernel assembly preserved verbatim as inline __asm__ volatile."
+      }
+    },
+    {
+      "name": "ExpInterlockedPopEntrySList",
+      "subsystem": "ex",
+      "address": "0x1401693d0",
+      "size": 51,
+      "prototype": "struct _SINGLE_LIST_ENTRY* ExpInterlockedPopEntrySList(union _SLIST_HEADER* ListHead)",
+      "is_raw_asm": true,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "ExpInterlockedPopEntrySList",
+        "status": "PRESERVED_RAW_ASM",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 0,
+        "solve_time_ms": 0.0,
+        "verified_stages": [
+          "asm_identity_preserved"
+        ],
+        "counterexample": null,
+        "notes": "Non-C NT kernel assembly preserved verbatim as inline __asm__ volatile."
+      }
+    },
+    {
+      "name": "ExQueryDepthSList",
+      "subsystem": "ex",
+      "address": "0x1400eb9f0",
+      "size": 4,
+      "prototype": "uint16_t ExQueryDepthSList(union _SLIST_HEADER* SListHead)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "ExQueryDepthSList",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 3.02,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "ExInitializeRundownProtection",
+      "subsystem": "ex",
+      "address": "0x140038820",
+      "size": 5,
+      "prototype": "void ExInitializeRundownProtection(struct _EX_RUNDOWN_REF* RunRef)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "ExInitializeRundownProtection",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 3.971,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "ExReInitializeRundownProtection",
+      "subsystem": "ex",
+      "address": "0x140141d80",
+      "size": 6,
+      "prototype": "void ExReInitializeRundownProtection(struct _EX_RUNDOWN_REF* RunRef)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "ExReInitializeRundownProtection",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 4.3,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "RtlCompareMemory",
+      "subsystem": "rtl",
+      "address": "0x140169a60",
+      "size": 122,
+      "prototype": "size_t RtlCompareMemory(const void* Source1, const void* Source2, size_t Length)",
+      "is_raw_asm": true,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "RtlCompareMemory",
+        "status": "PRESERVED_RAW_ASM",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 0,
+        "solve_time_ms": 0.0,
+        "verified_stages": [
+          "asm_identity_preserved"
+        ],
+        "counterexample": null,
+        "notes": "Non-C NT kernel assembly preserved verbatim as inline __asm__ volatile."
+      }
+    },
+    {
+      "name": "RtlInitUnicodeString",
+      "subsystem": "rtl",
+      "address": "0x140055c20",
+      "size": 55,
+      "prototype": "void RtlInitUnicodeString(struct _UNICODE_STRING* DestinationString, const uint16_t* SourceString)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "RtlInitUnicodeString",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 2535.021,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "RtlInitAnsiString",
+      "subsystem": "rtl",
+      "address": "0x14004c800",
+      "size": 55,
+      "prototype": "void RtlInitAnsiString(struct _STRING* DestinationString, const char* SourceString)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "RtlInitAnsiString",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 2536.93,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "RtlInitializeBitMap",
+      "subsystem": "rtl",
+      "address": "0x140105310",
+      "size": 8,
+      "prototype": "void RtlInitializeBitMap(struct _RTL_BITMAP* BitMapHeader, uint32_t* BitMapBuffer, ULONG SizeOfBitMap)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "RtlInitializeBitMap",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 4.986,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "RtlTestBit",
+      "subsystem": "rtl",
+      "address": "0x140104290",
+      "size": 11,
+      "prototype": "BOOLEAN RtlTestBit(struct _RTL_BITMAP* BitMapHeader, ULONG BitNumber)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "RtlTestBit",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 34.388,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "RtlSetBit",
+      "subsystem": "rtl",
+      "address": "0x140109ff0",
+      "size": 8,
+      "prototype": "void RtlSetBit(struct _RTL_BITMAP* BitMapHeader, ULONG BitNumber)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "RtlSetBit",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 752.034,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "RtlClearBit",
+      "subsystem": "rtl",
+      "address": "0x14010a880",
+      "size": 8,
+      "prototype": "void RtlClearBit(struct _RTL_BITMAP* BitMapHeader, ULONG BitNumber)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "RtlClearBit",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 494.506,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "RtlExtendedMagicDivide",
+      "subsystem": "rtl",
+      "address": "0x14002f98c",
+      "size": 42,
+      "prototype": "int64_t RtlExtendedMagicDivide(int64_t Dividend, int64_t MagicDivisor, int8_t ShiftCount)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "RtlExtendedMagicDivide",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 62.182,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "RtlSecondsSince1970ToTime",
+      "subsystem": "rtl",
+      "address": "0x1401406f0",
+      "size": 32,
+      "prototype": "void RtlSecondsSince1970ToTime(ULONG ElapsedSeconds, union _LARGE_INTEGER* Time)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "RtlSecondsSince1970ToTime",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 5.27,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "RtlSecondsSince1980ToTime",
+      "subsystem": "rtl",
+      "address": "0x140248050",
+      "size": 32,
+      "prototype": "void RtlSecondsSince1980ToTime(ULONG ElapsedSeconds, union _LARGE_INTEGER* Time)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "RtlSecondsSince1980ToTime",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 34,
+        "solve_time_ms": 5.06,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "RtlTimeToSecondsSince1970",
+      "subsystem": "rtl",
+      "address": "0x140248080",
+      "size": 57,
+      "prototype": "BOOLEAN RtlTimeToSecondsSince1970(union _LARGE_INTEGER* Time, ULONG* ElapsedSeconds)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "RtlTimeToSecondsSince1970",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 28.582,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "SeTokenIsRestricted",
+      "subsystem": "se",
+      "address": "0x140016910",
+      "size": 12,
+      "prototype": "BOOLEAN SeTokenIsRestricted(struct _TOKEN* Token)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "SeTokenIsRestricted",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 4.053,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "SeTokenIsAdmin",
+      "subsystem": "se",
+      "address": "0x140458290",
+      "size": 119,
+      "prototype": "BOOLEAN SeTokenIsAdmin(struct _TOKEN* Token)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "SeTokenIsAdmin",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 48.863,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "SeQueryAuthenticationIdToken",
+      "subsystem": "se",
+      "address": "0x140571550",
+      "size": 10,
+      "prototype": "NTSTATUS SeQueryAuthenticationIdToken(struct _TOKEN* Token, struct _LUID* AuthenticationId)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "SeQueryAuthenticationIdToken",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 4.475,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    },
+    {
+      "name": "KdRefreshDebuggerNotPresent",
+      "subsystem": "kd_hal",
+      "address": "0x140141ef0",
+      "size": 36,
+      "prototype": "BOOLEAN KdRefreshDebuggerNotPresent(void)",
+      "is_raw_asm": false,
+      "rerolled_loops": [],
+      "recovered_divisions": [],
+      "proof": {
+        "function_name": "KdRefreshDebuggerNotPresent",
+        "status": "VERIFIED_EQUIVALENT",
+        "solver": "Z3",
+        "bit_width": 64,
+        "num_assertions": 33,
+        "solve_time_ms": 2468.959,
+        "verified_stages": [
+          "win64_callee_saved_abi",
+          "x86_64_to_llvm_ir_equivalence"
+        ],
+        "counterexample": null,
+        "notes": "UNSAT: Zero diverging inputs exist across 64-bit register & memory state space."
+      }
+    }
+  ]
+}

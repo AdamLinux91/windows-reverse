@@ -15,6 +15,10 @@ dist/
 *.so
 *.o
 *.obj
+*.efi
+*.EFI
+*.elf
+*.img
 
 # Generated analysis outputs (unless in examples/fixtures)
 output/

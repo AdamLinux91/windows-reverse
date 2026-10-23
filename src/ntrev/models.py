@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import struct as _struct
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -55,6 +56,7 @@ class BasicBlock:
     predecessors: list[int] = field(default_factory=list)
     fallthrough: int | None = None
     branch_target: int | None = None
+    tailcall_target: int | None = None
     is_raw_asm_block: bool = False
     raw_asm_reason: str | None = None
 
@@ -77,6 +79,7 @@ class AsmBlockClassification:
     inputs: list[str] = field(default_factory=list)
     outputs: list[str] = field(default_factory=list)
     clobbers: list[str] = field(default_factory=list)
+    is_c_callable_naked: bool = False
 
 
 @dataclass
@@ -123,6 +126,7 @@ class RuntimeFunctionEntry:
     unwind_info_rva: int
     prolog_size: int = 0
     unwind_flags: int = 0
+    chained_parent_rva: int | None = None
 
 
 @dataclass
@@ -152,10 +156,18 @@ class BinaryImage:
     entry_point_rva: int
     machine: str
     sections: list[PESectionInfo] = field(default_factory=list)
-    exports: dict[int, str] = field(default_factory=dict)  # RVA -> name
+    exports: dict[int, str] = field(default_factory=dict)  # RVA -> primary name
+    export_by_name: dict[str, int] = field(default_factory=dict)  # name -> RVA (preserves /OPT:ICF aliases)
     imports: dict[int, str] = field(default_factory=dict)  # IAT VA -> module!func
     pdata_functions: list[RuntimeFunctionEntry] = field(default_factory=list)
     rsds: CodeViewRSDS | None = None
+
+    def section_for_va(self, va: int) -> PESectionInfo | None:
+        rva = va - self.image_base
+        for sec in self.sections:
+            if sec.virtual_address <= rva < sec.virtual_address + max(sec.virtual_size, len(sec.raw_data)):
+                return sec
+        return None
 
     def read_va(self, va: int, length: int) -> bytes | None:
         rva = va - self.image_base
@@ -164,6 +176,19 @@ class BinaryImage:
                 off = rva - sec.virtual_address
                 return sec.raw_data[off : off + length]
         return None
+
+    def read_readonly_scalar(self, va: int, byte_size: int) -> int | None:
+        """Read a constant scalar from a non-writable (.rdata/.text) section if in bounds."""
+        if byte_size not in (1, 2, 4, 8):
+            return None
+        sec = self.section_for_va(va)
+        if sec is None or sec.is_writable:
+            return None
+        blob = self.read_va(va, byte_size)
+        if blob is None or len(blob) != byte_size:
+            return None
+        fmt = {1: "<B", 2: "<H", 4: "<I", 8: "<Q"}[byte_size]
+        return int(_struct.unpack(fmt, blob)[0])
 
 
 @dataclass
@@ -194,6 +219,11 @@ class StructDef:
     source: str = "pdb"  # "pdb" | "nt_builtin" | "reconstructed" | "ghidra"
 
     def field_at_offset(self, offset: int) -> StructField | None:
+        # Prefer non-array scalar/pointer/struct exact match over raw byte-fill arrays
+        exact = [f for f in self.fields if f.offset == offset and f.bit_size is None]
+        if exact:
+            non_fill = [f for f in exact if not (f.array_len and "Fill" in f.name)]
+            return non_fill[0] if non_fill else exact[0]
         for f in self.fields:
             if f.offset == offset:
                 return f
@@ -203,10 +233,84 @@ class StructDef:
                 return f
         return None
 
+    def resolve_nested_field_path(
+        self,
+        offset: int,
+        access_size: int,
+        all_structs: dict[str, StructDef],
+        max_depth: int = 4,
+        is_address_only: bool = False,
+    ) -> tuple[str, StructField] | None:
+        """
+        Resolve `offset` into a potentially nested member access path (e.g.,
+        `_KTHREAD + 0xb8` -> `("ApcState.Process", StructField(...))`,
+        `_ETHREAD + 0x640` -> `("Cid.UniqueThread", StructField(...))`).
+        """
+        if max_depth <= 0:
+            return None
+
+        # 1. Direct exact scalar/pointer match at `offset` with matching byte width
+        exact_scalars = [
+            f
+            for f in self.fields
+            if f.offset == offset
+            and f.bit_size is None
+            and f.array_len is None
+            and (f.is_pointer or f.c_type.endswith("*") or not f.c_type.startswith(("struct ", "union ")))
+            and f.size == access_size
+        ]
+        if exact_scalars:
+            return (exact_scalars[0].name, exact_scalars[0])
+
+        # 2. If `is_address_only` (e.g. `lea`), allow array or embedded struct at `offset`
+        if is_address_only:
+            exact_any = [
+                f
+                for f in self.fields
+                if f.offset == offset
+                and f.bit_size is None
+                and not (f.array_len and "Fill" in f.name)
+            ]
+            if exact_any:
+                return (exact_any[0].name, exact_any[0])
+
+        # 3. Recurse into embedded struct/union members covering `offset`
+        for f in self.fields:
+            if f.is_pointer or f.c_type.endswith("*"):
+                continue
+            sub_name = None
+            if f.c_type.startswith("struct "):
+                sub_name = f.c_type[len("struct ") :].strip()
+            elif f.c_type.startswith("union "):
+                sub_name = f.c_type[len("union ") :].strip()
+            elif f.c_type in all_structs:
+                sub_name = f.c_type
+            else:
+                for st_cand in all_structs.values():
+                    if st_cand.typedef_name == f.c_type:
+                        sub_name = st_cand.name
+                        break
+            if sub_name and sub_name in all_structs:
+                sub_st = all_structs[sub_name]
+                sub_sz = f.size if f.size > 0 else sub_st.size
+                if f.offset <= offset < f.offset + max(sub_sz, 1):
+                    nested = sub_st.resolve_nested_field_path(
+                        offset - f.offset,
+                        access_size,
+                        all_structs,
+                        max_depth - 1,
+                        is_address_only=is_address_only,
+                    )
+                    if nested is not None:
+                        sub_path, leaf_fld = nested
+                        return (f"{f.name}.{sub_path}", leaf_fld)
+
+        return None
+
 
 @dataclass
 class PDBSymbol:
-    """Public or procedure symbol from PDB DBI/Publics or Ghidra export."""
+    """Public, procedure, or global data symbol from PDB DBI/Publics or Ghidra export."""
 
     name: str
     rva: int
@@ -227,6 +331,7 @@ class PDBDatabase:
     structs: dict[str, StructDef] = field(default_factory=dict)
     symbols_by_rva: dict[int, PDBSymbol] = field(default_factory=dict)
     symbols_by_name: dict[str, PDBSymbol] = field(default_factory=dict)
+    data_symbols_by_rva: dict[int, PDBSymbol] = field(default_factory=dict)
 
 
 @dataclass
@@ -268,9 +373,9 @@ class InferredFuncSignature:
 
 @dataclass
 class RerolledLoop:
-    """Collapsed loop recovered from linear unrolling or multi-branch compiler unrolling."""
+    """Collapsed loop recovered from linear unrolling, outer+inner unrolling, or multi-branch dispatch."""
 
-    kind: str  # "linear_strided" | "multi_branch_dispatch"
+    kind: str  # "linear_strided" | "outer_unrolled_strided" | "multi_branch_dispatch"
     header_addr: int
     trip_count_expr: str
     max_unroll_factor: int
@@ -284,6 +389,7 @@ class RerolledLoop:
     c_loop_code: str
     covered_addrs: list[int] = field(default_factory=list)
     replaces_entire_function: bool = False
+    outer_iterations: int = 1
     description: str = ""
 
 
@@ -322,6 +428,20 @@ class EquivalenceProof:
 
 
 @dataclass
+class KernelGlobalRef:
+    """Kernel global variable or table referenced via RIP-relative addressing."""
+
+    name: str
+    va: int
+    size: int = 8
+    c_type: str = "uint64_t"
+    is_array_or_addr: bool = False
+    is_const: bool = False
+    initial_value: int | None = None
+    initial_bytes: list[int] | None = None
+
+
+@dataclass
 class DecompiledFunction:
     """Complete decompiled & Z3-verified output artifact for a single binary function."""
 
@@ -334,9 +454,11 @@ class DecompiledFunction:
     raw_llvm_ir: str
     optimized_llvm_ir: str
     c_code: str
+    subsystem: str = "ke"
     field_accesses: list[FieldAccessRef] = field(default_factory=list)
     rerolled_loops: list[RerolledLoop] = field(default_factory=list)
     recovered_divs: list[RecoveredDivMod] = field(default_factory=list)
+    referenced_globals: list[KernelGlobalRef] = field(default_factory=list)
     proof: EquivalenceProof = field(
         default_factory=lambda: EquivalenceProof(function_name="", status="UNVERIFIED")
     )
@@ -351,6 +473,7 @@ class DecompilationReport:
     image_base: int
     functions: list[DecompiledFunction] = field(default_factory=list)
     reconstructed_structs: list[StructDef] = field(default_factory=list)
+    referenced_globals: list[KernelGlobalRef] = field(default_factory=list)
     header_code: str = ""
     source_code: str = ""
     combined_llvm_ir: str = ""
@@ -362,3 +485,22 @@ class DecompilationReport:
             for f in self.functions
             if f.proof.status in ("VERIFIED_EQUIVALENT", "PRESERVED_RAW_ASM")
         )
+
+
+def classify_nt_subsystem(func_name: str) -> str:
+    """Classify an NT kernel symbol name into its canonical executive/kernel subsystem."""
+    prefixes = [
+        (("Ke", "Ki", "Kz", "Kf", "Hal"), "ke"),
+        (("Ps", "Psp"), "ps"),
+        (("Mm", "Mi"), "mm"),
+        (("Ob", "Obp"), "ob"),
+        (("Io", "Iop", "FsRtl", "Pi", "Pp", "Pnp"), "io"),
+        (("Ex", "Exp"), "ex"),
+        (("Rtl", "Rtlp"), "rtl"),
+        (("Se", "Sep"), "se"),
+        (("Kd", "Kdp", "Whea", "Po", "Pop"), "kd_hal"),
+    ]
+    for ptuple, subsys in prefixes:
+        if func_name.startswith(ptuple):
+            return subsys
+    return "misc"
