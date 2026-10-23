@@ -2,9 +2,9 @@
 
 **Automated Windows NT Binary Decompilation & Z3 Semantic Equivalence Engine**  
 
-
-****DISCLAIMER: this has NOT been tested, as for now it remains highly for analysis only!****
-
+---
+# ****DISCLAIMER: this has NOT been tested, as for now it remains highly for analysis only!****
+---
 
 
 *Phase 1 Foundation for the Core Integrated Hybrid Kernel Architecture*
