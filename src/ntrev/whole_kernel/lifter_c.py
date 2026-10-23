@@ -1,8 +1,10 @@
 """
 Whole-Kernel Streaming C11 Lifter & Relocatable Symbol/Data Emitter (`lifter_c.py`).
 
-Decompiles all ~22,200 exported and internal functions in retail `ntoskrnl.exe` into
-compilable, semantically exact C11 + preserved Ring-0 assembly shards:
+Lifts all ~22,200 exported and internal functions in retail `ntoskrnl.exe` into
+compilable C11 candidates plus preserved Ring-0 assembly shards. The generated C is
+structurally/bit-width aware, but it is not an unconditional semantic or byte-identity
+proof; use `whole_kernel.exact` for the byte-preserving execution artifact:
   - Pass 1 (`build_symbol_index`): Streams all `FunctionCFG`s (< 240 MiB RSS) to recover
     collision-free C identifiers, Win64 `ms_abi` parameter arities (callee stack reads +
     caller outgoing stack writes), `/OPT:ICF` RVA symbol aliases, IAT imports, PDB data
@@ -17,6 +19,7 @@ compilable, semantically exact C11 + preserved Ring-0 assembly shards:
 from __future__ import annotations
 
 import gc
+import hashlib
 import json
 import re
 import struct
@@ -166,6 +169,7 @@ class FunctionMeta:
     block_count: int = 0
     insn_count: int = 0
     switch_count: int = 0
+    original_machine_code_sha256: str = ""
 
 
 @dataclass
@@ -225,7 +229,12 @@ class WholeKernelEmitSummary:
 
 
 class WholeKernelCLifter:
-    """Two-pass streaming whole-kernel C11 + symbol-relocated ASM lifter."""
+    """Two-pass streaming whole-kernel C candidate + symbol-relocated ASM lifter.
+
+    This class is an analysis/build pipeline. It intentionally does not label
+    recompiled Microsoft C as behaviorally exact; :mod:`ntrev.whole_kernel.exact`
+    provides the byte-preserving artifact when exact execution is required.
+    """
 
     MAX_FUNCS_PER_SHARD = 750
 
@@ -418,6 +427,12 @@ class WholeKernelCLifter:
 
             callee_arity, static_stack, has_dyn = self._analyze_stack_and_arity(cfg)
             n_insns = sum(len(b.instructions) for b in cfg.blocks.values())
+            original_bytes = image.read_va(cfg.address, cfg.size)
+            original_machine_code_sha256 = (
+                hashlib.sha256(original_bytes).hexdigest()
+                if original_bytes is not None and len(original_bytes) == cfg.size
+                else ""
+            )
 
             # Track instruction addresses inside raw-ASM functions for mid-stub calls
             if cls.is_raw_asm:
@@ -480,6 +495,7 @@ class WholeKernelCLifter:
                 block_count=len(cfg.blocks),
                 insn_count=n_insns,
                 switch_count=len(cfg.jump_tables),
+                original_machine_code_sha256=original_machine_code_sha256,
             )
             idx.functions_by_rva[rva] = meta
             idx.functions_by_va[cfg.address] = meta
@@ -2821,6 +2837,7 @@ class WholeKernelCLifter:
                 "is_exported": fm.is_exported,
                 "is_raw_asm": fm.is_raw_asm,
                 "arity": fm.arity,
+                "original_machine_code_sha256": fm.original_machine_code_sha256,
                 "icf_aliases": fm.icf_aliases,
                 "export_aliases": fm.export_aliases,
             }

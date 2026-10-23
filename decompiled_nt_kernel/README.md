@@ -1,6 +1,14 @@
-# Decompiled Windows NT Kernel (`ntoskrnl.exe` 10.0.16299.15) — Windows Drop-In Replica & Hardware Tree
+# Decompiled Windows NT Kernel (`ntoskrnl.exe` 10.0.16299.15) — Analysis & Hardware Tree
 
-This self-contained directory holds the complete decompiled, de-optimized, and **Z3-formally-verified** output produced by `ntrev` from the retail x86-64 Microsoft Windows 10 NT Kernel (`ntoskrnl.exe` `10.0.16299.15`, RSDS GUID `83DB4240-4EFD-4AB6-AFB6-FA864B700CB3`) paired with its exact retail Microsoft symbol database (`ntkrnlmp.pdb`), together with everything required to:
+> **Execution boundary:** this committed 527-function tree is a selected analysis/demo tree,
+> not a byte-identical or fully proven semantic replacement for Microsoft `ntoskrnl.exe`.
+> A C compile, a relocatable link, or a small-function Z3 proof does not establish that a
+> booted Windows kernel behaves identically. For exact behavior, run
+> `ntrev exact-kernel` on the matching retail PE and use the resulting
+> `ntoskrnl.exact.exe`; the whole-kernel C/ASM output is documented in
+> [`docs/WHOLE_KERNEL.md`](../docs/WHOLE_KERNEL.md).
+
+This self-contained directory holds a selected decompiled and de-optimized output produced by `ntrev` from the retail x86-64 Microsoft Windows 10 NT Kernel (`ntoskrnl.exe` `10.0.16299.15`, RSDS GUID `83DB4240-4EFD-4AB6-AFB6-FA864B700CB3`) paired with its exact retail Microsoft symbol database (`ntkrnlmp.pdb`). It is useful for analysis and controlled hardware experiments, but it must not be advertised as a complete or exact Microsoft kernel replacement.
 
 1. **Drop directly into a real Windows installation** (`winload.efi` -> `IMAGE_SUBSYSTEM_NATIVE` PE32+ `ntoskrnl.exe` / `ntoskrnl_dropin.exe`) via a safe, non-destructive dual-boot BCD entry (`scripts/Install-DecompiledKernel.ps1` / `scripts/install_to_windows.bat`).
 2. **Boot directly on bare-metal x86-64 hardware** via UEFI (`\EFI\BOOT\BOOTX64.EFI`), GRUB2 / Multiboot2 (`nt_hybrid_kernel.elf`), or a flashable GPT + FAT32 USB drive (`nt_hardware_usb.img`).

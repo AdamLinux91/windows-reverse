@@ -46,7 +46,7 @@ The output tree contains:
 ```text
 build/ntoskrnl_whole/
 ├── include/{reconstructed_types.h,nt_whole_kernel_runtime.h,nt_whole_kernel_protos.h}
-├── src/<subsystem>/*.c                 # verified-C lift or preserved raw ASM shards
+├── src/<subsystem>/*.c                 # C-lift candidates or preserved raw ASM shards
 ├── src/globals/nt_data_sections.S       # reconstructed non-executable data and raw-ASM blobs
 ├── src/globals/nt_reconstructed_globals.c
 ├── specs/nt_whole_kernel_rvas.json      # every function, RVA, shard, arity, aliases, raw-ASM state
@@ -59,6 +59,34 @@ build/ntoskrnl_whole/
 relocatable link must have no unexpected unresolved symbol. Only the normal GCC 128-bit
 integer helpers (`__divti3`, `__modti3`, `__udivti3`, `__umodti3`) and the GOT marker
 are allowed at this intermediate stage; unresolved raw-ASM/data symbols fail the gate.
+
+### The exact behavior path
+
+If the requirement is that the kernel **actually behave exactly like the supplied
+Microsoft build**, do not boot the recompiled C shards. There is no available Microsoft
+source/compiler/optimizer proof that could justify that substitution. Ask `ntrev` to
+create a byte-preserving artifact instead:
+
+```bash
+ntrev exact-kernel \\
+  /path/to/Windows/System32/ntoskrnl.exe \\
+  --pdb /path/to/symbols/ntkrnlmp.pdb \\
+  -o build/ntoskrnl_exact
+
+# Or produce the C/ASM analysis tree and the exact PE together:
+ntrev whole-kernel /path/to/Windows/System32/ntoskrnl.exe \\
+  --pdb /path/to/symbols/ntkrnlmp.pdb \\
+  -o build/ntoskrnl_whole --compile --exact-image
+```
+
+This writes `ntoskrnl.exact.exe` and `ntoskrnl.exact.manifest.json`. The PE is copied
+without changing headers, relocations, imports, unwind metadata, signatures, or any
+other byte. The manifest records the complete-image SHA-256 plus hashes of every
+whole-kernel procedure and loaded section; `ntrev exact-kernel --verify-image ...
+--manifest ...` detects any later mutation. That is the only artifact currently
+entitled to an exact behavior claim. The generated C/ASM tree is still valuable for
+inspection and future replacement work, but it is not a drop-in replacement until an
+external Windows differential or formal-equivalence gate passes.
 
 The Python API is also available:
 
@@ -106,7 +134,15 @@ The run covered all executable sections, not merely exported routines: `.text`,
 
 ## What “exact” means and what is tested
 
-The pipeline has strong, testable exactness invariants:
+There are two different deliverables, and they must not be conflated:
+
+* The **analysis tree** has structural/build invariants. It is compilable C plus
+  relocatable assembly/data, but recompiled C is not automatically behavior-equivalent.
+* The **`ntoskrnl.exact.exe` artifact** is a byte-for-byte copy of the input PE. Its
+  complete-image hash is the behavior-preserving gate; its per-section and per-function
+  hashes are audit evidence.
+
+For the analysis tree, the pipeline has strong, testable structural invariants:
 
 - every emitted function is backed by an image entry from `.pdata`/PDB/exports;
 - no executable function bytes are silently dropped by the CFG builder;
