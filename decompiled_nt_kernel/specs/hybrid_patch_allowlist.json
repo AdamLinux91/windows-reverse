@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "mode": "host-backed-staged",
+  "purpose": "Small first-stage candidate set for Windows guest differential testing. Every other kernel entry point remains the untouched host implementation.",
+  "requirements": [
+    "Build against the same ntoskrnl.exe/PDB build as the host.",
+    "Run the Windows guest smoke suite before adding another function.",
+    "Do not treat compilation or the Linux silicon harness as a Windows behavior proof."
+  ],
+  "functions": [
+    {
+      "name": "KeGetCurrentIrql",
+      "host_name": "KeGetCurrentIrql",
+      "candidate_name": "KeGetCurrentIrql",
+      "reason": "Raw CPU/IRQL read; candidate is kept only as a first-stage guest smoke target."
+    },
+    {
+      "name": "PsGetProcessId",
+      "host_name": "PsGetProcessId",
+      "candidate_name": "PsGetProcessId",
+      "reason": "Leaf field accessor with no allocation, blocking, or global mutation."
+    },
+    {
+      "name": "PsGetThreadId",
+      "host_name": "PsGetThreadId",
+      "candidate_name": "PsGetThreadId",
+      "reason": "Leaf field accessor with no allocation, blocking, or global mutation."
+    },
+    {
+      "name": "MmSizeOfMdl",
+      "host_name": "MmSizeOfMdl",
+      "candidate_name": "MmSizeOfMdl",
+      "reason": "Pure MDL page-span arithmetic; no external side effects."
+    },
+    {
+      "name": "RtlTestBit",
+      "host_name": "RtlTestBit",
+      "candidate_name": "RtlTestBit",
+      "reason": "Leaf bitmap read; no allocation, blocking, or global mutation."
+    },
+    {
+      "name": "RtlSetBit",
+      "host_name": "RtlSetBit",
+      "candidate_name": "RtlSetBit",
+      "reason": "Leaf bitmap write; guest differential testing must cover alignment and races."
+    }
+  ]
+}

@@ -79,14 +79,33 @@ ntrev whole-kernel /path/to/Windows/System32/ntoskrnl.exe \\
   -o build/ntoskrnl_whole --compile --exact-image
 ```
 
+To compile the whole tree and produce a **host-backed staged hybrid** in one pass, add
+the matching host image:
+
+```bash
+ntrev whole-kernel /path/to/Windows/System32/ntoskrnl.exe \\
+  --pdb /path/to/symbols/ntkrnlmp.pdb \\
+  -o build/ntoskrnl_whole --compile \\
+  --host-ntoskrnl /path/to/Windows/System32/ntoskrnl.exe \\
+  --hybrid-allowlist decompiled_nt_kernel/specs/hybrid_patch_allowlist.json
+```
+
+The resulting `ntoskrnl_hybrid.exe` keeps the host implementation for all functions
+outside the allowlist. This is the application-compatible staging strategy: boot it in
+a disposable Windows VM, run `Run-WindowsKernelSmoke.ps1`, and only then expand the
+allowlist. It is deliberately not presented as a standalone replacement kernel.
+
 This writes `ntoskrnl.exact.exe` and `ntoskrnl.exact.manifest.json`. The PE is copied
 without changing headers, relocations, imports, unwind metadata, signatures, or any
 other byte. The manifest records the complete-image SHA-256 plus hashes of every
 whole-kernel procedure and loaded section; `ntrev exact-kernel --verify-image ...
 --manifest ...` detects any later mutation. That is the only artifact currently
 entitled to an exact behavior claim. The generated C/ASM tree is still valuable for
-inspection and future replacement work, but it is not a drop-in replacement until an
-external Windows differential or formal-equivalence gate passes.
+inspection and future replacement work, but it is not a standalone drop-in replacement
+until an external Windows differential or formal-equivalence gate passes. For an
+application-running intermediate milestone, use the host-backed staged hybrid in
+`decompiled_nt_kernel/`: it replaces only an explicit allowlist and retains the stock
+host kernel for every other subsystem.
 
 The Python API is also available:
 

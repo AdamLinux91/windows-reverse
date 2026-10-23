@@ -5,9 +5,11 @@
 #   make all            - Build standalone Windows ntoskrnl.exe, UEFI BOOTX64.EFI,
 #                         Multiboot2 ELF64 & GPT/FAT32 USB image
 #   make windows-kernel - Build pure from-source Windows PE32+ kernel (build/ntoskrnl.exe)
-#   make windows-dropin - Graft all 16 compiled subsystems onto a host ntoskrnl.exe
-#                         for full Boot-to-Desktop Windows System32 deployment:
-#                         make windows-dropin NTOSKRNL=/path/to/ntoskrnl.exe
+#   make windows-dropin - Legacy graft of all compiled subsystem entry points onto a host
+#                         ntoskrnl.exe (not a behavior proof; use windows-hybrid first).
+#   make windows-hybrid - Conservative host-backed graft: only functions in
+#                         specs/hybrid_patch_allowlist.json are redirected; every other
+#                         kernel path remains the stock host implementation.
 #   make uefi           - Build relocatable UEFI PE32+ image (build/BOOTX64.EFI)
 #   make multiboot2     - Build bare-metal Multiboot2 ELF64 image (build/nt_hybrid_kernel.elf)
 #   make usb-image      - Build bootable GPT+FAT32 USB flash image (build/nt_hardware_usb.img)
@@ -20,6 +22,7 @@ LD       ?= ld
 PYTHON   ?= python3
 BUILD    := build
 NTOSKRNL ?= /mnt/c/Windows/System32/ntoskrnl.exe
+HYBRID_PATCH_LIST ?= specs/hybrid_patch_allowlist.json
 
 NT_PURE_SUBSYS_SRCS := \
 	src/ke/ke_kernel.c \
@@ -70,18 +73,21 @@ HOST_NT_OBJS := $(patsubst %.c,$(BUILD)/host/%.o,$(NT_SUBSYS_SRCS))
 
 WIN_PE    := $(BUILD)/ntoskrnl.exe
 DROPIN_PE := $(BUILD)/ntoskrnl_dropin.exe
+HYBRID_PE := $(BUILD)/ntoskrnl_hybrid.exe
 EFI_BIN   := $(BUILD)/BOOTX64.EFI
 MB2_ELF   := $(BUILD)/nt_hybrid_kernel.elf
 USB_IMG   := $(BUILD)/nt_hardware_usb.img
 HOST_BIN  := $(BUILD)/silicon_harness
 
-.PHONY: all windows-kernel windows-dropin uefi multiboot2 usb-image test-silicon clean
+.PHONY: all windows-kernel windows-dropin windows-hybrid uefi multiboot2 usb-image test-silicon clean
 
 all: windows-kernel uefi multiboot2 usb-image
 
 windows-kernel: $(WIN_PE)
 
 windows-dropin: $(DROPIN_PE)
+
+windows-hybrid: $(HYBRID_PE)
 
 uefi: $(EFI_BIN)
 
@@ -112,6 +118,20 @@ $(DROPIN_PE): $(WINPE_DROPIN_OBJS) scripts/build_windows_dropin_ntoskrnl.py scri
 		--host-ntoskrnl "$(NTOSKRNL)" \
 		--specs-dir specs \
 		--proofs proofs/z3_equivalence_proofs.json \
+		--out $@ \
+		$(WINPE_DROPIN_OBJS)
+
+# A functional staged target: the stock host kernel handles all unlisted entry points,
+# so Windows application compatibility is preserved while the allowlisted candidates are
+# exercised in a real guest. This is intentionally separate from the legacy all-grafted
+# target, which is useful for research but is not an application-compatibility claim.
+$(HYBRID_PE): $(WINPE_DROPIN_OBJS) scripts/build_windows_dropin_ntoskrnl.py scripts/pe_elf_linker.py specs/hybrid_patch_allowlist.json
+	@mkdir -p $(dir $@)
+	$(PYTHON) scripts/build_windows_dropin_ntoskrnl.py \
+		--host-ntoskrnl "$(NTOSKRNL)" \
+		--specs-dir specs \
+		--proofs proofs/z3_equivalence_proofs.json \
+		--patch-list "$(HYBRID_PATCH_LIST)" \
 		--out $@ \
 		$(WINPE_DROPIN_OBJS)
 

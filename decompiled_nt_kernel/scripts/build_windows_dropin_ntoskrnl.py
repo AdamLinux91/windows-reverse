@@ -238,16 +238,77 @@ def main() -> int:
     )
     ap.add_argument("--host-ntoskrnl", required=True, type=Path, help="Host Windows x64 ntoskrnl.exe")
     ap.add_argument("--specs-dir", required=True, type=Path)
-    ap.add_argument("--proofs", required=True, type=Path)
+    ap.add_argument("--proofs", type=Path, help="Legacy selected-tree proof manifest")
+    ap.add_argument(
+        "--whole-manifest",
+        type=Path,
+        help="ntrev whole-kernel RVA manifest; maps generated C names back to PDB/PE names",
+    )
+    ap.add_argument(
+        "--patch-list",
+        type=Path,
+        help=(
+            "Optional JSON allowlist of candidate entry points to redirect. With this option "
+            "the host kernel remains authoritative for every non-listed function."
+        ),
+    )
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("objects", nargs="+", type=Path, help="Compiled subsystem .o files")
     args = ap.parse_args()
 
     raw_in = args.host_ntoskrnl.read_bytes()
     meta = parse_host_pe_metadata(raw_in)
-    rva_spec = json.loads((args.specs_dir / "ntoskrnl_16299_rva_map.json").read_text())
-    manifest = json.loads(args.proofs.read_text())
+    if args.whole_manifest is not None:
+        whole_manifest = json.loads(args.whole_manifest.read_text(encoding="utf-8"))
+        rva_spec = {"decompiled_functions": {}}
+        for candidate_name, entry in whole_manifest.get("functions", {}).items():
+            rva_spec["decompiled_functions"][candidate_name] = {
+                "rva": int(entry["rva"]),
+                "patch_prologue": (not bool(entry.get("is_raw_asm")) and int(entry.get("size", 0)) >= 5),
+            }
+        manifest = {
+            "functions": [
+                {"name": candidate_name, "is_raw_asm": bool(entry.get("is_raw_asm"))}
+                for candidate_name, entry in whole_manifest.get("functions", {}).items()
+            ]
+        }
+    else:
+        if args.proofs is None:
+            raise ValueError("--proofs is required unless --whole-manifest is supplied")
+        rva_spec = json.loads((args.specs_dir / "ntoskrnl_16299_rva_map.json").read_text())
+        manifest = json.loads(args.proofs.read_text())
     raw_asm_names = {f["name"] for f in manifest["functions"] if f.get("is_raw_asm")}
+
+    # A patch list turns this builder into a conservative, host-backed hybrid. The
+    # original kernel remains in place for every non-listed entry point, which is the
+    # only practical way to retain application compatibility while candidate functions
+    # are being validated inside a real Windows guest. Without a list, the historical
+    # all-functions graft behavior is retained for backwards compatibility.
+    patch_host_names: set[str] | None = None
+    patch_candidate_names: set[str] = set()
+    candidate_to_host: dict[str, str] = {}
+    if args.whole_manifest is not None:
+        for candidate_name, entry in whole_manifest.get("functions", {}).items():
+            candidate_to_host[candidate_name] = str(entry.get("orig_name", candidate_name))
+    if args.patch_list is not None:
+        patch_doc = json.loads(args.patch_list.read_text(encoding="utf-8"))
+        patch_items = patch_doc.get("functions", patch_doc) if isinstance(patch_doc, dict) else patch_doc
+        if not isinstance(patch_items, list) or not patch_items:
+            raise ValueError("--patch-list must contain a non-empty JSON functions list")
+        patch_host_names = set()
+        for item in patch_items:
+            if isinstance(item, str):
+                host_name = candidate_name = item
+            elif isinstance(item, dict):
+                host_name = str(item.get("host_name", item.get("name", ""))).strip()
+                candidate_name = str(item.get("candidate_name", item.get("name", host_name))).strip()
+            else:
+                raise ValueError("Each --patch-list functions entry must be a string or object")
+            if not host_name or not candidate_name:
+                raise ValueError("Each --patch-list entry needs a function name")
+            patch_host_names.add(host_name)
+            patch_candidate_names.add(candidate_name)
+            candidate_to_host[candidate_name] = host_name
 
     host_exports, _af_off = parse_host_exports(raw_in, meta)
     host_imports = parse_host_imports(raw_in, meta)
@@ -263,7 +324,7 @@ def main() -> int:
 
     selected_objects: list[Path] = []
     if is_exact_16299:
-        for sym_nm, info in rva_spec["external_symbols"].items():
+        for sym_nm, info in rva_spec.get("external_symbols", {}).items():
             ext_resolver[sym_nm] = info["rva"]
         selected_objects = list(args.objects)
         mode_desc = "Full PDB-Verified 10.0.16299.15 Mode (All 16 Subsystems)"
@@ -323,25 +384,36 @@ def main() -> int:
     ntrev_data_rva = linked.data_rva
     ntrevd_buf = bytearray(linked.data_bytes)
 
-    # 1. Redirect `.edata` exports for all grafted functions
+    # 1. Redirect `.edata` exports for grafted functions. In staged hybrid mode,
+    #    only the explicit allowlist is redirected; all other exports remain host code.
     edata_redirected = 0
+    patched_candidates: set[str] = set()
     for fn_name, new_rva in linked.global_sym_rva.items():
-        if fn_name in linked.func_bounds and fn_name in host_exports:
-            _old_rva, slot_file_off = host_exports[fn_name]
+        if fn_name not in linked.func_bounds:
+            continue
+        host_name = candidate_to_host.get(fn_name, fn_name)
+        if patch_host_names is not None and host_name not in patch_host_names and fn_name not in patch_candidate_names:
+            continue
+        if host_name in host_exports:
+            _old_rva, slot_file_off = host_exports[host_name]
             struct.pack_into("<I", buf, slot_file_off, new_rva)
             edata_redirected += 1
+            patched_candidates.add(fn_name)
 
     # 2. Patch non-chained primary function prologues (`E9 <rel32>`) where safe
     prologues_patched = 0
     decomp_meta = rva_spec.get("decompiled_functions", {})
     for fn_name, (new_rva, _end_rva) in linked.func_bounds.items():
+        host_name = candidate_to_host.get(fn_name, fn_name)
+        if patch_host_names is not None and host_name not in patch_host_names and fn_name not in patch_candidate_names:
+            continue
         orig_rva: int | None = None
         can_patch = False
         if is_exact_16299 and fn_name in decomp_meta:
             orig_rva = decomp_meta[fn_name]["rva"]
             can_patch = bool(decomp_meta[fn_name]["patch_prologue"])
-        elif fn_name in host_exports and fn_name != "KiSystemStartup":
-            orig_rva = host_exports[fn_name][0]
+        elif host_name in host_exports and host_name != "KiSystemStartup":
+            orig_rva = host_exports[host_name][0]
             can_patch = True
 
         if not can_patch or orig_rva is None:
@@ -357,6 +429,18 @@ def main() -> int:
             buf[orig_file_off] = 0xE9
             struct.pack_into("<i", buf, orig_file_off + 1, rel32)
             prologues_patched += 1
+            patched_candidates.add(fn_name)
+
+    if patch_host_names is not None:
+        unresolved_patch_names = sorted(
+            name for name in patch_host_names
+            if name not in {candidate_to_host.get(candidate, candidate) for candidate in patched_candidates}
+        )
+        if unresolved_patch_names:
+            raise RuntimeError(
+                "The staged hybrid patch list was not fully applied: "
+                + ", ".join(unresolved_patch_names)
+            )
 
     # 3. Synthesize `.pdata` (`RUNTIME_FUNCTION` + `UNWIND_INFO`) and append to existing `.pdata`
     ntrevd_buf.extend(b"\x00" * (align_up(len(ntrevd_buf), 8) - len(ntrevd_buf)))
@@ -480,6 +564,7 @@ def main() -> int:
         f"[OK] Built boot-to-desktop drop-in Windows kernel: {args.out}\n"
         f"     Mode           : {mode_desc}\n"
         f"     Grafted Code   : {len(linked.func_bounds)} functions in .ntrev (0x{ntrev_code_rva:x}, {len(linked.code_bytes):,} bytes)\n"
+        f"     Patch Policy   : {'allowlisted host-backed hybrid' if patch_host_names is not None else 'legacy all-grafted'}\n"
         f"     Exports Bound  : {edata_redirected} .edata RVAs redirected to .ntrev\n"
         f"     Prologues      : {prologues_patched} internal functions E9-trampolined to .ntrev\n"
         f"     SEH & CFG      : +{pdata_count_added} .pdata unwind entries | {cfg_total_entries:,} GFIDS CFG targets\n"

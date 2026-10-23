@@ -10,6 +10,22 @@
 
 This self-contained directory holds a selected decompiled and de-optimized output produced by `ntrev` from the retail x86-64 Microsoft Windows 10 NT Kernel (`ntoskrnl.exe` `10.0.16299.15`, RSDS GUID `83DB4240-4EFD-4AB6-AFB6-FA864B700CB3`) paired with its exact retail Microsoft symbol database (`ntkrnlmp.pdb`). It is useful for analysis and controlled hardware experiments, but it must not be advertised as a complete or exact Microsoft kernel replacement.
 
+For the first functional Windows milestone, use the **host-backed staged hybrid** target:
+
+```bash
+make windows-hybrid NTOSKRNL=/path/to/the/matching/Windows/System32/ntoskrnl.exe
+```
+
+`build/ntoskrnl_hybrid.exe` keeps the stock host kernel for every unlisted entry point and redirects only the small set in `specs/hybrid_patch_allowlist.json` to recompiled code. This preserves the original scheduler, memory manager, I/O manager, drivers, and application-facing kernel paths while candidate routines are tested incrementally. It is intentionally safer than grafting all 527 candidates at once. After booting the hybrid image in a disposable Windows VM, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\Run-WindowsKernelSmoke.ps1 `
+  -KernelImage C:\Windows\System32\ntoskrnl_decompiled.exe `
+  -PatchManifest C:\path\to\hybrid_patch_allowlist.json
+```
+
+The smoke report must pass process creation, file I/O, registry, named-pipe IPC, loopback networking, and CIM process enumeration before another function is added to the allowlist. A clean-room standalone kernel is a later milestone; it cannot run applications until it has its own validated loader, scheduler, VM, object, I/O, driver, syscall, and power implementations.
+
 1. **Drop directly into a real Windows installation** (`winload.efi` -> `IMAGE_SUBSYSTEM_NATIVE` PE32+ `ntoskrnl.exe` / `ntoskrnl_dropin.exe`) via a safe, non-destructive dual-boot BCD entry (`scripts/Install-DecompiledKernel.ps1` / `scripts/install_to_windows.bat`).
 2. **Boot directly on bare-metal x86-64 hardware** via UEFI (`\EFI\BOOT\BOOTX64.EFI`), GRUB2 / Multiboot2 (`nt_hybrid_kernel.elf`), or a flashable GPT + FAT32 USB drive (`nt_hardware_usb.img`).
 3. **Verify all 16 subsystems live on x86-64 CPU silicon** (`make test-silicon`).

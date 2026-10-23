@@ -126,6 +126,12 @@ def test_real_nt_z3_proof_manifest_complete() -> None:
     assert (HW_DIR / "specs" / "ntoskrnl_16299_exports.json").is_file()
     assert (HW_DIR / "specs" / "ntoskrnl_16299_imports.json").is_file()
     assert (HW_DIR / "specs" / "ntoskrnl_16299_rva_map.json").is_file()
+    hybrid_allowlist = json.loads(
+        (HW_DIR / "specs" / "hybrid_patch_allowlist.json").read_text(encoding="utf-8")
+    )
+    assert hybrid_allowlist["mode"] == "host-backed-staged"
+    assert hybrid_allowlist["functions"]
+    assert (HW_DIR / "scripts" / "Run-WindowsKernelSmoke.ps1").is_file()
     assert (HW_DIR / "scripts" / "Install-DecompiledKernel.ps1").is_file()
     assert (HW_DIR / "scripts" / "install_to_windows.bat").is_file()
 

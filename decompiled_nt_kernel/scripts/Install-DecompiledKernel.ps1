@@ -3,7 +3,7 @@
     Safe Dual-Boot Windows BCD Installer for the Decompiled ntoskrnl.exe Replica.
 
 .DESCRIPTION
-    Copies `build\ntoskrnl_dropin.exe` (or `-KernelPath`) into
+    Copies `build\ntoskrnl_hybrid.exe` (or `-KernelPath`) into
     `C:\Windows\System32\ntoskrnl_decompiled.exe` WITHOUT touching the stock
     `C:\Windows\System32\ntoskrnl.exe`, clones `{current}` in the Windows Boot
     Configuration Data (BCD) store, and configures `kernel ntoskrnl_decompiled.exe`
@@ -12,8 +12,8 @@
     Your primary Windows boot entry remains 100% untouched as an instant fallback.
 
 .PARAMETER KernelPath
-    Path to `ntoskrnl_dropin.exe` (boot-to-desktop grafted kernel) or `ntoskrnl.exe`
-    (pure from-source standalone kernel).
+    Path to `ntoskrnl_hybrid.exe` (host-backed staged kernel), `ntoskrnl_dropin.exe`
+    (legacy all-grafted research kernel), or `ntoskrnl.exe` (pure from-source image).
 
 .PARAMETER EnableKernelDebug
     Enable COM1 (115200 8N1) WinDbg kernel debugging on the cloned BCD entry.
@@ -23,9 +23,9 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$KernelPath = (Join-Path $PSScriptRoot "..\build\ntoskrnl_dropin.exe"),
+    [string]$KernelPath = (Join-Path $PSScriptRoot "..\build\ntoskrnl_hybrid.exe"),
     [string]$TargetFileName = "ntoskrnl_decompiled.exe",
-    [string]$BootDescription = "Windows 10/11 (Decompiled ntoskrnl.exe Replica)",
+    [string]$BootDescription = "Windows 10/11 (ntrev host-backed staged hybrid)",
     [switch]$EnableKernelDebug,
     [switch]$Uninstall
 )

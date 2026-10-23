@@ -11,6 +11,7 @@ Commands:
 from __future__ import annotations
 
 import argparse
+import subprocess
 import sys
 from pathlib import Path
 
@@ -198,6 +199,39 @@ def _cmd_whole_kernel(args: argparse.Namespace) -> int:
         except (OSError, ValueError) as exc:
             console.print(f"[bold red]Exact-image export refused:[/bold red] {exc}")
             return 2
+
+    hybrid_image = None
+    if args.host_ntoskrnl:
+        if not args.compile or compile_result is None or compile_result.failed_units or compile_result.unexpected_unresolved_symbols:
+            console.print("[bold red]A host-backed hybrid requires a successful --compile gate first.[/bold red]")
+            return 2
+        allowlist = (
+            Path(args.hybrid_allowlist).resolve()
+            if args.hybrid_allowlist
+            else Path(__file__).resolve().parents[2] / "decompiled_nt_kernel" / "specs" / "hybrid_patch_allowlist.json"
+        )
+        builder = Path(__file__).resolve().parents[2] / "decompiled_nt_kernel" / "scripts" / "build_windows_dropin_ntoskrnl.py"
+        objects = sorted((out_dir / "obj").glob("*.o"))
+        hybrid_image = out_dir / "ntoskrnl_hybrid.exe"
+        cmd = [
+            sys.executable,
+            str(builder),
+            "--host-ntoskrnl", str(Path(args.host_ntoskrnl).resolve()),
+            "--specs-dir", str(out_dir / "specs"),
+            "--whole-manifest", str(out_dir / "specs" / "nt_whole_kernel_rvas.json"),
+            "--patch-list", str(allowlist),
+            "--out", str(hybrid_image),
+            *(str(obj) for obj in objects),
+        ]
+        hybrid_result = subprocess.run(cmd, capture_output=True, text=True)
+        if hybrid_result.stdout:
+            console.print(hybrid_result.stdout.rstrip())
+        if hybrid_result.returncode != 0:
+            if hybrid_result.stderr:
+                console.print(f"[red]{hybrid_result.stderr.rstrip()}[/red]")
+            console.print("[bold red]Host-backed hybrid build failed.[/bold red]")
+            return 2
+
     table = Table(title="Whole-Kernel Coverage")
     table.add_column("Metric", style="bold cyan")
     table.add_column("Value", style="green")
@@ -217,6 +251,12 @@ def _cmd_whole_kernel(args: argparse.Namespace) -> int:
         console.print(
             f"[bold green]Exact behavior artifact:[/bold green] {exact_artifact.artifact_image}\n"
             f"[bold green]Exact artifact manifest:[/bold green] {exact_artifact.manifest_path}"
+        )
+    if hybrid_image is not None:
+        console.print(
+            f"[bold green]Host-backed hybrid artifact:[/bold green] {hybrid_image}\n"
+            "[yellow]Boot this only in a disposable Windows VM, then run "
+            "decompiled_nt_kernel/scripts/Run-WindowsKernelSmoke.ps1.[/yellow]"
         )
     console.print("[bold green]Whole-kernel C/ASM shards, reconstructed data sections, prototypes, and RVA manifest written.[/bold green]")
     return 0
@@ -322,6 +362,17 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--exact-image",
         action="store_true",
         help="Also copy the input PE byte-for-byte to output/exact for actual kernel behavior",
+    )
+    p_whole.add_argument(
+        "--host-ntoskrnl",
+        help=(
+            "Build a conservative host-backed hybrid after --compile; unlisted functions "
+            "remain in the supplied host kernel"
+        ),
+    )
+    p_whole.add_argument(
+        "--hybrid-allowlist",
+        help="JSON candidate allowlist for --host-ntoskrnl (defaults to the staged leaf set)",
     )
     p_whole.set_defaults(func=_cmd_whole_kernel)
 
